@@ -3,6 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from alma.api.auth import router as auth_router
+from alma.api.chat import router as chat_router
+from alma.api.conversations import router as conversations_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
@@ -17,3 +21,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth_router)
+app.include_router(conversations_router)
+app.include_router(chat_router)
