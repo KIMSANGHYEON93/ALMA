@@ -10,26 +10,24 @@ from alma.main import app
 from alma.models.models import Base
 
 TEST_DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://alma:alma@localhost:5433/alma_test"
+    "TEST_DATABASE_URL",
+    os.getenv("DATABASE_URL", "postgresql+asyncpg://alma:alma@localhost:5433/alma_test"),
 )
 
 
-@pytest.fixture(scope="session")
-async def test_engine():
-    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+@pytest.fixture
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    engine = create_async_engine(
+        TEST_DATABASE_URL,
+        echo=False,
+        connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0},
+    )
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
-    yield engine
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    await engine.dispose()
 
-
-@pytest.fixture
-async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
     session_factory = async_sessionmaker(
-        test_engine, class_=AsyncSession, expire_on_commit=False
+        engine, class_=AsyncSession, expire_on_commit=False
     )
     async with session_factory() as session:
 
@@ -40,3 +38,5 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
         yield session
         await session.rollback()
         app.dependency_overrides.clear()
+
+    await engine.dispose()
