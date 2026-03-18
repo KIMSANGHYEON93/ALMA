@@ -18,9 +18,7 @@ class ChatService:
         self.memory = MemoryService(session)
         self.integration = IntegrationService(session, llm)
 
-    async def process_message(
-        self, user_id: str, conversation_id: str, content: str
-    ) -> str:
+    async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
         # 1. Store user message
         await self.memory.store_message(conversation_id, "user", content)
 
@@ -28,22 +26,14 @@ class ChatService:
         similar = await self.memory.search_similar(user_id, content, limit=3)
 
         # 3. Get current conversation history
-        history = await self.memory.get_conversation_history(
-            conversation_id, limit=10
-        )
+        history = await self.memory.get_conversation_history(conversation_id, limit=10)
 
         # 4. Build LLM request
         messages: list[ChatMessage] = []
 
         if similar:
-            context = "\n".join(
-                [f"[Past {m.role}]: {m.content}" for m in similar]
-            )
-            messages.append(
-                ChatMessage(
-                    role="user", content=f"[Relevant past context]\n{context}"
-                )
-            )
+            context = "\n".join([f"[Past {m.role}]: {m.content}" for m in similar])
+            messages.append(ChatMessage(role="user", content=f"[Relevant past context]\n{context}"))
             messages.append(
                 ChatMessage(
                     role="assistant",
@@ -69,8 +59,6 @@ class ChatService:
 
         # 7. Store assistant response
         full_response = response.content + action_note
-        await self.memory.store_message(
-            conversation_id, "assistant", full_response
-        )
+        await self.memory.store_message(conversation_id, "assistant", full_response)
 
         return full_response

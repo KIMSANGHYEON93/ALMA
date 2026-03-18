@@ -37,15 +37,9 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
-@router.post(
-    "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
-)
-async def register(
-    req: RegisterRequest, session: AsyncSession = Depends(get_session)
-):
-    existing = await session.execute(
-        select(User).where(User.email == req.email)
-    )
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+async def register(req: RegisterRequest, session: AsyncSession = Depends(get_session)):
+    existing = await session.execute(select(User).where(User.email == req.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Email already registered")
 
@@ -66,9 +60,7 @@ async def register(
 
 @router.post("/login", response_model=TokenResponse)
 async def login(req: LoginRequest, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(
-        select(User).where(User.email == req.email)
-    )
+    result = await session.execute(select(User).where(User.email == req.email))
     user = result.scalar_one_or_none()
     if not user or not verify_password(req.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -80,15 +72,11 @@ async def login(req: LoginRequest, session: AsyncSession = Depends(get_session))
 
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh(
-    req: RefreshRequest, session: AsyncSession = Depends(get_session)
-):
+async def refresh(req: RefreshRequest, session: AsyncSession = Depends(get_session)):
     try:
         payload = decode_token(req.refresh_token)
         if payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=401, detail="Invalid refresh token"
-            )
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
         user_id = payload["sub"]
     except HTTPException:
         raise

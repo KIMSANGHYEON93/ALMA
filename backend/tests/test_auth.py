@@ -24,9 +24,7 @@ def test_create_and_decode_token():
 
 @pytest.mark.asyncio
 async def test_register_user(db_session):
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.post(
             "/api/auth/register",
             json={
@@ -43,9 +41,7 @@ async def test_register_user(db_session):
 @pytest.mark.asyncio
 async def test_login_user(db_session):
     # Register first
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         await client.post(
             "/api/auth/register",
             json={"email": "login@example.com", "password": "securepass123"},

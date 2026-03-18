@@ -42,8 +42,6 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
                     content=content,
                 )
 
-                await websocket.send_text(
-                    json.dumps({"type": "message", "content": response})
-                )
+                await websocket.send_text(json.dumps({"type": "message", "content": response}))
         except WebSocketDisconnect:
             pass

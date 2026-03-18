@@ -27,9 +27,7 @@ async def test_create_conversation(db_session):
     db_session.add(conv)
     await db_session.commit()
 
-    result = await db_session.execute(
-        select(Conversation).where(Conversation.user_id == user.id)
-    )
+    result = await db_session.execute(select(Conversation).where(Conversation.user_id == user.id))
     saved = result.scalar_one()
     assert saved.title == "Test Chat"
 
@@ -48,9 +46,7 @@ async def test_create_message(db_session):
     db_session.add(msg)
     await db_session.commit()
 
-    result = await db_session.execute(
-        select(Message).where(Message.conversation_id == conv.id)
-    )
+    result = await db_session.execute(select(Message).where(Message.conversation_id == conv.id))
     saved = result.scalar_one()
     assert saved.content == "Hello ALMA"
     assert saved.role == "user"

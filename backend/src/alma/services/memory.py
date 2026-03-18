@@ -12,9 +12,7 @@ class MemoryService:
         self.message_repo = MessageRepository(session)
         self.conversation_repo = ConversationRepository(session)
 
-    async def store_message(
-        self, conversation_id: str, role: str, content: str
-    ) -> None:
+    async def store_message(self, conversation_id: str, role: str, content: str) -> None:
         embedding = await self._get_embedding(content)
         await self.message_repo.create(
             conversation_id=uuid.UUID(conversation_id),
@@ -23,9 +21,7 @@ class MemoryService:
             embedding=embedding,
         )
 
-    async def search_similar(
-        self, user_id: str, query: str, limit: int = 5
-    ) -> list[ChatMessage]:
+    async def search_similar(self, user_id: str, query: str, limit: int = 5) -> list[ChatMessage]:
         embedding = await self._get_embedding(query)
         messages = await self.message_repo.search_similar(
             user_id=uuid.UUID(user_id), embedding=embedding, limit=limit

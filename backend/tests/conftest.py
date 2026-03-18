@@ -2,8 +2,8 @@ import os
 from collections.abc import AsyncGenerator
 
 import pytest
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import event, text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from alma.database import get_session
 from alma.main import app
@@ -26,17 +26,25 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
 
-    session_factory = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with session_factory() as session:
+    async with engine.connect() as conn:
+        trans = await conn.begin()
+        await conn.begin_nested()
+
+        session = AsyncSession(bind=conn, expire_on_commit=False)
+
+        # Restart SAVEPOINT after each commit inside tests
+        @event.listens_for(session.sync_session, "after_transaction_end")
+        def restart_savepoint(session_sync, transaction):  # type: ignore[no-untyped-def]
+            if transaction.nested and not transaction._parent.nested:
+                session_sync.begin_nested()
 
         async def override_get_session():  # type: ignore[misc]
             yield session
 
         app.dependency_overrides[get_session] = override_get_session
         yield session
-        await session.rollback()
         app.dependency_overrides.clear()
+
+        await trans.rollback()
 
     await engine.dispose()

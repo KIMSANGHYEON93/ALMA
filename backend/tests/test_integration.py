@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from alma.services.integration import ActionIntent, IntegrationService
+from alma.services.integration import IntegrationService
 
 
 @pytest.mark.asyncio
@@ -18,9 +18,7 @@ async def test_detect_action_intent(db_session):
     )()
 
     service = IntegrationService(db_session, mock_llm)
-    intent = await service.detect_action_intent(
-        "Please schedule a team meeting tomorrow at 2pm"
-    )
+    intent = await service.detect_action_intent("Please schedule a team meeting tomorrow at 2pm")
 
     assert intent is not None
     assert intent.service == "calendar"
