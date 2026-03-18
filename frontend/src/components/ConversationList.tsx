@@ -26,7 +26,7 @@ export default function ConversationList({
   const fetchConversations = useCallback(async () => {
     if (!token) return;
     try {
-      const data = await apiClient<Conversation[]>("/api/conversations/", {
+      const data = await apiClient<Conversation[]>("/api/conversations", {
         token,
       });
       setConversations(data);
@@ -39,7 +39,7 @@ export default function ConversationList({
     if (!token || isCreating) return;
     setIsCreating(true);
     try {
-      const data = await apiClient<Conversation>("/api/conversations/", {
+      const data = await apiClient<Conversation>("/api/conversations", {
         method: "POST",
         token,
         body: { title: null },

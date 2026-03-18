@@ -23,7 +23,7 @@ class CreateConversationRequest(BaseModel):
     title: str | None = None
 
 
-@router.get("/", response_model=list[ConversationResponse])
+@router.get("", response_model=list[ConversationResponse])
 async def list_conversations(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
@@ -41,7 +41,7 @@ async def list_conversations(
     ]
 
 
-@router.post("/", response_model=ConversationResponse, status_code=201)
+@router.post("", response_model=ConversationResponse, status_code=201)
 async def create_conversation(
     req: CreateConversationRequest,
     user: User = Depends(get_current_user),

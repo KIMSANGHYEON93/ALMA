@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     yield
 
 
-app = FastAPI(title="ALMA", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="ALMA", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
