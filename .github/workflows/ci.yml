@@ -1,0 +1,57 @@
+name: ALMA CI
+
+on:
+  push:
+    branches: [main, feature/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install ruff mypy
+      - run: ruff check src/ tests/
+      - run: ruff format --check src/ tests/
+
+  backend-test:
+    runs-on: ubuntu-latest
+    needs: backend-lint
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: alma
+          POSTGRES_PASSWORD: alma
+          POSTGRES_DB: alma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql+asyncpg://alma:alma@localhost:5432/alma
+      TEST_DATABASE_URL: postgresql+asyncpg://alma:alma@localhost:5432/alma
+      JWT_SECRET: ci-test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install uv
+      - run: uv pip install --system -e ".[dev]"
+      - run: |
+          alembic upgrade head
+      - run: pytest -v --cov=alma --cov-report=term-missing
