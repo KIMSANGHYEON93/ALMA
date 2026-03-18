@@ -1,3 +1,5 @@
+import { clearTokens } from "./auth";
+
 interface ApiOptions {
   method?: string;
   token?: string;
@@ -22,6 +24,12 @@ export async function apiClient<T>(
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+
+  if (res.status === 401) {
+    clearTokens();
+    window.location.href = "/login";
+    throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "요청 실패" }));

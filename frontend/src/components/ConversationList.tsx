@@ -21,6 +21,7 @@ export default function ConversationList({
   onSelect,
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     if (!token) return;
@@ -30,12 +31,13 @@ export default function ConversationList({
       });
       setConversations(data);
     } catch {
-      // 인증 실패 시 무시 — page.tsx에서 리다이렉트 처리
+      // 401 → api.ts에서 로그인 리다이렉트 처리됨
     }
   }, [token]);
 
   const createConversation = async () => {
-    if (!token) return;
+    if (!token || isCreating) return;
+    setIsCreating(true);
     try {
       const data = await apiClient<Conversation>("/api/conversations/", {
         method: "POST",
@@ -45,7 +47,9 @@ export default function ConversationList({
       setConversations((prev) => [data, ...prev]);
       onSelect(data.id);
     } catch {
-      // 에러 무시
+      // 401 → api.ts에서 로그인 리다이렉트 처리됨
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -58,9 +62,10 @@ export default function ConversationList({
       <div className="p-4 border-b dark:border-gray-800">
         <button
           onClick={createConversation}
-          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+          disabled={isCreating}
+          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
         >
-          + 새 대화
+          {isCreating ? "생성 중..." : "+ 새 대화"}
         </button>
       </div>
       <div className="flex-1 overflow-y-auto">
