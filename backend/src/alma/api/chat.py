@@ -3,10 +3,10 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from alma.auth.auth import decode_token
+from alma.domain.identity.service import decode_token
 from alma.database import async_session
-from alma.llm.claude import ClaudeProvider
-from alma.services.chat import ChatService
+from alma.infrastructure.llm.claude import ClaudeProvider
+from alma.domain.chat.service import ChatService
 
 logger = logging.getLogger(__name__)
 

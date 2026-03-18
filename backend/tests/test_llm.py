@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from alma.llm.base import ChatMessage, LLMRequest, LLMResponse
-from alma.llm.claude import ClaudeProvider
+from alma.infrastructure.llm.base import ChatMessage, LLMRequest, LLMResponse
+from alma.infrastructure.llm.claude import ClaudeProvider
 
 
 def test_llm_request_creation():
@@ -31,7 +31,7 @@ async def test_claude_provider_complete():
 
     mock_response = MagicMock()
     mock_response.content = [MagicMock(text="Hello from Claude")]
-    mock_response.model = "claude-sonnet-4-6-20250514"
+    mock_response.model = "claude-3-haiku-20240307"
     mock_response.usage.input_tokens = 10
     mock_response.usage.output_tokens = 5
 

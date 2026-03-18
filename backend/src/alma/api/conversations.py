@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from alma.auth.dependencies import get_current_user
 from alma.database import get_session
 from alma.models.models import User
-from alma.repositories.repositories import ConversationRepository
+from alma.domain.chat.repository import ConversationRepository
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 

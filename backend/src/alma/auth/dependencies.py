@@ -3,7 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from alma.auth.auth import decode_token
+from alma.domain.identity.service import decode_token
 from alma.database import get_session
 from alma.models.models import User
 

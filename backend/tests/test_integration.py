@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock
 
-from alma.services.integration import IntegrationService
+from alma.domain.integration.service import IntegrationService
 
 
 @pytest.mark.asyncio

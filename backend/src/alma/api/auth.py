@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from alma.auth.auth import (
+from alma.domain.identity.service import (
     create_access_token,
     create_refresh_token,
     decode_token,

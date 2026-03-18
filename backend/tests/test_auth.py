@@ -1,7 +1,7 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from alma.auth.auth import (
+from alma.domain.identity.service import (
     create_access_token,
     decode_token,
     hash_password,
@@ -40,7 +40,6 @@ async def test_register_user(db_session):
 
 @pytest.mark.asyncio
 async def test_login_user(db_session):
-    # Register first
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         await client.post(
             "/api/auth/register",

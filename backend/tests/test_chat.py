@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from alma.llm.base import LLMResponse
+from alma.infrastructure.llm.base import LLMResponse
 from alma.models.models import Conversation, User
-from alma.services.chat import ChatService
+from alma.domain.chat.service import ChatService
 
 
 @pytest.mark.asyncio
@@ -26,16 +26,10 @@ async def test_process_message(db_session):
     service = ChatService(session=db_session, llm=mock_llm)
 
     with patch.object(
-        service.memory,
-        "_get_embedding",
-        new_callable=AsyncMock,
-        return_value=[0.1] * 1536,
+        service.memory, "_get_embedding", new_callable=AsyncMock, return_value=[0.1] * 1536
     ):
         with patch.object(
-            service.memory,
-            "search_similar",
-            new_callable=AsyncMock,
-            return_value=[],
+            service.memory, "search_similar", new_callable=AsyncMock, return_value=[]
         ):
             with patch.object(
                 service.integration,
