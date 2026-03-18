@@ -1,28 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { login, register, saveToken } from "@/lib/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
     try {
       const data = isRegister
         ? await register(email, password, displayName)
         : await login(email, password);
       saveToken(data.access_token, data.refresh_token);
-      router.push("/");
+      window.location.href = "/";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "인증 오류가 발생했습니다");
+      setIsSubmitting(false);
     }
   };
 
@@ -69,9 +70,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          disabled={isSubmitting}
+          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          {isRegister ? "회원가입" : "로그인"}
+          {isSubmitting ? "처리 중..." : isRegister ? "회원가입" : "로그인"}
         </button>
 
         <button
