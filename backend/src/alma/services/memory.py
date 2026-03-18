@@ -1,9 +1,12 @@
+import logging
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from alma.llm.base import ChatMessage
 from alma.repositories.repositories import ConversationRepository, MessageRepository
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryService:
@@ -23,6 +26,8 @@ class MemoryService:
 
     async def search_similar(self, user_id: str, query: str, limit: int = 5) -> list[ChatMessage]:
         embedding = await self._get_embedding(query)
+        if embedding is None:
+            return []
         messages = await self.message_repo.search_similar(
             user_id=uuid.UUID(user_id), embedding=embedding, limit=limit
         )
@@ -36,14 +41,37 @@ class MemoryService:
         )
         return [ChatMessage(role=m.role, content=m.content) for m in messages]
 
-    async def _get_embedding(self, text: str) -> list[float]:
-        import openai
-
+    async def _get_embedding(self, text: str) -> list[float] | None:
         from alma.config import settings
 
-        client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
-        response = await client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text,
-        )
-        return response.data[0].embedding
+        # Gemini Embedding API
+        if settings.gemini_api_key:
+            try:
+                import google.generativeai as genai
+
+                genai.configure(api_key=settings.gemini_api_key)
+                result = genai.embed_content(
+                    model="models/text-embedding-004",
+                    content=text,
+                )
+                return result["embedding"]
+            except Exception:
+                logger.warning("Gemini embedding failed, skipping")
+                return None
+
+        # OpenAI Embedding API
+        if settings.openai_api_key:
+            try:
+                import openai
+
+                client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
+                response = await client.embeddings.create(
+                    model="text-embedding-3-small",
+                    input=text,
+                )
+                return response.data[0].embedding
+            except Exception:
+                logger.warning("OpenAI embedding failed, skipping")
+                return None
+
+        return None
