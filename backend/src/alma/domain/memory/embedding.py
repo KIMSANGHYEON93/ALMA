@@ -18,19 +18,19 @@ class GeminiEmbedding:
     dimensions = 768
 
     def __init__(self, api_key: str):
-        import google.generativeai as genai
+        from google import genai
 
-        genai.configure(api_key=api_key)
-        self._genai = genai
+        self._client = genai.Client(api_key=api_key)
 
     async def embed(self, text: str) -> list[float] | None:
         try:
             result = await asyncio.to_thread(
-                self._genai.embed_content,
-                model="models/text-embedding-004",
-                content=text,
+                self._client.models.embed_content,
+                model="gemini-embedding-001",
+                contents=text,
+                config={"output_dimensionality": self.dimensions},
             )
-            return result["embedding"]
+            return list(result.embeddings[0].values)
         except Exception:
             logger.warning("Gemini embedding failed", exc_info=True)
             return None
