@@ -3,6 +3,7 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from alma.domain.memory.embedding import EmbeddingProvider
 from alma.infrastructure.llm.base import ChatMessage
 from alma.domain.chat.repository import ConversationRepository, MessageRepository
 
@@ -10,8 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryService:
-    def __init__(self, session: AsyncSession):
+    def __init__(
+        self,
+        session: AsyncSession,
+        embedding_provider: EmbeddingProvider | None = None,
+    ):
         self.session = session
+        self.embedding_provider = embedding_provider
         self.message_repo = MessageRepository(session)
         self.conversation_repo = ConversationRepository(session)
 
@@ -42,30 +48,6 @@ class MemoryService:
         return [ChatMessage(role=m.role, content=m.content) for m in messages]
 
     async def _get_embedding(self, text: str) -> list[float] | None:
-        from alma.config import settings
-
-        if settings.gemini_api_key:
-            try:
-                import google.generativeai as genai
-
-                genai.configure(api_key=settings.gemini_api_key)
-                result = genai.embed_content(model="models/text-embedding-004", content=text)
-                return result["embedding"]
-            except Exception:
-                logger.warning("Gemini embedding failed, skipping")
-                return None
-
-        if settings.openai_api_key:
-            try:
-                import openai
-
-                client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
-                response = await client.embeddings.create(
-                    model="text-embedding-3-small", input=text
-                )
-                return response.data[0].embedding
-            except Exception:
-                logger.warning("OpenAI embedding failed, skipping")
-                return None
-
-        return None
+        if self.embedding_provider is None:
+            return None
+        return await self.embedding_provider.embed(text)

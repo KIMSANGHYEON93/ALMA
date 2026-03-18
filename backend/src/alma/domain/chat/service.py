@@ -1,8 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from alma.infrastructure.llm.base import ChatMessage, LLMProvider, LLMRequest
+from alma.config import settings
 from alma.domain.integration.service import IntegrationService
+from alma.domain.memory.embedding import create_embedding_provider
 from alma.domain.memory.service import MemoryService
+from alma.infrastructure.llm.base import ChatMessage, LLMProvider, LLMRequest
 
 SYSTEM_PROMPT = """You are ALMA (Adaptive Life Management Agent), a personal AI assistant.
 Your mission: help users grow toward the life they desire.
@@ -15,7 +17,8 @@ class ChatService:
     def __init__(self, session: AsyncSession, llm: LLMProvider):
         self.session = session
         self.llm = llm
-        self.memory = MemoryService(session)
+        embedding_provider = create_embedding_provider(settings)
+        self.memory = MemoryService(session, embedding_provider)
         self.integration = IntegrationService(session, llm)
 
     async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
