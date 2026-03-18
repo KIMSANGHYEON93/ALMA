@@ -8,11 +8,21 @@ import { getToken } from "@/lib/auth";
 export default function Home() {
   const [token, setToken] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const saved = getToken();
-    if (saved) setToken(saved);
+    setToken(saved);
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="text-gray-400">로딩 중...</span>
+      </div>
+    );
+  }
 
   if (!token) {
     return (

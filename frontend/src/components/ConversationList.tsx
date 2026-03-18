@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 
 interface Conversation {
@@ -22,26 +22,36 @@ export default function ConversationList({
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
 
-  const fetchConversations = async () => {
-    const data = await apiClient<Conversation[]>("/api/conversations/", {
-      token,
-    });
-    setConversations(data);
-  };
+  const fetchConversations = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await apiClient<Conversation[]>("/api/conversations/", {
+        token,
+      });
+      setConversations(data);
+    } catch {
+      // 인증 실패 시 무시 — page.tsx에서 리다이렉트 처리
+    }
+  }, [token]);
 
   const createConversation = async () => {
-    const data = await apiClient<Conversation>("/api/conversations/", {
-      method: "POST",
-      token,
-      body: { title: null },
-    });
-    setConversations((prev) => [data, ...prev]);
-    onSelect(data.id);
+    if (!token) return;
+    try {
+      const data = await apiClient<Conversation>("/api/conversations/", {
+        method: "POST",
+        token,
+        body: { title: null },
+      });
+      setConversations((prev) => [data, ...prev]);
+      onSelect(data.id);
+    } catch {
+      // 에러 무시
+    }
   };
 
   useEffect(() => {
     fetchConversations();
-  }, [token]);
+  }, [fetchConversations]);
 
   return (
     <aside className="w-72 border-r dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900">
