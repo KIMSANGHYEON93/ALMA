@@ -54,7 +54,7 @@ class Message(Base):
     )
     role: Mapped[str] = mapped_column(nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding = mapped_column(Vector(1536), nullable=True)
+    embedding = mapped_column(Vector(768), nullable=True)
     metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict, server_default="{}")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -84,3 +84,28 @@ class ActionLog(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     __table_args__ = (Index("idx_actions_user", "user_id", "created_at"),)
+
+
+class UserMemory(Base):
+    __tablename__ = "user_memories"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    category: Mapped[str] = mapped_column(nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding = mapped_column(Vector(768), nullable=True)
+    metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict, server_default="{}")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index("idx_user_memories_user", "user_id", "category"),
+        Index(
+            "idx_user_memories_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )

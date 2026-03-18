@@ -26,7 +26,7 @@ async def test_process_message(db_session):
     service = ChatService(session=db_session, llm=mock_llm)
 
     with patch.object(
-        service.memory, "_get_embedding", new_callable=AsyncMock, return_value=[0.1] * 1536
+        service.memory, "_get_embedding", new_callable=AsyncMock, return_value=[0.1] * 768
     ):
         with patch.object(
             service.memory, "search_similar", new_callable=AsyncMock, return_value=[]
