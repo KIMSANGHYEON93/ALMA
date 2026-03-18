@@ -58,6 +58,24 @@ class MessageRepository:
         )
         return list(result.scalars().all())
 
+    async def get_messages_paginated(
+        self,
+        conversation_id: uuid.UUID,
+        limit: int = 20,
+        before_id: uuid.UUID | None = None,
+    ) -> tuple[list[Message], bool]:
+        query = select(Message).where(Message.conversation_id == conversation_id)
+        if before_id:
+            subq = select(Message.created_at).where(Message.id == before_id).scalar_subquery()
+            query = query.where(Message.created_at < subq)
+        query = query.order_by(desc(Message.created_at)).limit(limit + 1)
+        result = await self.session.execute(query)
+        rows = list(result.scalars().all())
+        has_more = len(rows) > limit
+        messages = rows[:limit]
+        messages.reverse()
+        return messages, has_more
+
     async def search_similar(
         self, user_id: uuid.UUID, embedding: list[float], limit: int = 5
     ) -> list[Message]:

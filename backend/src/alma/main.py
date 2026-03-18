@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from alma.api.auth import router as auth_router
 from alma.api.chat import router as chat_router
 from alma.api.conversations import router as conversations_router
+from alma.api.messages import router as messages_router
 
 
 @asynccontextmanager
@@ -24,3 +25,4 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(conversations_router)
 app.include_router(chat_router)
+app.include_router(messages_router)
