@@ -18,9 +18,7 @@ async def test_get_preferences(db_session):
     await db_session.flush()
 
     token = create_access_token(str(user.id))
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.get(
             "/api/users/me/preferences",
             headers={"Authorization": f"Bearer {token}"},
@@ -41,9 +39,7 @@ async def test_update_preferences(db_session):
     await db_session.flush()
 
     token = create_access_token(str(user.id))
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.put(
             "/api/users/me/preferences",
             headers={"Authorization": f"Bearer {token}"},
@@ -63,9 +59,7 @@ async def test_put_ignores_learned_field(db_session):
     await db_session.flush()
 
     token = create_access_token(str(user.id))
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         await client.put(
             "/api/users/me/preferences",
             headers={"Authorization": f"Bearer {token}"},

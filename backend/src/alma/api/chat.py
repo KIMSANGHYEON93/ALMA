@@ -45,9 +45,7 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
                         conversation_id=conversation_id,
                         content=content,
                     )
-                    await websocket.send_text(
-                        json.dumps({"type": "message", "content": response})
-                    )
+                    await websocket.send_text(json.dumps({"type": "message", "content": response}))
                 except Exception:
                     logger.exception("Chat processing error")
                     await websocket.send_text(
