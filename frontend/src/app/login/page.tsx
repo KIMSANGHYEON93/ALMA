@@ -20,7 +20,7 @@ export default function LoginPage() {
         ? await register(email, password, displayName)
         : await login(email, password);
       saveToken(data.access_token, data.refresh_token);
-      window.location.href = "/";
+      window.location.href = "/chat";
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "인증 오류가 발생했습니다");
       setIsSubmitting(false);
