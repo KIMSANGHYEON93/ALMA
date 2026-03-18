@@ -8,7 +8,7 @@
 - **이름:** ALMA (Adaptive Life Management Agent)
 - **미션:** "인간이 원하는 삶의 성장을 목표로 하는 미래를 만들어가는 AI 비서"
 - **리포지토리:** https://github.com/KIMSANGHYEON93/ALMA
-- **브랜치:** `feature/phase1-mvp` (21 commits)
+- **브랜치:** `feature/phase1-mvp` (23 commits)
 - **경로:** `~/alma/`
 
 ## 기술 스택
@@ -84,6 +84,17 @@ backend/src/alma/
 | 3 | `022ba6c` | UserProfileService + ChatService 개인화 |
 | 4 | `d3173c1` | UserMemoryRepository + 최종 검증 (27 tests) |
 
+### 기반 완성 (2026-03-19)
+
+| 커밋 | 내용 |
+|------|------|
+| `b61d700` | Gemini/OpenAI 임베딩 활성화 + google-genai SDK 전환 |
+
+- ✅ Gemini 임베딩 768차원 동작 검증
+- ✅ Frontend 클린 빌드 통과
+- ✅ E2E 8단계 전체 통과 (Auth→Chat→Messages→Preferences)
+- ✅ 27/27 테스트 통과
+
 ### Phase 2 성과
 
 | 항목 | 결과 |
@@ -107,6 +118,8 @@ backend/src/alma/
 | Alembic HNSW 인덱스 락 | pg_terminate_backend + SET statement_timeout=0 |
 | Gemini SDK 동기 호출 | asyncio.to_thread() |
 | Vector 차원 불일치 | OpenAI dimensions=768 파라미터 |
+| google-generativeai deprecated | google-genai 1.68.0 + gemini-embedding-001 |
+| .next 캐시 빌드 실패 | rm -rf .next 클린 빌드 |
 
 ## DB 테이블 현황 (5개)
 
@@ -124,8 +137,8 @@ backend/src/alma/
 ```
 DATABASE_URL=postgresql+asyncpg://postgres.hxwumvcbnkcxemfswiye:***@aws-1-ap-south-1.pooler.supabase.com:6543/postgres
 ANTHROPIC_API_KEY=sk-ant-***
-GEMINI_API_KEY=           (미설정 → 임베딩 비활성)
-OPENAI_API_KEY=           (미설정 → 임베딩 비활성)
+GEMINI_API_KEY=AIza***    (활성 → 벡터 검색 동작)
+OPENAI_API_KEY=sk-proj-*** (활성 → fallback)
 JWT_SECRET=alma-dev-secret-change-in-production
 ```
 
@@ -163,5 +176,5 @@ cd ~/alma/frontend && npm run dev
 
 ---
 
-*마지막 업데이트: 2026-03-18*
-*마지막 커밋: `d3173c1` (Phase 2 완료)*
+*마지막 업데이트: 2026-03-19*
+*마지막 커밋: `b61d700` (임베딩 활성화, 기반 완성)*
