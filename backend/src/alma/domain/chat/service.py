@@ -1,6 +1,9 @@
+import json
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from alma.config import settings
+from alma.domain.identity.profile import UserProfileService
 from alma.domain.integration.service import IntegrationService
 from alma.domain.memory.embedding import create_embedding_provider
 from alma.domain.memory.service import MemoryService
@@ -20,6 +23,7 @@ class ChatService:
         embedding_provider = create_embedding_provider(settings)
         self.memory = MemoryService(session, embedding_provider)
         self.integration = IntegrationService(session, llm)
+        self.profile = UserProfileService(session)
 
     async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
         await self.memory.store_message(conversation_id, "user", content)
@@ -39,7 +43,16 @@ class ChatService:
         for msg in history:
             messages.append(msg)
 
-        request = LLMRequest(messages=messages, system_prompt=SYSTEM_PROMPT)
+        # 사용자 선호도 기반 system prompt 개인화
+        preferences = await self.profile.get_preferences(user_id)
+        safe_prefs = {
+            "language": preferences.get("language", "ko"),
+            "response_style": preferences.get("response_style", "concise"),
+            "interests": preferences.get("interests", [])[:10],
+        }
+        personalized_prompt = SYSTEM_PROMPT + f"\n\nUser preferences: {json.dumps(safe_prefs)}"
+
+        request = LLMRequest(messages=messages, system_prompt=personalized_prompt)
         response = await self.llm.complete(request)
 
         intent = await self.integration.detect_action_intent(response.content)
