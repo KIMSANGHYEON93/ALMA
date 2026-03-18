@@ -39,34 +39,54 @@ export default function LoginPage() {
         </p>
 
         {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
+          <p role="alert" className="text-red-500 text-sm text-center">
+            {error}
+          </p>
         )}
 
         {isRegister && (
+          <div>
+            <label htmlFor="display-name" className="sr-only">
+              이름
+            </label>
+            <input
+              id="display-name"
+              type="text"
+              placeholder="이름"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+            />
+          </div>
+        )}
+        <div>
+          <label htmlFor="email" className="sr-only">
+            이메일
+          </label>
           <input
-            type="text"
-            placeholder="이름"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            id="email"
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
           />
-        )}
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
-        />
+        </div>
+        <div>
+          <label htmlFor="password" className="sr-only">
+            비밀번호
+          </label>
+          <input
+            id="password"
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+          />
+        </div>
 
         <button
           type="submit"

@@ -2,23 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
-import { apiClient } from "@/lib/api";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-interface MessagesPageResponse {
-  messages: {
-    id: string;
-    role: string;
-    content: string;
-    created_at: string;
-  }[];
-  has_more: boolean;
-}
+import Spinner from "./common/Spinner";
+import { useMessages } from "@/hooks/useMessages";
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 interface ChatWindowProps {
   token: string;
@@ -29,152 +16,57 @@ export default function ChatWindow({
   token,
   conversationId,
 }: ChatWindowProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-
-  const wsRef = useRef<WebSocket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const shouldAutoScroll = useRef(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    messages,
+    hasMore,
+    isLoadingHistory,
+    isLoadingMore,
+    loadHistory,
+    loadMore,
+    addMessage,
+  } = useMessages(conversationId, token, scrollContainerRef);
+
+  const handleWsMessage = useCallback(
+    (content: string, id?: string) => {
+      addMessage({ id: id ?? "", role: "assistant", content });
+      shouldAutoScroll.current = true;
+    },
+    [addMessage]
+  );
+
+  const { isConnected, sendMessage: wsSend } = useChatWebSocket(
+    conversationId,
+    token,
+    handleWsMessage
+  );
+
+  const { loadMoreRef } = useInfiniteScroll(
+    loadMore,
+    hasMore && !isLoadingMore,
+    scrollContainerRef
+  );
 
   // conversationId 변경 시 히스토리 로드
   useEffect(() => {
     let cancelled = false;
 
-    const loadHistory = async () => {
-      setIsLoadingHistory(true);
-      setMessages([]);
-      setHasMore(false);
-
-      try {
-        const data = await apiClient<MessagesPageResponse>(
-          `/api/conversations/${conversationId}/messages?limit=20`,
-          { token }
-        );
-
-        if (cancelled) return;
-
-        setMessages(
-          data.messages.map((m) => ({
-            id: m.id,
-            role: m.role as "user" | "assistant",
-            content: m.content,
-          }))
-        );
-        setHasMore(data.has_more);
+    const load = async () => {
+      await loadHistory();
+      if (!cancelled) {
         shouldAutoScroll.current = true;
-      } catch (error) {
-        if (!cancelled) {
-          console.error("히스토리 로드 실패:", error);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingHistory(false);
-        }
       }
     };
-
-    loadHistory();
+    load();
 
     return () => {
       cancelled = true;
     };
-  }, [conversationId, token]);
-
-  // 이전 메시지 추가 로드 (무한 스크롤)
-  const loadMore = useCallback(async () => {
-    if (!hasMore || isLoadingMore || messages.length === 0) return;
-
-    setIsLoadingMore(true);
-
-    const container = scrollContainerRef.current;
-    const prevScrollHeight = container?.scrollHeight ?? 0;
-
-    try {
-      const oldestId = messages[0].id;
-      const data = await apiClient<MessagesPageResponse>(
-        `/api/conversations/${conversationId}/messages?limit=20&before=${oldestId}`,
-        { token }
-      );
-
-      setMessages((prev) => [
-        ...data.messages.map((m) => ({
-          id: m.id,
-          role: m.role as "user" | "assistant",
-          content: m.content,
-        })),
-        ...prev,
-      ]);
-      setHasMore(data.has_more);
-
-      // 스크롤 위치 복원: 새 메시지가 위에 추가된 만큼 스크롤 유지
-      requestAnimationFrame(() => {
-        if (container) {
-          const newScrollHeight = container.scrollHeight;
-          container.scrollTop = newScrollHeight - prevScrollHeight;
-        }
-      });
-    } catch (error) {
-      console.error("이전 메시지 로드 실패:", error);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [hasMore, isLoadingMore, messages, conversationId, token]);
-
-  // IntersectionObserver로 상단 스크롤 감지
-  useEffect(() => {
-    const target = loadMoreRef.current;
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          loadMore();
-        }
-      },
-      {
-        root: scrollContainerRef.current,
-        threshold: 0.1,
-      }
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [hasMore, isLoadingMore, loadMore]);
-
-  // WebSocket 연결
-  useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
-    const ws = new WebSocket(
-      `${protocol}//${host}/api/chat/ws/${conversationId}?token=${token}`
-    );
-
-    ws.onopen = () => setIsConnected(true);
-    ws.onclose = () => setIsConnected(false);
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "message") {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: data.id ?? "",
-            role: "assistant",
-            content: data.content,
-          },
-        ]);
-        shouldAutoScroll.current = true;
-      }
-    };
-
-    wsRef.current = ws;
-    return () => ws.close();
-  }, [conversationId, token]);
+  }, [loadHistory]);
 
   // 새 메시지 시 하단으로 자동 스크롤
   useEffect(() => {
@@ -185,13 +77,10 @@ export default function ChatWindow({
   }, [messages]);
 
   const sendMessage = () => {
-    if (!input.trim() || !wsRef.current) return;
+    if (!input.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: "", role: "user", content: input },
-    ]);
-    wsRef.current.send(JSON.stringify({ content: input }));
+    addMessage({ id: "", role: "user", content: input });
+    wsSend(input);
     setInput("");
     shouldAutoScroll.current = true;
   };
@@ -208,6 +97,7 @@ export default function ChatWindow({
       <div className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800">
         <h2 className="font-semibold">ALMA</h2>
         <span
+          role="status"
           className={`text-xs px-2 py-1 rounded-full ${
             isConnected
               ? "bg-green-100 text-green-700"
@@ -227,57 +117,15 @@ export default function ChatWindow({
 
         {/* 이전 메시지 로딩 스피너 */}
         {isLoadingMore && (
-          <div className="flex justify-center py-2" role="status">
-            <svg
-              className="animate-spin h-5 w-5 text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              aria-label="이전 메시지 로드 중"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            <span className="sr-only">이전 메시지 로드 중</span>
+          <div className="flex justify-center py-2 text-gray-400">
+            <Spinner size="sm" label="이전 메시지 로드 중" />
           </div>
         )}
 
         {/* 히스토리 최초 로딩 스피너 */}
         {isLoadingHistory && (
-          <div className="flex justify-center items-center py-12" role="status">
-            <svg
-              className="animate-spin h-8 w-8 text-blue-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              aria-label="대화 히스토리 로드 중"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            <span className="sr-only">대화 히스토리 로드 중</span>
+          <div className="flex justify-center items-center py-12 text-blue-500">
+            <Spinner size="md" label="대화 히스토리 로드 중" />
           </div>
         )}
 
@@ -294,7 +142,11 @@ export default function ChatWindow({
 
       <div className="p-4 border-t dark:border-gray-800">
         <div className="flex gap-2">
+          <label htmlFor="chat-input" className="sr-only">
+            메시지 입력
+          </label>
           <textarea
+            id="chat-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

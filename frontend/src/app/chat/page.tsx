@@ -1,23 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ChatWindow from "@/components/ChatWindow";
 import ConversationList from "@/components/ConversationList";
-import { getToken } from "@/lib/auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ChatPage() {
-  const [token, setToken] = useState<string | null>(null);
+  const { token, isLoading } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const saved = getToken();
-    setToken(saved);
-    setIsLoading(false);
-    if (!saved) {
-      window.location.href = "/login";
-    }
-  }, []);
 
   if (isLoading || !token) {
     return (
@@ -30,7 +20,6 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen">
       <ConversationList
-        token={token}
         activeId={conversationId}
         onSelect={setConversationId}
       />

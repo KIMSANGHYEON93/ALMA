@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Conversation {
   id: string;
@@ -10,16 +11,15 @@ interface Conversation {
 }
 
 interface ConversationListProps {
-  token: string;
   activeId: string | null;
   onSelect: (id: string) => void;
 }
 
 export default function ConversationList({
-  token,
   activeId,
   onSelect,
 }: ConversationListProps) {
+  const { token } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -73,6 +73,7 @@ export default function ConversationList({
           <button
             key={conv.id}
             onClick={() => onSelect(conv.id)}
+            aria-current={activeId === conv.id ? "true" : undefined}
             className={`w-full text-left px-4 py-3 border-b dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition text-sm ${
               activeId === conv.id
                 ? "bg-blue-50 dark:bg-gray-800 font-medium"
