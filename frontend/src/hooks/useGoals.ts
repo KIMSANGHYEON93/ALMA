@@ -2,39 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
+import { onGoalsChanged } from "@/lib/events";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Goal, GoalDetail, GoalSummary, Milestone } from "@/lib/types";
 
-export interface Milestone {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string;
-  sort_order: number;
-  completed_at: string | null;
-}
-
-export interface Goal {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string;
-  status: string;
-  target_date: string | null;
-  progress: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface GoalDetail extends Goal {
-  milestones: Milestone[];
-  suggest_complete: boolean;
-}
-
-export interface GoalSummary {
-  total_goals: number;
-  active_goals: number;
-  average_progress: number;
-}
+export type { Goal, GoalDetail, GoalSummary, Milestone };
 
 export function useGoals() {
   const { token } = useAuth();
@@ -60,6 +32,11 @@ export function useGoals() {
 
   useEffect(() => {
     fetchGoals();
+  }, [fetchGoals]);
+
+  // 다른 페이지에서 목표 변경 시 자동 갱신
+  useEffect(() => {
+    return onGoalsChanged(fetchGoals);
   }, [fetchGoals]);
 
   const createGoal = async (data: {

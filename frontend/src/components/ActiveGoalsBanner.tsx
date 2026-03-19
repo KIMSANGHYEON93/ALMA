@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
+import { onGoalsChanged } from "@/lib/events";
 import { useAuth } from "@/contexts/AuthContext";
 import type { GoalSummary } from "@/lib/types";
 import Link from "next/link";
@@ -10,12 +11,21 @@ export default function ActiveGoalsBanner() {
   const { token } = useAuth();
   const [summary, setSummary] = useState<GoalSummary | null>(null);
 
-  useEffect(() => {
+  const fetchSummary = useCallback(() => {
     if (!token) return;
     apiClient<GoalSummary>("/api/goals/summary", { token })
       .then(setSummary)
       .catch(() => {});
   }, [token]);
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+
+  // goals 변경 이벤트 수신 시 새로고침
+  useEffect(() => {
+    return onGoalsChanged(fetchSummary);
+  }, [fetchSummary]);
 
   if (!summary || summary.active_goals === 0) return null;
 

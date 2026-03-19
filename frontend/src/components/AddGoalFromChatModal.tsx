@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { apiClient } from "@/lib/api";
+import { emitGoalsChanged } from "@/lib/events";
 import { useAuth } from "@/contexts/AuthContext";
 import type { GoalCategory } from "@/lib/types";
 
@@ -54,6 +55,7 @@ export default function AddGoalFromChatModal({
           category,
         },
       });
+      emitGoalsChanged();
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "목표 생성 실패");

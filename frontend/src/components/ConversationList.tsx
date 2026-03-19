@@ -12,7 +12,7 @@ interface Conversation {
 
 interface ConversationListProps {
   activeId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
 }
 
 export default function ConversationList({
@@ -80,10 +80,10 @@ export default function ConversationList({
         method: "DELETE",
         token,
       });
-      setConversations((prev) => prev.filter((c) => c.id !== id));
+      const remaining = conversations.filter((c) => c.id !== id);
+      setConversations(remaining);
       if (activeId === id) {
-        const remaining = conversations.filter((c) => c.id !== id);
-        onSelect(remaining.length > 0 ? remaining[0].id : "");
+        onSelect(remaining.length > 0 ? remaining[0].id : null as unknown as string);
       }
     } catch {
       // handled

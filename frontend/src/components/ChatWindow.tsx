@@ -77,6 +77,10 @@ export default function ChatWindow({
 
   const sendMessage = () => {
     if (!input.trim() || input.length > MAX_LENGTH) return;
+    if (!isConnected) {
+      setToast({ message: "연결이 끊겼습니다. 잠시 후 다시 시도해주세요.", type: "error" });
+      return;
+    }
     addMessage({ id: "", role: "user", content: input });
     wsSend(input);
     setInput("");
