@@ -50,6 +50,7 @@ api/                    → Presentation Layer (FastAPI routers)
   chat.py                 WebSocket /api/chat/ws/{id}?token=
   profile.py              GET/PUT /api/users/me/preferences
   goals.py                GET/POST/PUT/DELETE /api/goals, milestones, summary
+  integrations.py         GET/POST/DELETE /api/integrations, Google OAuth + Calendar
 
 domain/                 → Business Logic (DDD)
   identity/               Bounded Context: 인증/사용자
@@ -69,15 +70,18 @@ domain/                 → Business Logic (DDD)
     repository.py           GoalRepo, MilestoneRepo, LinkRepo
     models.py               GoalStatus, GoalCategory Enum
   integration/            Bounded Context: 외부 연동
-    service.py              IntegrationService (액션 인텐트 감지)
-    repository.py           ActionLogRepository
+    service.py              IntegrationService (인텐트 감지 + Calendar 실제 연동)
+    repository.py           ActionLogRepo + IntegrationRepo
+    oauth.py                GoogleOAuthService (OAuth2 + CSRF state)
+    calendar.py             GoogleCalendarProvider (asyncio.to_thread)
+    crypto.py               Fernet 토큰 암호화/복호화
 
 infrastructure/         → Technical Implementations
   llm/
     base.py                 LLMProvider Protocol, ChatMessage, LLMRequest/Response
     claude.py               ClaudeProvider (claude-3-haiku-20240307)
 
-models/models.py        → Shared Kernel (User, Conversation, Message, ActionLog, UserMemory, Goal, Milestone, GoalConversationLink)
+models/models.py        → Shared Kernel (User, Conversation, Message, ActionLog, UserMemory, Goal, Milestone, GoalConversationLink, Integration)
 auth/dependencies.py    → get_current_user (JWT verification FastAPI dependency)
 config.py               → Settings (pydantic-settings)
 database.py             → async engine + session (pgbouncer statement_cache_size=0)
