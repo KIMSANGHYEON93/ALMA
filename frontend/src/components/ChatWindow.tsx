@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import Spinner from "./common/Spinner";
+import Toast from "./common/Toast";
 import ActiveGoalsBanner from "./ActiveGoalsBanner";
+import AddGoalFromChatModal from "./AddGoalFromChatModal";
 import { useMessages } from "@/hooks/useMessages";
 import { useChatWebSocket } from "@/hooks/useChatWebSocket";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -21,6 +23,8 @@ export default function ChatWindow({
   const bottomRef = useRef<HTMLDivElement>(null);
   const shouldAutoScroll = useRef(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [goalModalContent, setGoalModalContent] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const {
     messages,
@@ -52,24 +56,16 @@ export default function ChatWindow({
     scrollContainerRef
   );
 
-  // conversationId 변경 시 히스토리 로드
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       await loadHistory();
-      if (!cancelled) {
-        shouldAutoScroll.current = true;
-      }
+      if (!cancelled) shouldAutoScroll.current = true;
     };
     load();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [loadHistory]);
 
-  // 새 메시지 시 하단으로 자동 스크롤
   useEffect(() => {
     if (shouldAutoScroll.current) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,7 +77,6 @@ export default function ChatWindow({
 
   const sendMessage = () => {
     if (!input.trim() || input.length > MAX_LENGTH) return;
-
     addMessage({ id: "", role: "user", content: input });
     wsSend(input);
     setInput("");
@@ -93,6 +88,15 @@ export default function ChatWindow({
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const handleAddGoal = (content: string) => {
+    setGoalModalContent(content);
+  };
+
+  const handleGoalSuccess = () => {
+    setGoalModalContent(null);
+    setToast({ message: "목표가 추가되었습니다", type: "success" });
   };
 
   return (
@@ -118,29 +122,26 @@ export default function ChatWindow({
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto p-6 space-y-4"
       >
-        {/* 무한 스크롤 감지 영역 */}
         <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
 
-        {/* 이전 메시지 로딩 스피너 */}
         {isLoadingMore && (
           <div className="flex justify-center py-2 text-gray-400">
             <Spinner size="sm" label="이전 메시지 로드 중" />
           </div>
         )}
 
-        {/* 히스토리 최초 로딩 스피너 */}
         {isLoadingHistory && (
           <div className="flex justify-center items-center py-12 text-blue-500">
             <Spinner size="md" label="대화 히스토리 로드 중" />
           </div>
         )}
 
-        {/* 메시지 목록 */}
         {messages.map((msg, i) => (
           <MessageBubble
             key={msg.id || `ws-${i}`}
             role={msg.role}
             content={msg.content}
+            onAddGoal={msg.role === "assistant" ? handleAddGoal : undefined}
           />
         ))}
         <div ref={bottomRef} />
@@ -183,6 +184,24 @@ export default function ChatWindow({
           </button>
         </div>
       </div>
+
+      {/* 목표 추가 모달 */}
+      {goalModalContent && (
+        <AddGoalFromChatModal
+          messageContent={goalModalContent}
+          onClose={() => setGoalModalContent(null)}
+          onSuccess={handleGoalSuccess}
+        />
+      )}
+
+      {/* 토스트 알림 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
