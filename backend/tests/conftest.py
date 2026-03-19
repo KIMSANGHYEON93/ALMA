@@ -48,3 +48,15 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
         await trans.rollback()
 
     await engine.dispose()
+
+
+@pytest.fixture
+async def test_user(db_session: AsyncSession):
+    """Create a test user for goal/milestone tests."""
+    from alma.models.models import User
+
+    user = User(email=f"goal-test-{id(db_session)}@test.com", password_hash="hashed")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user

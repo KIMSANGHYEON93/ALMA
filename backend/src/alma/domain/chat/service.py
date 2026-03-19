@@ -17,13 +17,14 @@ Always respond in the user's language. Be concise and helpful."""
 
 
 class ChatService:
-    def __init__(self, session: AsyncSession, llm: LLMProvider):
+    def __init__(self, session: AsyncSession, llm: LLMProvider, goal_service=None):
         self.session = session
         self.llm = llm
         embedding_provider = create_embedding_provider(settings)
         self.memory = MemoryService(session, embedding_provider)
         self.integration = IntegrationService(session, llm)
         self.profile = UserProfileService(session)
+        self.goal_service = goal_service  # optional — None이면 목표 감지 스킵
 
     async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
         await self.memory.store_message(conversation_id, "user", content)
@@ -51,6 +52,12 @@ class ChatService:
             "interests": preferences.get("interests", [])[:10],
         }
         personalized_prompt = SYSTEM_PROMPT + f"\n\nUser preferences: {json.dumps(safe_prefs)}"
+
+        # 활성 목표 컨텍스트 주입 (optional)
+        if self.goal_service:
+            goal_context = await self.goal_service.get_active_goals_context(user_id)
+            if goal_context:
+                personalized_prompt += f"\n\n{goal_context}"
 
         request = LLMRequest(messages=messages, system_prompt=personalized_prompt)
         response = await self.llm.complete(request)
