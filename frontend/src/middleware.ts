@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // 인증이 필요한 경로
-const protectedPaths = ["/chat", "/settings"];
+const protectedPaths = ["/chat", "/settings", "/goals"];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("alma_access_token")?.value;
@@ -24,5 +24,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/chat/:path*", "/settings/:path*"],
+  matcher: ["/", "/login", "/chat/:path*", "/settings/:path*", "/goals/:path*"],
 };
