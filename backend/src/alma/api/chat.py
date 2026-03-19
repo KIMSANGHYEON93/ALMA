@@ -7,6 +7,7 @@ from alma.domain.identity.service import decode_token
 from alma.database import async_session
 from alma.infrastructure.llm.claude import ClaudeProvider
 from alma.domain.chat.service import ChatService
+from alma.domain.growth.service import GoalService
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,8 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
 
     async with async_session() as session:
         llm = ClaudeProvider()
-        chat_service = ChatService(session=session, llm=llm)
+        goal_service = GoalService(session)
+        chat_service = ChatService(session=session, llm=llm, goal_service=goal_service)
 
         try:
             while True:

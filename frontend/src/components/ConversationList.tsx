@@ -57,6 +57,13 @@ export default function ConversationList({
     fetchConversations();
   }, [fetchConversations]);
 
+  // 제목 자동 갱신 (첫 메시지 후 서버에서 제목 생성됨)
+  useEffect(() => {
+    if (!activeId) return;
+    const timer = setTimeout(() => fetchConversations(), 3000);
+    return () => clearTimeout(timer);
+  }, [activeId, fetchConversations]);
+
   return (
     <aside className="w-72 border-r dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900">
       <div className="p-4 border-b dark:border-gray-800">

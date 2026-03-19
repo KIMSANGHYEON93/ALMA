@@ -17,6 +17,18 @@ class ConversationRepository:
         await self.session.refresh(conv)
         return conv
 
+    async def get(self, conversation_id: uuid.UUID) -> Conversation | None:
+        result = await self.session.execute(
+            select(Conversation).where(Conversation.id == conversation_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def update_title(self, conversation_id: uuid.UUID, title: str) -> None:
+        conv = await self.get(conversation_id)
+        if conv and not conv.title:
+            conv.title = title
+            await self.session.commit()
+
     async def list_by_user(self, user_id: uuid.UUID, limit: int = 20) -> list[Conversation]:
         result = await self.session.execute(
             select(Conversation)

@@ -5,7 +5,7 @@ from alma.infrastructure.llm.base import LLMRequest, LLMResponse
 
 
 class ClaudeProvider:
-    def __init__(self, model: str = "claude-3-haiku-20240307"):
+    def __init__(self, model: str = "claude-sonnet-4-20250514"):
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
         self.model = model
 
