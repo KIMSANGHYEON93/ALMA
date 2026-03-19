@@ -29,6 +29,8 @@ export function useProfile() {
 
   const updatePreferences = async (updates: Partial<UserPreferences>) => {
     if (!token) return;
+    // 낙관적 업데이트: 클릭 즉시 UI 반영
+    setPreferences((prev) => ({ ...prev, ...updates }));
     setSaving(true);
     try {
       const data = await apiClient<UserPreferences>("/api/users/me/preferences", {
@@ -37,6 +39,9 @@ export function useProfile() {
         body: updates,
       });
       setPreferences(data);
+    } catch {
+      // 실패 시 서버 상태로 롤백
+      await fetchPreferences();
     } finally {
       setSaving(false);
     }

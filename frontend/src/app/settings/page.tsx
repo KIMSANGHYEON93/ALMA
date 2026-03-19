@@ -60,7 +60,13 @@ export default function SettingsPage() {
     try {
       await connectGoogle();
     } catch (e) {
-      setConnectError(e instanceof Error ? e.message : "연결 실패");
+      const msg = e instanceof Error ? e.message : "연결 실패";
+      // 개발 환경 에러를 사용자 친화적 메시지로 변환
+      if (msg.includes("not configured") || msg.includes("503")) {
+        setConnectError("Google Calendar 연동은 현재 준비 중입니다. 곧 사용 가능합니다.");
+      } else {
+        setConnectError(msg);
+      }
     }
   };
 

@@ -34,7 +34,13 @@ export async function apiClient<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: "요청 실패" }));
-    throw new Error(error.detail || `HTTP ${res.status}`);
+    const detail = error.detail;
+    const message = typeof detail === "string"
+      ? detail
+      : Array.isArray(detail)
+        ? detail.map((d: { msg?: string }) => d.msg || "").join(", ")
+        : JSON.stringify(detail) || `HTTP ${res.status}`;
+    throw new Error(message);
   }
 
   if (res.status === 204) return undefined as T;
