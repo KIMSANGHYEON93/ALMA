@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from alma.models.models import Conversation, Message
@@ -24,10 +24,12 @@ class ConversationRepository:
         return result.scalar_one_or_none()
 
     async def update_title(self, conversation_id: uuid.UUID, title: str) -> None:
-        conv = await self.get(conversation_id)
-        if conv and not conv.title:
-            conv.title = title
-            await self.session.commit()
+        await self.session.execute(
+            update(Conversation)
+            .where(Conversation.id == conversation_id, Conversation.title.is_(None))
+            .values(title=title)
+        )
+        await self.session.commit()
 
     async def list_by_user(self, user_id: uuid.UUID, limit: int = 20) -> list[Conversation]:
         result = await self.session.execute(

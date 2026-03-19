@@ -40,7 +40,7 @@ export default function ChatWindow({
     [addMessage]
   );
 
-  const { isConnected, sendMessage: wsSend } = useChatWebSocket(
+  const { isConnected, isConnecting, sendMessage: wsSend } = useChatWebSocket(
     conversationId,
     token,
     handleWsMessage
@@ -77,8 +77,10 @@ export default function ChatWindow({
     }
   }, [messages]);
 
+  const MAX_LENGTH = 2000;
+
   const sendMessage = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || input.length > MAX_LENGTH) return;
 
     addMessage({ id: "", role: "user", content: input });
     wsSend(input);
@@ -101,12 +103,14 @@ export default function ChatWindow({
         <span
           role="status"
           className={`text-xs px-2 py-1 rounded-full ${
-            isConnected
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+            isConnecting
+              ? "bg-yellow-100 text-yellow-700"
+              : isConnected
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
           }`}
         >
-          {isConnected ? "연결됨" : "연결 끊김"}
+          {isConnecting ? "연결 중..." : isConnected ? "연결됨" : "연결 끊김"}
         </span>
       </div>
 
@@ -147,18 +151,32 @@ export default function ChatWindow({
           <label htmlFor="chat-input" className="sr-only">
             메시지 입력
           </label>
-          <textarea
-            id="chat-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="메시지를 입력하세요..."
-            rows={1}
-            className="flex-1 px-4 py-2 border rounded-lg resize-none dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex-1 relative">
+            <textarea
+              id="chat-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value.slice(0, MAX_LENGTH))}
+              onKeyDown={handleKeyDown}
+              placeholder="메시지를 입력하세요..."
+              rows={1}
+              maxLength={MAX_LENGTH}
+              className={`w-full px-4 py-2 border rounded-lg resize-none dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                input.length >= MAX_LENGTH ? "border-red-400" : ""
+              }`}
+            />
+            {input.length > MAX_LENGTH * 0.8 && (
+              <span
+                className={`absolute right-2 bottom-1 text-xs ${
+                  input.length >= MAX_LENGTH ? "text-red-500" : "text-gray-400"
+                }`}
+              >
+                {input.length}/{MAX_LENGTH}
+              </span>
+            )}
+          </div>
           <button
             onClick={sendMessage}
-            disabled={!isConnected || !input.trim()}
+            disabled={!isConnected || !input.trim() || input.length > MAX_LENGTH}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             전송

@@ -6,6 +6,7 @@ export function useChatWebSocket(
   onMessage: (content: string, id?: string) => void
 ) {
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
 
@@ -21,8 +22,8 @@ export function useChatWebSocket(
       `${protocol}//${host}/api/chat/ws/${conversationId}?token=${token}`
     );
 
-    ws.onopen = () => setIsConnected(true);
-    ws.onclose = () => setIsConnected(false);
+    ws.onopen = () => { setIsConnected(true); setIsConnecting(false); };
+    ws.onclose = () => { setIsConnected(false); setIsConnecting(false); };
     ws.onerror = (event) => {
       console.error("WebSocket 연결 오류:", event);
     };
@@ -46,5 +47,5 @@ export function useChatWebSocket(
     wsRef.current.send(JSON.stringify({ content }));
   }, []);
 
-  return { isConnected, sendMessage };
+  return { isConnected, isConnecting, sendMessage };
 }

@@ -109,4 +109,4 @@ class ChatService:
             if title:
                 await self.conv_repo.update_title(uuid.UUID(conversation_id), title)
         except Exception:
-            logger.debug("Failed to generate title", exc_info=True)
+            logger.warning("Failed to generate title", exc_info=True)
