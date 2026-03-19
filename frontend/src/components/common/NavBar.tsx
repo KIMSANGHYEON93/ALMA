@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const navItems = [
   { href: "/chat", label: "대화" },
   { href: "/goals", label: "목표" },
+  { href: "/settings", label: "설정" },
 ];
 
 export default function NavBar() {

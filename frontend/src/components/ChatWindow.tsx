@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import Spinner from "./common/Spinner";
+import ActiveGoalsBanner from "./ActiveGoalsBanner";
 import { useMessages } from "@/hooks/useMessages";
 import { useChatWebSocket } from "@/hooks/useChatWebSocket";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
@@ -94,6 +95,7 @@ export default function ChatWindow({
 
   return (
     <div className="flex flex-col h-full">
+      <ActiveGoalsBanner />
       <div className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800">
         <h2 className="font-semibold">ALMA</h2>
         <span
