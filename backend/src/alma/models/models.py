@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import CheckConstraint, Date, ForeignKey, Index, Text, func
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Index, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -205,5 +205,64 @@ class Integration(Base):
         CheckConstraint(
             "status IN ('pending','active','disconnected','expired')",
             name="ck_integrations_status",
+        ),
+    )
+
+
+class Retrospective(Base):
+    __tablename__ = "retrospectives"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    period_type: Mapped[str] = mapped_column(nullable=False, default="weekly")
+    period_start = mapped_column(Date, nullable=False)
+    period_end = mapped_column(Date, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    highlights: Mapped[dict] = mapped_column(JSONB, default=list, server_default="[]")
+    challenges: Mapped[dict] = mapped_column(JSONB, default=list, server_default="[]")
+    goals_progress: Mapped[dict] = mapped_column(JSONB, default=list, server_default="[]")
+    conversation_count: Mapped[int] = mapped_column(default=0, server_default="0")
+    message_count: Mapped[int] = mapped_column(default=0, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    insights: Mapped[list["Insight"]] = relationship(
+        back_populates="retrospective", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("idx_retro_user", "user_id", "period_end"),
+        UniqueConstraint("user_id", "period_type", "period_start", name="uq_retro_period"),
+        CheckConstraint("period_type = 'weekly'", name="ck_retro_period_type"),
+    )
+
+
+class Insight(Base):
+    __tablename__ = "insights"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    retrospective_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("retrospectives.id", ondelete="SET NULL"), nullable=True
+    )
+    category: Mapped[str] = mapped_column(nullable=False)
+    title: Mapped[str] = mapped_column(nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    data: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    source_period: Mapped[str | None] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    retrospective: Mapped["Retrospective | None"] = relationship(back_populates="insights")
+
+    __table_args__ = (
+        Index("idx_insights_user", "user_id", "created_at"),
+        Index("idx_insights_retro", "retrospective_id"),
+        CheckConstraint(
+            "category IN ('topic_trend','goal_pattern','activity_pattern','recommendation')",
+            name="ck_insight_category",
         ),
     )

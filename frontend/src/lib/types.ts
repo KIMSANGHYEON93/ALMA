@@ -132,3 +132,42 @@ export interface CalendarEvent {
   end: string;
   timezone?: string;
 }
+
+// ─── Insights / Retrospectives ───
+
+export type InsightCategory = "topic_trend" | "goal_pattern" | "activity_pattern" | "recommendation";
+
+export interface Retrospective {
+  id: string;
+  period_type: string;
+  period_start: string;
+  period_end: string;
+  summary: string;
+  highlights: string[];
+  challenges: string[];
+  goals_progress: Record<string, unknown>;
+  conversation_count: number;
+  message_count: number;
+  created_at: string;
+  insights?: InsightItem[];
+}
+
+export interface InsightItem {
+  id: string;
+  category: InsightCategory;
+  title: string;
+  content: string;
+  data: Record<string, unknown>;
+  source_period: string | null;
+  created_at: string;
+}
+
+export interface InsightDashboard {
+  latest_retrospective: Retrospective | null;
+  recent_insights: InsightItem[];
+  stats: {
+    active_goals: number;
+    completed_goals: number;
+    streak_days: number;
+  };
+}

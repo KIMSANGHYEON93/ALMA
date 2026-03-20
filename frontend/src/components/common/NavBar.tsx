@@ -8,6 +8,7 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 const navItems = [
   { href: "/chat", label: "대화" },
   { href: "/goals", label: "목표" },
+  { href: "/insights", label: "인사이트" },
   { href: "/settings", label: "설정" },
 ];
 
