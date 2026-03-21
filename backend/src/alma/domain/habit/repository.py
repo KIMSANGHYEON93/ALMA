@@ -46,9 +46,7 @@ class HabitRepository:
         result = await self.session.execute(select(Habit).where(Habit.id == habit_id))
         return result.scalar_one_or_none()
 
-    async def list_by_user(
-        self, user_id: uuid.UUID, status: str | None = None
-    ) -> list[Habit]:
+    async def list_by_user(self, user_id: uuid.UUID, status: str | None = None) -> list[Habit]:
         query = select(Habit).where(Habit.user_id == user_id)
         if status:
             query = query.where(Habit.status == status)
@@ -107,15 +105,11 @@ class HabitLogRepository:
 
     async def get_by_date(self, habit_id: uuid.UUID, log_date: date) -> HabitLog | None:
         result = await self.session.execute(
-            select(HabitLog).where(
-                HabitLog.habit_id == habit_id, HabitLog.log_date == log_date
-            )
+            select(HabitLog).where(HabitLog.habit_id == habit_id, HabitLog.log_date == log_date)
         )
         return result.scalar_one_or_none()
 
-    async def list_by_habit(
-        self, habit_id: uuid.UUID, start: date, end: date
-    ) -> list[HabitLog]:
+    async def list_by_habit(self, habit_id: uuid.UUID, start: date, end: date) -> list[HabitLog]:
         result = await self.session.execute(
             select(HabitLog)
             .where(
@@ -127,19 +121,13 @@ class HabitLogRepository:
         )
         return list(result.scalars().all())
 
-    async def list_by_user_date(
-        self, user_id: uuid.UUID, log_date: date
-    ) -> list[HabitLog]:
+    async def list_by_user_date(self, user_id: uuid.UUID, log_date: date) -> list[HabitLog]:
         result = await self.session.execute(
-            select(HabitLog).where(
-                HabitLog.user_id == user_id, HabitLog.log_date == log_date
-            )
+            select(HabitLog).where(HabitLog.user_id == user_id, HabitLog.log_date == log_date)
         )
         return list(result.scalars().all())
 
-    async def get_completed_dates(
-        self, habit_id: uuid.UUID, start: date, end: date
-    ) -> set[date]:
+    async def get_completed_dates(self, habit_id: uuid.UUID, start: date, end: date) -> set[date]:
         result = await self.session.execute(
             select(HabitLog.log_date).where(
                 HabitLog.habit_id == habit_id,
