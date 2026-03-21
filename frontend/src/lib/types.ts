@@ -171,3 +171,71 @@ export interface InsightDashboard {
     streak_days: number;
   };
 }
+
+// ─── Habits ───
+
+export type FrequencyType = "daily" | "specific_days" | "times_per_week" | "every_n_days";
+export type HabitStatus = "active" | "paused" | "archived";
+
+export interface Habit {
+  id: string;
+  title: string;
+  description: string | null;
+  frequency_type: FrequencyType;
+  frequency_value: Record<string, unknown>;
+  target_value: number | null;
+  target_unit: string | null;
+  status: HabitStatus;
+  goal_id: string | null;
+  start_date: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HabitDetail extends Habit {
+  streak: number;
+}
+
+export interface HabitLog {
+  id: string;
+  habit_id: string;
+  log_date: string;
+  completed: boolean;
+  value: number | null;
+  note: string | null;
+  source: string;
+  created_at: string;
+}
+
+export interface HabitCreate {
+  title: string;
+  description?: string;
+  frequency_type?: FrequencyType;
+  frequency_value?: Record<string, unknown>;
+  target_value?: number;
+  target_unit?: string;
+  goal_id?: string;
+  start_date?: string;
+}
+
+export interface TodayHabitItem {
+  id: string;
+  title: string;
+  frequency_type: string;
+  scheduled_today: boolean;
+  checked_in: boolean;
+  completed: boolean;
+  value: number | null;
+  target_value: number | null;
+  target_unit: string | null;
+  streak: number;
+  note: string | null;
+}
+
+export interface TodaySummary {
+  date: string;
+  total: number;
+  completed: number;
+  habits: TodayHabitItem[];
+}
