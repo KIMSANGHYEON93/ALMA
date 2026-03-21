@@ -266,3 +266,72 @@ class Insight(Base):
             name="ck_insight_category",
         ),
     )
+
+
+class Habit(Base):
+    __tablename__ = "habits"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    goal_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("goals.id", ondelete="SET NULL"), nullable=True
+    )
+    title: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    frequency_type: Mapped[str] = mapped_column(nullable=False)
+    frequency_value: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    target_value: Mapped[float | None] = mapped_column(nullable=True)
+    target_unit: Mapped[str | None] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=False, default="active")
+    start_date = mapped_column(Date, nullable=False)
+    sort_order: Mapped[int] = mapped_column(default=0, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    logs: Mapped[list["HabitLog"]] = relationship(
+        back_populates="habit", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("idx_habits_user", "user_id", "status"),
+        CheckConstraint(
+            "frequency_type IN ('daily','specific_days','times_per_week','every_n_days')",
+            name="ck_habits_frequency_type",
+        ),
+        CheckConstraint(
+            "status IN ('active','paused','archived')",
+            name="ck_habits_status",
+        ),
+    )
+
+
+class HabitLog(Base):
+    __tablename__ = "habit_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    habit_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("habits.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    log_date = mapped_column(Date, nullable=False)
+    completed: Mapped[bool] = mapped_column(nullable=False)
+    value: Mapped[float | None] = mapped_column(nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source: Mapped[str] = mapped_column(nullable=False, default="ui")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    habit: Mapped["Habit"] = relationship(back_populates="logs")
+
+    __table_args__ = (
+        UniqueConstraint("habit_id", "log_date", name="uq_habit_log_date"),
+        Index("idx_habit_logs_habit_date", "habit_id", "log_date"),
+        Index("idx_habit_logs_user_date", "user_id", "log_date"),
+        CheckConstraint(
+            "source IN ('ui','chat')",
+            name="ck_habit_logs_source",
+        ),
+    )
