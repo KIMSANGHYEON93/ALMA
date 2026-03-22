@@ -55,7 +55,9 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
       className={`p-4 rounded-xl border transition ${
         item.completed
           ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-          : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+          : item.scheduled_today && !item.checked_in
+            ? "bg-white dark:bg-gray-900 border-l-4 border-l-orange-400 border-gray-200 dark:border-gray-800"
+            : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
       } ${!item.scheduled_today ? "opacity-50" : ""}`}
     >
       <div className="flex items-center justify-between">
@@ -84,7 +86,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
             </span>
             {item.streak > 0 && (
               <span className="ml-2 text-xs text-orange-500 font-medium">
-                {item.streak}{item.frequency_type === "times_per_week" ? "주" : "일"}
+                🔥 {item.streak}{item.frequency_type === "times_per_week" ? "주" : "일"}
               </span>
             )}
           </div>
