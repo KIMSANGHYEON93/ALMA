@@ -25,6 +25,7 @@ export default function ChatWindow({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [goalModalContent, setGoalModalContent] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [habitReminder, setHabitReminder] = useState<string | null>(null);
 
   const {
     messages,
@@ -47,7 +48,8 @@ export default function ChatWindow({
   const { isConnected, isConnecting, sendMessage: wsSend } = useChatWebSocket(
     conversationId,
     token,
-    handleWsMessage
+    handleWsMessage,
+    (message) => setHabitReminder(message)
   );
 
   const { loadMoreRef } = useInfiniteScroll(
@@ -106,6 +108,20 @@ export default function ChatWindow({
   return (
     <div className="flex flex-col h-full">
       <ActiveGoalsBanner />
+      {habitReminder && (
+        <div className="mx-4 mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">습관 알림</p>
+            <p className="text-sm text-amber-700 dark:text-amber-400 whitespace-pre-line mt-1">{habitReminder}</p>
+          </div>
+          <button
+            onClick={() => setHabitReminder(null)}
+            className="text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 ml-2 shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800">
         <h2 className="font-semibold">ALMA</h2>
         <span
