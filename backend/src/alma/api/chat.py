@@ -8,6 +8,7 @@ from alma.database import async_session
 from alma.infrastructure.llm.claude import ClaudeProvider
 from alma.domain.chat.service import ChatService
 from alma.domain.growth.service import GoalService
+from alma.domain.habit.service import HabitService
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,38 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
     async with async_session() as session:
         llm = ClaudeProvider()
         goal_service = GoalService(session)
-        chat_service = ChatService(session=session, llm=llm, goal_service=goal_service)
+        habit_service = HabitService(session)
+        chat_service = ChatService(
+            session=session,
+            llm=llm,
+            goal_service=goal_service,
+            habit_service=habit_service,
+        )
+
+        # 접속 시 미완료 습관 리마인더
+        try:
+            import uuid as uuid_mod
+
+            summary = await habit_service.get_today_summary(uuid_mod.UUID(user_id))
+            uncompleted = [
+                h for h in summary["habits"] if h["scheduled_today"] and not h["completed"]
+            ]
+            if uncompleted:
+                names = "\n".join(f"⬜ {h['title']}" for h in uncompleted)
+                reminder_msg = (
+                    f"오늘 아직 완료하지 않은 습관이 있어요:\n{names}\n"
+                    f"완료: {summary['completed']}/{summary['total']}"
+                )
+                await websocket.send_text(
+                    json.dumps(
+                        {
+                            "type": "habit_reminder",
+                            "message": reminder_msg,
+                        }
+                    )
+                )
+        except Exception:
+            logger.warning("Failed to send habit reminder", exc_info=True)
 
         try:
             while True:

@@ -29,14 +29,17 @@ Guidelines:
 
 
 class ChatService:
-    def __init__(self, session: AsyncSession, llm: LLMProvider, goal_service=None):
+    def __init__(
+        self, session: AsyncSession, llm: LLMProvider, goal_service=None, habit_service=None
+    ):
         self.session = session
         self.llm = llm
         embedding_provider = create_embedding_provider(settings)
         self.memory = MemoryService(session, embedding_provider)
-        self.integration = IntegrationService(session, llm)
+        self.integration = IntegrationService(session, llm, habit_service=habit_service)
         self.profile = UserProfileService(session)
-        self.goal_service = goal_service  # optional — None이면 목표 감지 스킵
+        self.goal_service = goal_service
+        self.habit_service = habit_service
         self.conv_repo = ConversationRepository(session)
 
     async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
@@ -72,16 +75,27 @@ class ChatService:
             if goal_context:
                 personalized_prompt += f"\n\n{goal_context}"
 
+        # 활성 습관 컨텍스트 주입 (optional)
+        if self.habit_service:
+            habit_context = await self.habit_service.get_habits_context(uuid.UUID(user_id))
+            if habit_context:
+                personalized_prompt += f"\n\n{habit_context}"
+
         request = LLMRequest(messages=messages, system_prompt=personalized_prompt)
         response = await self.llm.complete(request)
 
         intent = await self.integration.detect_action_intent(response.content)
         action_note = ""
-        if intent and intent.needs_confirmation:
-            action_note = (
-                f"\n\n---\n[Action: {intent.service}.{intent.action}"
-                f"({intent.params}). 실행할까요? (예/아니오)]"
-            )
+        if intent:
+            if intent.needs_confirmation:
+                action_note = (
+                    f"\n\n---\n[Action: {intent.service}.{intent.action}"
+                    f"({intent.params}). 실행할까요? (예/아니오)]"
+                )
+            else:
+                # 자동 실행 (habit.checkin, habit.uncheckin, habit.today)
+                result = await self.integration.execute_action(user_id, intent)
+                action_note = self._format_habit_result(intent, result)
 
         full_response = response.content + action_note
         await self.memory.store_message(conversation_id, "assistant", full_response)
@@ -90,6 +104,24 @@ class ChatService:
         await self._maybe_generate_title(conversation_id, content)
 
         return full_response
+
+    def _format_habit_result(self, intent: object, result: dict) -> str:
+        """habit 인텐트 자동 실행 결과를 자연어로 포맷"""
+        if not result.get("success"):
+            return f"\n\n⚠️ {result.get('error', '실행 실패')}"
+
+        action = getattr(intent, "action", "")
+        if action == "checkin":
+            streak = result.get("streak", 0)
+            return f"\n\n✅ '{result['habit']}' 체크인 완료! 🔥{streak}일 연속"
+        elif action == "uncheckin":
+            return f"\n\n⬜ '{result['habit']}' 체크인이 취소되었습니다"
+        elif action == "today":
+            summary = result.get("summary", {})
+            total = summary.get("total", 0)
+            completed = summary.get("completed", 0)
+            return f"\n\n📋 오늘 습관: {completed}/{total} 완료"
+        return ""
 
     async def _maybe_generate_title(self, conversation_id: str, user_message: str) -> None:
         """첫 사용자 메시지를 기반으로 대화 제목을 자동 생성"""

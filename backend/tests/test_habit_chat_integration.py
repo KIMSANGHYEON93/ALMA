@@ -198,3 +198,73 @@ async def test_create_habit_via_intent(db_session: AsyncSession, test_user):
 
     habits = await habit_service.list_habits(test_user.id, status="active")
     assert any(h.title == "물 마시기" for h in habits)
+
+
+@pytest.mark.asyncio
+async def test_chat_with_habit_service(db_session: AsyncSession, test_user):
+    """HabitService 주입 시 ChatService 생성 확인"""
+    from alma.domain.chat.service import ChatService
+
+    habit_service = HabitService(db_session)
+    mock_llm = MagicMock()
+    chat = ChatService(db_session, mock_llm, habit_service=habit_service)
+    assert chat.habit_service is not None
+    assert chat.integration.habit_service is not None
+
+
+@pytest.mark.asyncio
+async def test_chat_without_habit_service(db_session: AsyncSession):
+    """habit_service=None이면 에러 없이 동작"""
+    from alma.domain.chat.service import ChatService
+
+    mock_llm = MagicMock()
+    chat = ChatService(db_session, mock_llm, habit_service=None)
+    assert chat.habit_service is None
+
+
+@pytest.mark.asyncio
+async def test_habit_today_via_intent(db_session: AsyncSession, test_user):
+    habit_service = HabitService(db_session)
+    await habit_service.create_habit(
+        test_user.id,
+        "운동",
+        frequency_type="daily",
+        frequency_value={},
+        start_date=date.today(),
+    )
+
+    mock_llm = MagicMock()
+    integration_service = IntegrationService(db_session, mock_llm, habit_service=habit_service)
+
+    intent = ActionIntent(service="habit", action="today", params={}, needs_confirmation=False)
+    result = await integration_service.execute_action(str(test_user.id), intent)
+
+    assert result["success"] is True
+    assert "summary" in result
+    assert result["summary"]["total"] == 1
+
+
+@pytest.mark.asyncio
+async def test_websocket_habit_reminder(db_session: AsyncSession, test_user):
+    """접속 시 미완료 습관이 있으면 리마인더 생성 확인"""
+    habit_service = HabitService(db_session)
+    await habit_service.create_habit(
+        test_user.id,
+        "운동",
+        frequency_type="daily",
+        frequency_value={},
+        start_date=date.today(),
+    )
+    await habit_service.create_habit(
+        test_user.id,
+        "독서",
+        frequency_type="daily",
+        frequency_value={},
+        start_date=date.today(),
+    )
+
+    summary = await habit_service.get_today_summary(test_user.id)
+    uncompleted = [h for h in summary["habits"] if h["scheduled_today"] and not h["completed"]]
+
+    assert len(uncompleted) == 2
+    assert any(h["title"] == "운동" for h in uncompleted)
