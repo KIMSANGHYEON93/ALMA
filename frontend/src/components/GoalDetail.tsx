@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { GoalDetail as GoalDetailType } from "@/hooks/useGoals";
 
 interface GoalDetailProps {
@@ -59,9 +61,11 @@ export default function GoalDetailView({
           {detail.title}
         </h2>
         {detail.description && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {detail.description}
-          </p>
+          <div className="text-sm text-gray-500 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {detail.description}
+            </ReactMarkdown>
+          </div>
         )}
 
         {/* Progress */}
