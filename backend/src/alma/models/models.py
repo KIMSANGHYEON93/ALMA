@@ -262,7 +262,7 @@ class Insight(Base):
         Index("idx_insights_user", "user_id", "created_at"),
         Index("idx_insights_retro", "retrospective_id"),
         CheckConstraint(
-            "category IN ('topic_trend','goal_pattern','activity_pattern','recommendation')",
+            "category IN ('topic_trend','goal_pattern','activity_pattern','recommendation','habit_pattern')",
             name="ck_insight_category",
         ),
     )

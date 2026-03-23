@@ -137,3 +137,37 @@ class HabitLogRepository:
             )
         )
         return {row[0] for row in result.all()}
+
+    async def get_completed_dates_by_user(
+        self, user_id: uuid.UUID, start: date, end: date
+    ) -> dict[date, set[uuid.UUID]]:
+        """사용자의 날짜별 완료된 습관 ID set 반환"""
+        result = await self.session.execute(
+            select(HabitLog.log_date, HabitLog.habit_id).where(
+                HabitLog.user_id == user_id,
+                HabitLog.completed.is_(True),
+                HabitLog.log_date >= start,
+                HabitLog.log_date <= end,
+            )
+        )
+        data: dict[date, set[uuid.UUID]] = {}
+        for row in result.all():
+            data.setdefault(row[0], set()).add(row[1])
+        return data
+
+    async def get_heatmap_data(
+        self, user_id: uuid.UUID, year: int
+    ) -> dict[str, int]:
+        """연간 날짜별 완료 습관 수"""
+        from sqlalchemy import func as sa_func
+        year_start = date(year, 1, 1)
+        year_end = date(year, 12, 31)
+        result = await self.session.execute(
+            select(HabitLog.log_date, sa_func.count()).where(
+                HabitLog.user_id == user_id,
+                HabitLog.completed.is_(True),
+                HabitLog.log_date >= year_start,
+                HabitLog.log_date <= year_end,
+            ).group_by(HabitLog.log_date)
+        )
+        return {row[0].isoformat(): row[1] for row in result.all()}
