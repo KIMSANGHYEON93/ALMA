@@ -37,12 +37,17 @@ class IntegrationService:
             "- habit.create: create a new habit (params: title, frequency_type, frequency_value, target_value?, target_unit?)\n"
             "- habit.update: update a habit (params: title, ...fields to change)\n"
             "- habit.delete: delete a habit (params: title)\n"
-            "- habit.analyze: analyze habit patterns and provide coaching (params: {})\n\n"
+            "- habit.analyze: analyze habit patterns and provide coaching (params: {})\n"
+            "- automation.suggest: suggest automation rules based on patterns (params: {})\n"
+            "- automation.list: list user's automation rules (params: {})\n"
+            "- automation.create: create an automation rule (params: name, trigger_event, action_type, action_config)\n\n"
             "Rules:\n"
             "- habit.checkin, habit.uncheckin, habit.today → needs_confirmation=false\n"
             "- habit.analyze → needs_confirmation=false\n"
             "- habit.create, habit.update, habit.delete → needs_confirmation=true\n"
-            "- calendar actions → needs_confirmation=true\n\n"
+            "- calendar actions → needs_confirmation=true\n"
+            "- automation.suggest, automation.list → needs_confirmation=false\n"
+            "- automation.create → needs_confirmation=true\n\n"
             'If action needed, respond with JSON: {"service":"...","action":"...","params":{...},"needs_confirmation":true/false}\n'
             "If no action needed, respond with: null\n"
             "Message: " + user_message
@@ -72,6 +77,8 @@ class IntegrationService:
                 result = await self._execute_calendar_action(user_id, intent)
             elif intent.service == "habit":
                 result = await self._execute_habit_action(user_id, intent)
+            elif intent.service == "automation":
+                result = await self._execute_automation_action(user_id, intent)
             elif intent.service == "notion":
                 result = await self._execute_notion_action(user_id, intent)
             else:
@@ -92,8 +99,10 @@ class IntegrationService:
 
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "integration.action_executed", "integration",
+                "integration.action_executed",
+                "integration",
                 {"service": intent.service, "action": intent.action, "success": success},
                 user_id=user_id,
             )
@@ -196,6 +205,36 @@ class IntegrationService:
             return {"success": True, "habit": habit.title, "deleted": True}
 
         return {"success": False, "error": f"Unknown action: {action}"}
+
+    async def _execute_automation_action(self, user_id: str, intent: ActionIntent) -> dict:
+        from alma.domain.automation.service import AutomationService
+
+        uid = uuid.UUID(user_id)
+        service = AutomationService(self.session, self.llm)
+
+        if intent.action == "suggest":
+            suggestions = await service.suggest_automations(uid)
+            return {"success": True, "suggestions": suggestions}
+        elif intent.action == "list":
+            rules = await service.list_rules(uid)
+            return {
+                "success": True,
+                "rules": [
+                    {"name": r.name, "trigger": r.trigger_event, "active": r.is_active}
+                    for r in rules
+                ],
+            }
+        elif intent.action == "create":
+            params = intent.params
+            rule = await service.create_rule(
+                uid,
+                params.get("name", "새 규칙"),
+                params.get("trigger_event", ""),
+                params.get("action_type", "notification"),
+                params.get("action_config", {}),
+            )
+            return {"success": True, "rule": rule.name, "created": True}
+        return {"success": False, "error": f"Unknown automation action: {intent.action}"}
 
     async def _execute_notion_action(self, user_id: str, intent: ActionIntent) -> dict:
         return {
