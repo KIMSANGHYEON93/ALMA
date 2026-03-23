@@ -25,7 +25,17 @@ class GoalService:
         return min(100, int(completed / len(milestones) * 100))
 
     async def create_goal(self, user_id: uuid.UUID, title: str, **kwargs) -> Goal:
-        return await self.goal_repo.create(user_id, title, **kwargs)
+        goal = await self.goal_repo.create(user_id, title, **kwargs)
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "goal.created", "growth",
+                {"goal_id": str(goal.id), "title": goal.title},
+                user_id=str(user_id), aggregate_id=str(goal.id),
+            )
+        except Exception:
+            pass
+        return goal
 
     async def get_goal(self, goal_id, user_id) -> Goal | None:
         goal = await self.goal_repo.get(uuid.UUID(str(goal_id)))

@@ -90,6 +90,16 @@ class IntegrationService:
             success=success,
         )
 
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "integration.action_executed", "integration",
+                {"service": intent.service, "action": intent.action, "success": success},
+                user_id=user_id,
+            )
+        except Exception:
+            pass
+
         return result
 
     async def _execute_calendar_action(self, user_id: str, intent: ActionIntent) -> dict:

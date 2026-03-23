@@ -23,7 +23,7 @@ class HabitService:
         start_date: date | None = None,
         **kwargs,
     ) -> Habit:
-        return await self.habit_repo.create(
+        habit = await self.habit_repo.create(
             user_id=user_id,
             title=title,
             frequency_type=frequency_type,
@@ -31,6 +31,16 @@ class HabitService:
             start_date=start_date or date.today(),
             **kwargs,
         )
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "habit.created", "habit",
+                {"habit_id": str(habit.id), "title": habit.title, "frequency_type": habit.frequency_type},
+                user_id=str(user_id), aggregate_id=str(habit.id),
+            )
+        except Exception:
+            pass
+        return habit
 
     async def get_habit(self, habit_id: uuid.UUID, user_id: uuid.UUID) -> Habit | None:
         habit = await self.habit_repo.get(habit_id)
@@ -54,6 +64,11 @@ class HabitService:
 
     async def delete_habit(self, habit_id: uuid.UUID) -> None:
         await self.habit_repo.delete(habit_id)
+        try:
+            from alma.core.events.helpers import emit
+            await emit("habit.deleted", "habit", {"habit_id": str(habit_id)})
+        except Exception:
+            pass
 
     async def checkin(
         self,
@@ -68,7 +83,7 @@ class HabitService:
         habit = await self.habit_repo.get(habit_id)
         if not habit or habit.user_id != user_id:
             raise PermissionError("Not the owner of this habit")
-        return await self.log_repo.upsert(
+        result = await self.log_repo.upsert(
             habit_id=habit_id,
             user_id=user_id,
             log_date=log_date,
@@ -77,6 +92,16 @@ class HabitService:
             value=value,
             note=note,
         )
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "habit.checkin_completed", "habit",
+                {"habit_id": str(habit_id), "completed": completed, "source": source},
+                user_id=str(user_id), aggregate_id=str(habit_id),
+            )
+        except Exception:
+            pass
+        return result
 
     async def get_logs(
         self,

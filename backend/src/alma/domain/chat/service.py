@@ -103,6 +103,16 @@ class ChatService:
         # 첫 메시지 시 대화 제목 자동 생성
         await self._maybe_generate_title(conversation_id, content)
 
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "chat.message_processed", "chat",
+                {"conversation_id": conversation_id, "content_preview": content[:100]},
+                user_id=user_id,
+            )
+        except Exception:
+            pass
+
         return full_response
 
     def _format_habit_result(self, intent: object, result: dict) -> str:
