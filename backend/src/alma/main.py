@@ -8,6 +8,7 @@ from alma.api.chat import router as chat_router
 from alma.api.conversations import router as conversations_router
 from alma.api.messages import router as messages_router
 from alma.api.goals import router as goals_router
+from alma.api.habit_analytics import router as habit_analytics_router
 from alma.api.habits import router as habits_router
 from alma.api.insights import router as insights_router
 from alma.api.integrations import router as integrations_router
@@ -34,5 +35,6 @@ app.include_router(messages_router)
 app.include_router(profile_router)
 app.include_router(goals_router)
 app.include_router(habits_router)
+app.include_router(habit_analytics_router)
 app.include_router(insights_router)
 app.include_router(integrations_router)

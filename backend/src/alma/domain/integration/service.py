@@ -36,9 +36,11 @@ class IntegrationService:
             "- habit.today: show today's habit summary (params: {})\n"
             "- habit.create: create a new habit (params: title, frequency_type, frequency_value, target_value?, target_unit?)\n"
             "- habit.update: update a habit (params: title, ...fields to change)\n"
-            "- habit.delete: delete a habit (params: title)\n\n"
+            "- habit.delete: delete a habit (params: title)\n"
+            "- habit.analyze: analyze habit patterns and provide coaching (params: {})\n\n"
             "Rules:\n"
             "- habit.checkin, habit.uncheckin, habit.today → needs_confirmation=false\n"
+            "- habit.analyze → needs_confirmation=false\n"
             "- habit.create, habit.update, habit.delete → needs_confirmation=true\n"
             "- calendar actions → needs_confirmation=true\n\n"
             'If action needed, respond with JSON: {"service":"...","action":"...","params":{...},"needs_confirmation":true/false}\n'
@@ -118,6 +120,13 @@ class IntegrationService:
         uid = uuid.UUID(user_id)
         params = intent.params
         action = intent.action
+
+        if action == "analyze":
+            from alma.domain.habit.analytics import HabitAnalyticsService
+
+            analytics = HabitAnalyticsService(self.session, self.llm)
+            result = await analytics.generate_insight(uid)
+            return {"success": True, "content": result["content"]}
 
         if action == "today":
             summary = await self.habit_service.get_today_summary(uid)

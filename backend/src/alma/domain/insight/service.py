@@ -44,10 +44,12 @@ class InsightService:
         session: AsyncSession,
         llm: LLMProvider,
         goal_service: GoalService | None = None,
+        habit_analytics_service=None,
     ):
         self.session = session
         self.llm = llm
         self.goal_service = goal_service
+        self.habit_analytics = habit_analytics_service
         self.retro_repo = RetrospectiveRepository(session)
         self.insight_repo = InsightRepository(session)
 
@@ -58,9 +60,7 @@ class InsightService:
         period_start = period_end - timedelta(days=7)
 
         # 중복 체크
-        existing = await self.retro_repo.get_by_period(
-            user_id, "weekly", period_start
-        )
+        existing = await self.retro_repo.get_by_period(user_id, "weekly", period_start)
         if existing:
             return existing
 
@@ -68,12 +68,8 @@ class InsightService:
         messages = await self.retro_repo.get_period_messages(
             user_id, period_start, period_end, limit=MAX_MESSAGES
         )
-        conv_count = await self.retro_repo.count_conversations(
-            user_id, period_start, period_end
-        )
-        msg_count = await self.retro_repo.count_messages(
-            user_id, period_start, period_end
-        )
+        conv_count = await self.retro_repo.count_conversations(user_id, period_start, period_end)
+        msg_count = await self.retro_repo.count_messages(user_id, period_start, period_end)
 
         # 목표 스냅샷 (Anti-Corruption: GoalService 공개 메서드만)
         goals_data: dict = {}
@@ -98,12 +94,19 @@ class InsightService:
 
         # 메시지 샘플링 + LLM 분석
         messages_summary = "\n".join(
-            f"[{m.role}] {m.content[:MAX_CONTENT_LENGTH]}"
-            for m in messages[:MAX_MESSAGES]
+            f"[{m.role}] {m.content[:MAX_CONTENT_LENGTH]}" for m in messages[:MAX_MESSAGES]
         )
         goals_summary = json.dumps(goals_data, ensure_ascii=False) if goals_data else "No goals set"
 
-        analysis = await self._analyze_with_llm(messages_summary, goals_summary)
+        # 습관 통계 주입
+        habit_stats = ""
+        if self.habit_analytics:
+            try:
+                habit_stats = await self.habit_analytics.get_stats_summary(user_id, days=7)
+            except Exception:
+                logger.warning("Failed to get habit stats", exc_info=True)
+
+        analysis = await self._analyze_with_llm(messages_summary, goals_summary, habit_stats)
 
         # 회고 저장
         week_num = period_start.isocalendar()[1]
@@ -139,11 +142,13 @@ class InsightService:
         return retro
 
     async def _analyze_with_llm(
-        self, messages_summary: str, goals_summary: str
+        self, messages_summary: str, goals_summary: str, habit_stats: str = ""
     ) -> dict:
         prompt = ANALYSIS_PROMPT.format(
             messages_summary=messages_summary, goals_summary=goals_summary
         )
+        if habit_stats:
+            prompt += f"\n\n## Habit Statistics\n{habit_stats}"
         request = LLMRequest(
             messages=[ChatMessage(role="user", content=prompt)],
             max_tokens=2000,
@@ -181,14 +186,13 @@ class InsightService:
             "recent_insights": [self._insight_to_dict(i) for i in recent_insights],
             "stats": {
                 "active_goals": goals_data.get("active_goals", 0),
-                "completed_goals": goals_data.get("total_goals", 0) - goals_data.get("active_goals", 0),
+                "completed_goals": goals_data.get("total_goals", 0)
+                - goals_data.get("active_goals", 0),
                 "streak_days": streak,
             },
         }
 
-    async def list_retrospectives(
-        self, user_id: uuid.UUID, limit: int = 10
-    ) -> list[dict]:
+    async def list_retrospectives(self, user_id: uuid.UUID, limit: int = 10) -> list[dict]:
         retros = await self.retro_repo.list_by_user(user_id, limit)
         return [self._retro_to_dict(r) for r in retros]
 
