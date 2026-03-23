@@ -292,3 +292,29 @@ export interface InsightResult {
   content: string;
   generated_at: string;
 }
+
+// ─── Automations ───
+
+export interface AutomationRule {
+  id: string;
+  name: string;
+  description: string | null;
+  trigger_event: string;
+  trigger_condition: Record<string, unknown>;
+  action_type: string;
+  action_config: Record<string, unknown>;
+  confidence: number;
+  is_active: boolean;
+  execution_count: number;
+  last_executed_at: string | null;
+  created_at: string;
+}
+
+export interface AutomationRuleCreate {
+  name: string;
+  trigger_event: string;
+  trigger_condition?: Record<string, unknown>;
+  action_type: string;
+  action_config: Record<string, unknown>;
+  description?: string;
+}
