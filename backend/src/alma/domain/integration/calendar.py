@@ -44,10 +44,7 @@ class GoogleCalendarProvider:
     async def _refresh_token_if_needed(self) -> None:
         from datetime import datetime
 
-        if (
-            self.integration.token_expiry
-            and datetime.utcnow() < self.integration.token_expiry
-        ):
+        if self.integration.token_expiry and datetime.utcnow() < self.integration.token_expiry:
             return
         try:
             creds = self._get_credentials()
@@ -94,29 +91,53 @@ class GoogleCalendarProvider:
         return [self._parse_event(item) for item in items]
 
     async def create_event(
-        self, summary: str, start: str, end: str, description: str | None = None
+        self,
+        summary: str,
+        start: str,
+        end: str,
+        description: str | None = None,
+        recurrence: list[str] | None = None,
+        reminders: dict | None = None,
+        timezone: str | None = None,
     ) -> CalendarEvent:
         await self._refresh_token_if_needed()
         creds = self._get_credentials()
 
+        start_body: dict = {"dateTime": start}
+        end_body: dict = {"dateTime": end}
+        if timezone:
+            start_body["timeZone"] = timezone
+            end_body["timeZone"] = timezone
+
         event_body: dict = {
             "summary": summary,
-            "start": {"dateTime": start},
-            "end": {"dateTime": end},
+            "start": start_body,
+            "end": end_body,
         }
         if description:
             event_body["description"] = description
+        if recurrence:
+            event_body["recurrence"] = recurrence
+        if reminders:
+            event_body["reminders"] = reminders
 
         def _create():
             service = self._build_service(creds)
-            return (
-                service.events()
-                .insert(calendarId="primary", body=event_body)
-                .execute()
-            )
+            return service.events().insert(calendarId="primary", body=event_body).execute()
 
         result = await asyncio.to_thread(_create)
         return self._parse_event(result)
+
+    async def delete_event(self, event_id: str) -> None:
+        """Google Calendar 이벤트 삭제"""
+        await self._refresh_token_if_needed()
+        creds = self._get_credentials()
+
+        def _delete():
+            service = self._build_service(creds)
+            service.events().delete(calendarId="primary", eventId=event_id).execute()
+
+        await asyncio.to_thread(_delete)
 
     @staticmethod
     def _parse_event(item: dict) -> CalendarEvent:
