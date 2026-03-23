@@ -355,3 +355,29 @@ class Event(Base):
         Index("idx_events_user", "user_id", "created_at"),
         Index("idx_events_aggregate", "aggregate_id", "created_at"),
     )
+
+
+class AutomationRule(Base):
+    __tablename__ = "automation_rules"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    trigger_event: Mapped[str] = mapped_column(nullable=False)
+    trigger_condition: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    action_type: Mapped[str] = mapped_column(nullable=False)
+    action_config: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    confidence: Mapped[float] = mapped_column(default=0.0)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    execution_count: Mapped[int] = mapped_column(default=0)
+    last_executed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index("idx_rules_user", "user_id", "is_active"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_rules_confidence"),
+    )
