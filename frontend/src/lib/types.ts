@@ -239,3 +239,56 @@ export interface TodaySummary {
   completed: number;
   habits: TodayHabitItem[];
 }
+
+// ─── Habit Analytics ───
+
+export interface HeatmapData {
+  dates: Record<string, number>;
+}
+
+export interface TrendDay {
+  date: string;
+  total: number;
+  completed: number;
+  rate: number;
+}
+
+export interface WeekdayRate {
+  day: string;
+  rate: number;
+}
+
+export interface TrendData {
+  daily: TrendDay[];
+  weekday: WeekdayRate[];
+}
+
+export interface CompletionHabit {
+  id: string;
+  title: string;
+  rate: number;
+  total_days: number;
+  completed_days: number;
+}
+
+export interface CompletionData {
+  habits: CompletionHabit[];
+}
+
+export interface CorrelationPair {
+  habit_a: string;
+  habit_b: string;
+  habit_a_title: string;
+  habit_b_title: string;
+  correlation: number;
+}
+
+export interface CorrelationData {
+  pairs: CorrelationPair[];
+}
+
+export interface InsightResult {
+  id: string;
+  content: string;
+  generated_at: string;
+}

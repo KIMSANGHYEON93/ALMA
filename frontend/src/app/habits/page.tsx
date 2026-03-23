@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
 import HabitCard from "@/components/HabitCard";
 import HabitForm from "@/components/HabitForm";
@@ -42,6 +43,11 @@ export default function HabitsPage() {
       <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950">
         <div className="max-w-2xl mx-auto">
           <HabitTodaySummary summary={todaySummary} />
+          <div className="px-4 pt-2">
+            <Link href="/habits/analytics" className="text-sm text-blue-500 hover:text-blue-600">
+              통계 보기 →
+            </Link>
+          </div>
           <div className="p-4 space-y-3">
             {sortedHabits.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
