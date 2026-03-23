@@ -336,3 +336,22 @@ class HabitLog(Base):
             name="ck_habit_logs_source",
         ),
     )
+
+
+class Event(Base):
+    __tablename__ = "events"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_type: Mapped[str] = mapped_column(nullable=False)
+    source: Mapped[str] = mapped_column(nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, default=dict)
+    aggregate_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(nullable=True)
+    trace_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_events_type", "event_type", "created_at"),
+        Index("idx_events_user", "user_id", "created_at"),
+        Index("idx_events_aggregate", "aggregate_id", "created_at"),
+    )
