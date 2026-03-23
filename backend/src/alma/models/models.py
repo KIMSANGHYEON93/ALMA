@@ -287,6 +287,7 @@ class Habit(Base):
     status: Mapped[str] = mapped_column(nullable=False, default="active")
     start_date = mapped_column(Date, nullable=False)
     sort_order: Mapped[int] = mapped_column(default=0, server_default="0")
+    calendar_event_id: Mapped[str | None] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 

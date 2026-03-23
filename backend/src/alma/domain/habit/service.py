@@ -160,6 +160,30 @@ class HabitService:
                 break
         return streak
 
+    async def find_by_title(self, user_id: uuid.UUID, query: str) -> list[Habit]:
+        """활성 습관 중 title에 query가 포함된 습관 반환 (case-insensitive)"""
+        habits = await self.list_habits(user_id, status="active")
+        query_lower = query.lower()
+        return [h for h in habits if query_lower in h.title.lower()]
+
+    async def get_habits_context(self, user_id: uuid.UUID) -> str:
+        """채팅 시스템 프롬프트에 주입할 오늘 습관 상태 텍스트"""
+        summary = await self.get_today_summary(user_id)
+        if summary["total"] == 0:
+            return ""
+        lines = [f"[오늘의 습관 ({summary['completed']}/{summary['total']} 완료)]"]
+        for h in summary["habits"]:
+            if not h["scheduled_today"]:
+                continue
+            icon = "✅" if h["completed"] else "⬜"
+            text = f"- {icon} {h['title']}"
+            if h["target_value"]:
+                text += f" ({h['value'] or 0}/{h['target_value']}{h['target_unit'] or ''})"
+            if h["streak"] > 0:
+                text += f" 🔥{h['streak']}일"
+            lines.append(text)
+        return "\n".join(lines)
+
     async def get_today_summary(self, user_id: uuid.UUID) -> dict:
         today = date.today()
         habits = await self.habit_repo.list_by_user(user_id, status="active")
