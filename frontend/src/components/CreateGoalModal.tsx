@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface CreateGoalModalProps {
   onClose: () => void;
-  onCreate: (data: { title: string; description?: string; category: string }) => Promise<void>;
+  onCreate: (data: { title: string; description?: string; category: string; target_date?: string }) => Promise<void>;
 }
 
 const categories = [
@@ -20,6 +20,7 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("personal");
+  const [targetDate, setTargetDate] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,6 +32,7 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
         title: title.trim(),
         description: description.trim() || undefined,
         category,
+        target_date: targetDate || undefined,
       });
       onClose();
     } finally {
@@ -98,6 +100,19 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
               </button>
             ))}
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="goal-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            목표일 (선택)
+          </label>
+          <input
+            id="goal-date"
+            type="date"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div className="flex gap-2 pt-2">

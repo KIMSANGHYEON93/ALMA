@@ -76,11 +76,18 @@ export default function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
         </span>
       </div>
 
-      {goal.status !== "active" && (
-        <span className="inline-block mt-2 text-xs text-gray-400">
-          {statusLabels[goal.status]}
-        </span>
-      )}
+      <div className="flex items-center gap-2 mt-2">
+        {goal.target_date && (
+          <span className="text-xs text-gray-400">
+            {goal.target_date}까지
+          </span>
+        )}
+        {goal.status !== "active" && (
+          <span className="text-xs text-gray-400">
+            {statusLabels[goal.status]}
+          </span>
+        )}
+      </div>
     </button>
   );
 }

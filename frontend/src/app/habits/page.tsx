@@ -23,7 +23,9 @@ export default function HabitsPage() {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  // 로컬 timezone 기준 날짜 (UTC의 toISOString은 한국시간 00:00~09:00에 전날이 됨)
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const todayMap = new Map(todaySummary?.habits.map((h) => [h.id, h]));
 
   // Sort: scheduled today first, then by sort_order
