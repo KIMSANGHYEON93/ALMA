@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/integrations/google/callback"
     encryption_key: str = ""
+    telegram_bot_token: str = ""
+    telegram_allowed_users: str = ""  # comma-separated telegram user IDs
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

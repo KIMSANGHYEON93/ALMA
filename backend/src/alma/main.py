@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from alma.api.auth import router as auth_router
+from alma.api.chat_rest import router as chat_rest_router
 from alma.api.chat import router as chat_router
 from alma.api.conversations import router as conversations_router
 from alma.api.goals import router as goals_router
@@ -14,6 +15,7 @@ from alma.api.automations import router as automations_router
 from alma.api.integrations import router as integrations_router
 from alma.api.knowledge import router as knowledge_router
 from alma.api.llm import router as llm_router
+from alma.gateway.telegram import router as telegram_router
 from alma.api.messages import router as messages_router
 from alma.api.profile import router as profile_router
 from alma.core.events import event_bus
@@ -57,3 +59,5 @@ app.include_router(integrations_router)
 app.include_router(automations_router)
 app.include_router(knowledge_router)
 app.include_router(llm_router)
+app.include_router(chat_rest_router)
+app.include_router(telegram_router)
