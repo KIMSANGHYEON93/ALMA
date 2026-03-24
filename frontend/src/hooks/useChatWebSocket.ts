@@ -23,9 +23,10 @@ export function useChatWebSocket(
 
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
+    // WebSocket은 Next.js rewrites를 통하지 않으므로 백엔드에 직접 연결
+    const wsHost = window.location.hostname + ":8000";
     const ws = new WebSocket(
-      `${protocol}//${host}/api/chat/ws/${conversationId}?token=${token}`
+      `${protocol}//${wsHost}/api/chat/ws/${conversationId}?token=${token}`
     );
 
     ws.onopen = () => { setIsConnected(true); setIsConnecting(false); };
