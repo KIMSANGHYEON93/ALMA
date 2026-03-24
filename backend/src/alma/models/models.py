@@ -381,3 +381,57 @@ class AutomationRule(Base):
         Index("idx_rules_user", "user_id", "is_active"),
         CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_rules_confidence"),
     )
+
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(nullable=False)
+    source_type: Mapped[str] = mapped_column(nullable=False)
+    source_url: Mapped[str | None] = mapped_column(nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    chunk_count: Mapped[int] = mapped_column(default=0)
+    status: Mapped[str] = mapped_column(default="processing")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("idx_documents_user", "user_id", "status"),
+        CheckConstraint("source_type IN ('text','url')", name="ck_doc_source_type"),
+        CheckConstraint("status IN ('processing','ready','error')", name="ck_doc_status"),
+    )
+
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    chunk_index: Mapped[int] = mapped_column(nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding = mapped_column(Vector(768), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    document: Mapped["Document"] = relationship(back_populates="chunks")
+
+    __table_args__ = (
+        Index("idx_chunks_document", "document_id", "chunk_index"),
+        Index("idx_chunks_user", "user_id"),
+        Index(
+            "idx_chunks_embedding", "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
