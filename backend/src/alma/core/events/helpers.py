@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from alma.core.events import event_bus
 from alma.core.events.models import DomainEvent
@@ -19,7 +19,7 @@ async def emit(
             event_type=event_type,
             source=source,
             payload=payload,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             user_id=user_id,
             aggregate_id=aggregate_id,
             trace_id=trace_id,

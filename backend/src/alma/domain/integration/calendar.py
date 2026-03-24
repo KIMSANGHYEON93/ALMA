@@ -42,9 +42,12 @@ class GoogleCalendarProvider:
         return build("calendar", "v3", credentials=credentials)
 
     async def _refresh_token_if_needed(self) -> None:
-        from datetime import datetime
+        from datetime import datetime, timezone
 
-        if self.integration.token_expiry and datetime.utcnow() < self.integration.token_expiry:
+        if (
+            self.integration.token_expiry
+            and datetime.now(timezone.utc) < self.integration.token_expiry
+        ):
             return
         try:
             creds = self._get_credentials()

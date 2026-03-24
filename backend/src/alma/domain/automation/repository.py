@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,9 +53,7 @@ class AutomationRuleRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def find_matching(
-        self, user_id: uuid.UUID, event_type: str
-    ) -> list[AutomationRule]:
+    async def find_matching(self, user_id: uuid.UUID, event_type: str) -> list[AutomationRule]:
         """특정 이벤트 타입에 매칭되는 활성 규칙 조회"""
         result = await self.session.execute(
             select(AutomationRule).where(
@@ -81,5 +79,5 @@ class AutomationRuleRepository:
         rule = await self.get(rule_id)
         if rule:
             rule.execution_count += 1
-            rule.last_executed_at = datetime.utcnow()
+            rule.last_executed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             await self.session.commit()

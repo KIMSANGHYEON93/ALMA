@@ -2,7 +2,7 @@
 import json
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,7 +125,7 @@ class AutomationService:
         if not self.llm:
             return []
 
-        since = datetime.utcnow() - timedelta(days=7)
+        since = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=7)
         events = await self.event_store.query_by_user(user_id, since, limit=50)
         if len(events) < 5:
             return []

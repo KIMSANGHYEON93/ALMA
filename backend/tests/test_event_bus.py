@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
 
 import pytest
@@ -16,7 +16,7 @@ def _make_event(event_type="test.event", source="test", user_id=None, aggregate_
         event_type=event_type,
         source=source,
         payload={"key": "value"},
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         user_id=user_id,
         aggregate_id=aggregate_id,
     )
@@ -81,7 +81,7 @@ async def test_event_store_query_by_type(db_session: AsyncSession):
     await repo.append(_make_event(event_type="habit.checkin"))
     await repo.append(_make_event(event_type="chat.message"))
 
-    since = datetime.utcnow() - timedelta(minutes=1)
+    since = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1)
     results = await repo.query_by_type("chat.message", since)
     assert len(results) == 2
 
@@ -92,7 +92,7 @@ async def test_event_store_query_by_user(db_session: AsyncSession, test_user):
     await repo.append(_make_event(user_id=str(test_user.id)))
     await repo.append(_make_event(user_id=str(uuid.uuid4())))
 
-    since = datetime.utcnow() - timedelta(minutes=1)
+    since = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1)
     results = await repo.query_by_user(test_user.id, since)
     assert len(results) == 1
 
