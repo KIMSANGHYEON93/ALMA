@@ -12,6 +12,7 @@ from alma.api.habits import router as habits_router
 from alma.api.insights import router as insights_router
 from alma.api.automations import router as automations_router
 from alma.api.integrations import router as integrations_router
+from alma.api.knowledge import router as knowledge_router
 from alma.api.messages import router as messages_router
 from alma.api.profile import router as profile_router
 from alma.core.events import event_bus
@@ -53,3 +54,4 @@ app.include_router(habit_analytics_router)
 app.include_router(insights_router)
 app.include_router(integrations_router)
 app.include_router(automations_router)
+app.include_router(knowledge_router)

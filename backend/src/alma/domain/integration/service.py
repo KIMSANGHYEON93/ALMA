@@ -40,14 +40,18 @@ class IntegrationService:
             "- habit.analyze: analyze habit patterns and provide coaching (params: {})\n"
             "- automation.suggest: suggest automation rules based on patterns (params: {})\n"
             "- automation.list: list user's automation rules (params: {})\n"
-            "- automation.create: create an automation rule (params: name, trigger_event, action_type, action_config)\n\n"
+            "- automation.create: create an automation rule (params: name, trigger_event, action_type, action_config)\n"
+            "- knowledge.add: add text to knowledge base (params: title, content)\n"
+            "- knowledge.search: search knowledge base (params: query)\n\n"
             "Rules:\n"
             "- habit.checkin, habit.uncheckin, habit.today → needs_confirmation=false\n"
             "- habit.analyze → needs_confirmation=false\n"
             "- habit.create, habit.update, habit.delete → needs_confirmation=true\n"
             "- calendar actions → needs_confirmation=true\n"
             "- automation.suggest, automation.list → needs_confirmation=false\n"
-            "- automation.create → needs_confirmation=true\n\n"
+            "- automation.create → needs_confirmation=true\n"
+            "- knowledge.search → needs_confirmation=false\n"
+            "- knowledge.add → needs_confirmation=true\n\n"
             'If action needed, respond with JSON: {"service":"...","action":"...","params":{...},"needs_confirmation":true/false}\n'
             "If no action needed, respond with: null\n"
             "Message: " + user_message
@@ -77,6 +81,8 @@ class IntegrationService:
                 result = await self._execute_calendar_action(user_id, intent)
             elif intent.service == "habit":
                 result = await self._execute_habit_action(user_id, intent)
+            elif intent.service == "knowledge":
+                result = await self._execute_knowledge_action(user_id, intent)
             elif intent.service == "automation":
                 result = await self._execute_automation_action(user_id, intent)
             elif intent.service == "notion":
@@ -235,6 +241,24 @@ class IntegrationService:
             )
             return {"success": True, "rule": rule.name, "created": True}
         return {"success": False, "error": f"Unknown automation action: {intent.action}"}
+
+    async def _execute_knowledge_action(self, user_id: str, intent: ActionIntent) -> dict:
+        from alma.domain.knowledge.service import KnowledgeService
+
+        uid = uuid.UUID(user_id)
+        service = KnowledgeService(self.session)
+
+        if intent.action == "search":
+            results = await service.search(uid, intent.params.get("query", ""))
+            return {"success": True, "results": results}
+        elif intent.action == "add":
+            doc = await service.add_document(
+                uid,
+                intent.params.get("title", "채팅에서 추가"),
+                intent.params.get("content", ""),
+            )
+            return {"success": True, "document": doc.title, "created": True}
+        return {"success": False, "error": f"Unknown knowledge action: {intent.action}"}
 
     async def _execute_notion_action(self, user_id: str, intent: ActionIntent) -> dict:
         return {

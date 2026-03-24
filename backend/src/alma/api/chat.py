@@ -6,9 +6,12 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from alma.domain.identity.service import decode_token
 from alma.database import async_session
 from alma.infrastructure.llm.claude import ClaudeProvider
+from alma.config import settings
 from alma.domain.chat.service import ChatService
 from alma.domain.growth.service import GoalService
 from alma.domain.habit.service import HabitService
+from alma.domain.knowledge.service import KnowledgeService
+from alma.domain.memory.embedding import create_embedding_provider
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +38,14 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
         llm = ClaudeProvider()
         goal_service = GoalService(session)
         habit_service = HabitService(session)
+        embedding_provider = create_embedding_provider(settings)
+        knowledge_service = KnowledgeService(session, embedding_provider)
         chat_service = ChatService(
             session=session,
             llm=llm,
             goal_service=goal_service,
             habit_service=habit_service,
+            knowledge_service=knowledge_service,
         )
 
         # 접속 시 미완료 습관 리마인더

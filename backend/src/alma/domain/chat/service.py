@@ -30,7 +30,12 @@ Guidelines:
 
 class ChatService:
     def __init__(
-        self, session: AsyncSession, llm: LLMProvider, goal_service=None, habit_service=None
+        self,
+        session: AsyncSession,
+        llm: LLMProvider,
+        goal_service=None,
+        habit_service=None,
+        knowledge_service=None,
     ):
         self.session = session
         self.llm = llm
@@ -40,6 +45,7 @@ class ChatService:
         self.profile = UserProfileService(session)
         self.goal_service = goal_service
         self.habit_service = habit_service
+        self.knowledge_service = knowledge_service
         self.conv_repo = ConversationRepository(session)
 
     async def process_message(self, user_id: str, conversation_id: str, content: str) -> str:
@@ -81,6 +87,19 @@ class ChatService:
             if habit_context:
                 personalized_prompt += f"\n\n{habit_context}"
 
+        # 지식 RAG 검색 (optional)
+        if self.knowledge_service:
+            try:
+                knowledge_results = await self.knowledge_service.search(uuid.UUID(user_id), content)
+                if knowledge_results:
+                    knowledge_ctx = "\n".join(
+                        f"[Knowledge: {r['document_title']}] {r['content']}"
+                        for r in knowledge_results[:3]
+                    )
+                    personalized_prompt += f"\n\n{knowledge_ctx}"
+            except Exception:
+                pass
+
         request = LLMRequest(messages=messages, system_prompt=personalized_prompt)
         response = await self.llm.complete(request)
 
@@ -105,8 +124,10 @@ class ChatService:
 
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "chat.message_processed", "chat",
+                "chat.message_processed",
+                "chat",
                 {"conversation_id": conversation_id, "content_preview": content[:100]},
                 user_id=user_id,
             )
