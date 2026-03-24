@@ -6,6 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useIntegrations } from "@/hooks/useIntegrations";
 
+const models = [
+  { value: "claude", label: "Claude (Anthropic)", desc: "고품질 응답" },
+  { value: "openai", label: "GPT-4o mini (OpenAI)", desc: "빠른 응답" },
+  { value: "gemini", label: "Gemini (Google)", desc: "균형 잡힌 성능" },
+];
+
 const languages = [
   { value: "ko", label: "한국어" },
   { value: "en", label: "English" },
@@ -82,6 +88,35 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               ALMA 응답 설정
             </h2>
+
+            {/* AI Model */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                AI 모델
+              </label>
+              <div className="space-y-2">
+                {models.map((m) => (
+                  <button
+                    key={m.value}
+                    onClick={() => updatePreferences({ llm_model: m.value })}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition ${
+                      (preferences.llm_model || "claude") === m.value
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    <span className={`text-sm font-medium ${
+                      (preferences.llm_model || "claude") === m.value
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}>
+                      {m.label}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-2">{m.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Language */}
             <div className="mb-6">
