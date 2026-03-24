@@ -150,7 +150,11 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
           type="text"
           value={noteText}
           onChange={(e) => setNoteText(e.target.value)}
-          onBlur={() => item.checked_in && onCheckin(item.completed, item.value ?? undefined, noteText || undefined)}
+          onBlur={() => {
+            if (item.checked_in && noteText !== (item.note || "")) {
+              onCheckin(item.completed, item.value ?? undefined, noteText || undefined);
+            }
+          }}
           placeholder="짧은 메모..."
           className="mt-1 w-full px-2 py-1 text-sm border rounded dark:bg-gray-800 dark:border-gray-700"
         />

@@ -47,7 +47,7 @@ export function useMessages(
       );
       setHasMore(data.has_more);
     } catch (error) {
-      console.error("히스토리 로드 실패:", error);
+      // error logged silently in production
     } finally {
       setIsLoadingHistory(false);
     }
@@ -86,7 +86,7 @@ export function useMessages(
         }
       });
     } catch (error) {
-      console.error("이전 메시지 로드 실패:", error);
+      // error logged silently in production
     } finally {
       setIsLoadingMore(false);
     }
