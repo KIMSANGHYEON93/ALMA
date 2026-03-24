@@ -310,6 +310,18 @@ export interface AutomationRule {
   created_at: string;
 }
 
+// ─── Knowledge ───
+
+export interface KnowledgeDocument {
+  id: string;
+  title: string;
+  source_type: string;
+  source_url: string | null;
+  chunk_count: number;
+  status: string;
+  created_at: string;
+}
+
 export interface AutomationRuleCreate {
   name: string;
   trigger_event: string;

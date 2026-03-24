@@ -10,6 +10,7 @@ const navItems = [
   { href: "/goals", label: "목표" },
   { href: "/habits", label: "습관" },
   { href: "/insights", label: "인사이트" },
+  { href: "/knowledge", label: "지식" },
   { href: "/automations", label: "자동화" },
   { href: "/settings", label: "설정" },
 ];
