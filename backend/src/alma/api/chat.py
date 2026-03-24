@@ -5,7 +5,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from alma.domain.identity.service import decode_token
 from alma.database import async_session
-from alma.infrastructure.llm.claude import ClaudeProvider
+from alma.api.llm import create_llm_router
 from alma.config import settings
 from alma.domain.chat.service import ChatService
 from alma.domain.growth.service import GoalService
@@ -35,14 +35,14 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
     await websocket.accept()
 
     async with async_session() as session:
-        llm = ClaudeProvider()
+        llm_router = create_llm_router()
         goal_service = GoalService(session)
         habit_service = HabitService(session)
         embedding_provider = create_embedding_provider(settings)
         knowledge_service = KnowledgeService(session, embedding_provider)
         chat_service = ChatService(
             session=session,
-            llm=llm,
+            llm=llm_router,
             goal_service=goal_service,
             habit_service=habit_service,
             knowledge_service=knowledge_service,
