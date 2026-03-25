@@ -9,6 +9,7 @@ DEFAULT_PREFERENCES = {
     "response_style": "concise",
     "interests": [],
     "timezone": "Asia/Seoul",
+    "llm_model": "claude",
     "learned": {},
 }
 

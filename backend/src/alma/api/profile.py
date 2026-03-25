@@ -13,10 +13,12 @@ router = APIRouter(prefix="/api/users/me", tags=["profile"])
 
 
 class PreferencesUpdate(BaseModel):
-    language: Literal["ko", "en", "ja"] = "ko"
-    response_style: Literal["concise", "detailed", "casual"] = "concise"
-    interests: list[str] = []
-    timezone: str = "Asia/Seoul"
+    language: Literal["ko", "en", "ja"] | None = None
+    response_style: Literal["concise", "detailed", "casual", "professional"] | None = None
+    interests: list[str] | None = None
+    timezone: str | None = None
+    llm_model: Literal["claude", "openai", "gemini"] | None = None
+    telegram_id: str | None = None
 
 
 @router.get("/preferences")
@@ -35,4 +37,5 @@ async def update_preferences(
     session: AsyncSession = Depends(get_session),
 ):
     service = UserProfileService(session)
-    return await service.update_preferences(str(user.id), body.model_dump())
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    return await service.update_preferences(str(user.id), updates)

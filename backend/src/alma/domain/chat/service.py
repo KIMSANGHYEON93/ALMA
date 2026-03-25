@@ -101,7 +101,12 @@ class ChatService:
                 pass
 
         request = LLMRequest(messages=messages, system_prompt=personalized_prompt)
-        response = await self.llm.complete(request)
+        # 사용자 선호 LLM 모델 사용 (LLMRouter인 경우)
+        llm_model = preferences.get("llm_model")
+        if hasattr(self.llm, "providers") and llm_model:
+            response = await self.llm.complete(request, provider_name=llm_model)
+        else:
+            response = await self.llm.complete(request)
 
         intent = await self.integration.detect_action_intent(response.content)
         action_note = ""
