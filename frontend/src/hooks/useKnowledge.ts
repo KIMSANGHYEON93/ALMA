@@ -47,11 +47,28 @@ export function useKnowledge() {
     await fetchDocs();
   };
 
+  const addFile = async (title: string, file: File) => {
+    if (!token) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+    const res = await fetch("/api/knowledge/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+      throw new Error(err.detail || "Upload failed");
+    }
+    await fetchDocs();
+  };
+
   const deleteDocument = async (id: string) => {
     if (!token) return;
     await apiClient(`/api/knowledge/${id}`, { method: "DELETE", token });
     await fetchDocs();
   };
 
-  return { documents, loading, addDocument, addFromUrl, deleteDocument, refresh: fetchDocs };
+  return { documents, loading, addDocument, addFromUrl, addFile, deleteDocument, refresh: fetchDocs };
 }

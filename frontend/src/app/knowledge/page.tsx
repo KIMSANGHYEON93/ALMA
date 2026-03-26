@@ -9,7 +9,7 @@ import { useKnowledge } from "@/hooks/useKnowledge";
 
 export default function KnowledgePage() {
   const { isLoading: authLoading } = useAuth();
-  const { documents, loading, addDocument, addFromUrl, deleteDocument } = useKnowledge();
+  const { documents, loading, addDocument, addFromUrl, addFile, deleteDocument } = useKnowledge();
   const [showAdd, setShowAdd] = useState(false);
 
   if (authLoading || loading) {
@@ -63,6 +63,7 @@ export default function KnowledgePage() {
           <AddKnowledgeModal
             onAddText={addDocument}
             onAddUrl={addFromUrl}
+            onAddFile={addFile}
             onClose={() => setShowAdd(false)}
           />
         )}

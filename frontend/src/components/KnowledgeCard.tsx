@@ -26,7 +26,7 @@ export default function KnowledgeCard({ doc, onDelete }: Props) {
               {status.label}
             </span>
             <span className="text-xs text-gray-400">
-              {doc.source_type === "url" ? "URL" : "텍스트"} · {doc.chunk_count}개 청크
+              {doc.source_type === "url" ? "URL" : doc.source_type === "file" ? "파일" : "텍스트"} · {doc.chunk_count}개 청크
             </span>
             {doc.source_url && (
               <a
