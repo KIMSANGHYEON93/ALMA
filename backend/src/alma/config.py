@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     encryption_key: str = ""
     telegram_bot_token: str = ""
     telegram_allowed_users: str = ""  # comma-separated telegram user IDs
+    discord_bot_token: str = ""
+    discord_allowed_guilds: str = ""  # comma-separated guild IDs
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

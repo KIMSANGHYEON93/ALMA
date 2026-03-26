@@ -15,6 +15,7 @@ from alma.api.automations import router as automations_router
 from alma.api.integrations import router as integrations_router
 from alma.api.knowledge import router as knowledge_router
 from alma.api.llm import router as llm_router
+from alma.gateway.discord_bot import router as discord_router
 from alma.gateway.telegram import router as telegram_router
 from alma.api.messages import router as messages_router
 from alma.api.profile import router as profile_router
@@ -61,3 +62,4 @@ app.include_router(knowledge_router)
 app.include_router(llm_router)
 app.include_router(chat_rest_router)
 app.include_router(telegram_router)
+app.include_router(discord_router)

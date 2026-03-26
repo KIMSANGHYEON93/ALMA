@@ -19,6 +19,7 @@ class PreferencesUpdate(BaseModel):
     timezone: str | None = None
     llm_model: Literal["claude", "openai", "gemini"] | None = None
     telegram_id: str | None = None
+    discord_id: str | None = None
 
 
 @router.get("/preferences")
