@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -85,6 +85,48 @@ async def add_from_url(
 ):
     service = _get_service(session)
     doc = await service.add_from_url(user.id, req.title, req.url)
+    return _doc_response(doc)
+
+
+@router.post("/upload", response_model=DocumentResponse, status_code=201)
+async def upload_document(
+    file: UploadFile = File(...),
+    title: str = Form(default=""),
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """파일 업로드 (PDF, DOCX, TXT)"""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    allowed = (".pdf", ".docx", ".txt")
+    if not any(file.filename.lower().endswith(ext) for ext in allowed):
+        raise HTTPException(status_code=400, detail=f"Supported formats: {', '.join(allowed)}")
+
+    # 10MB 제한
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+
+    from alma.domain.knowledge.parser import extract_text
+
+    try:
+        text = extract_text(file.filename, contents)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse file: {str(e)}")
+
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="No text content found in file")
+
+    doc_title = title.strip() or file.filename.rsplit(".", 1)[0]
+    service = _get_service(session)
+    doc = await service.add_document(
+        user.id,
+        doc_title,
+        text,
+        source_type="file",
+        source_url=file.filename,
+    )
     return _doc_response(doc)
 
 

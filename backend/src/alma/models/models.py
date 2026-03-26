@@ -404,7 +404,7 @@ class Document(Base):
 
     __table_args__ = (
         Index("idx_documents_user", "user_id", "status"),
-        CheckConstraint("source_type IN ('text','url')", name="ck_doc_source_type"),
+        CheckConstraint("source_type IN ('text','url','file')", name="ck_doc_source_type"),
         CheckConstraint("status IN ('processing','ready','error')", name="ck_doc_status"),
     )
 
