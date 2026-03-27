@@ -18,6 +18,16 @@ class Settings(BaseSettings):
     telegram_allowed_users: str = ""  # comma-separated telegram user IDs
     discord_bot_token: str = ""
     discord_allowed_guilds: str = ""  # comma-separated guild IDs
+    vapid_private_key: str = ""
+    vapid_public_key: str = ""
+    vapid_email: str = "mailto:admin@alma.dev"
+
+    # Ontology settings
+    ontology_dedup_auto_merge_threshold: float = 0.98
+    ontology_dedup_review_threshold: float = 0.92
+    ontology_confidence_auto_verify: float = 0.8
+    ontology_confidence_reject: float = 0.5
+    ontology_chat_min_length: int = 30
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
