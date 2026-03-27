@@ -41,9 +41,9 @@ export default function SettingsPage() {
   const [connectError, setConnectError] = useState("");
   const [googleClientId, setGoogleClientId] = useState(preferences.google_client_id as string || "");
   const [googleClientSecret, setGoogleClientSecret] = useState(preferences.google_client_secret as string || "");
-  const [anthropicKey, setAnthropicKey] = useState("");
-  const [openaiKey, setOpenaiKey] = useState("");
-  const [geminiKey, setGeminiKey] = useState("");
+  const [anthropicKey, setAnthropicKey] = useState((preferences.anthropic_api_key as string) || "");
+  const [openaiKey, setOpenaiKey] = useState((preferences.openai_api_key as string) || "");
+  const [geminiKey, setGeminiKey] = useState((preferences.gemini_api_key as string) || "");
 
   if (authLoading || prefLoading || intLoading) {
     return (
@@ -171,9 +171,6 @@ export default function SettingsPage() {
                       if (geminiKey) updates.gemini_api_key = geminiKey;
                       if (Object.keys(updates).length > 0) {
                         await updatePreferences(updates);
-                        setAnthropicKey("");
-                        setOpenaiKey("");
-                        setGeminiKey("");
                       }
                     }}
                     disabled={!anthropicKey && !openaiKey && !geminiKey}
