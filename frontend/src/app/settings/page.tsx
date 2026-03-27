@@ -7,10 +7,34 @@ import { useProfile } from "@/hooks/useProfile";
 import { useIntegrations } from "@/hooks/useIntegrations";
 import { usePushNotification } from "@/hooks/usePushNotification";
 
-const models = [
-  { value: "claude", label: "Claude (Anthropic)", desc: "고품질 응답" },
-  { value: "openai", label: "GPT-4o mini (OpenAI)", desc: "빠른 응답" },
-  { value: "gemini", label: "Gemini (Google)", desc: "균형 잡힌 성능" },
+const modelGroups = [
+  {
+    provider: "claude",
+    label: "Anthropic",
+    models: [
+      { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4", desc: "최신, 균형 잡힌 성능" },
+      { value: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku", desc: "빠르고 경제적" },
+      { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet", desc: "고품질 응답" },
+    ],
+  },
+  {
+    provider: "openai",
+    label: "OpenAI",
+    models: [
+      { value: "gpt-4o-mini", label: "GPT-4o mini", desc: "빠르고 저렴" },
+      { value: "gpt-4o", label: "GPT-4o", desc: "고성능" },
+      { value: "gpt-4.1-mini", label: "GPT-4.1 mini", desc: "최신 경량" },
+    ],
+  },
+  {
+    provider: "gemini",
+    label: "Google",
+    models: [
+      { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", desc: "빠른 응답" },
+      { value: "gemini-2.5-flash-preview-05-20", label: "Gemini 2.5 Flash", desc: "최신 프리뷰" },
+      { value: "gemini-2.5-pro-preview-05-06", label: "Gemini 2.5 Pro", desc: "고성능 프리뷰" },
+    ],
+  },
 ];
 
 const languages = [
@@ -102,26 +126,34 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 AI 모델
               </label>
-              <div className="space-y-2">
-                {models.map((m) => (
-                  <button
-                    key={m.value}
-                    onClick={() => updatePreferences({ llm_model: m.value })}
-                    className={`w-full text-left px-4 py-3 rounded-lg border transition ${
-                      (preferences.llm_model || "claude") === m.value
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
-                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
-                    }`}
-                  >
-                    <span className={`text-sm font-medium ${
-                      (preferences.llm_model || "claude") === m.value
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-700 dark:text-gray-300"
-                    }`}>
-                      {m.label}
-                    </span>
-                    <span className="text-xs text-gray-400 ml-2">{m.desc}</span>
-                  </button>
+              <div className="space-y-4">
+                {modelGroups.map((group) => (
+                  <div key={group.provider}>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{group.label}</p>
+                    <div className="space-y-1.5">
+                      {group.models.map((m) => (
+                        <button
+                          key={m.value}
+                          onClick={() => updatePreferences({ llm_model: m.value })}
+                          className={`w-full text-left px-4 py-2.5 rounded-lg border transition ${
+                            (preferences.llm_model || "claude-sonnet-4-20250514") === m.value
+                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                              : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                          }`}
+                        >
+                          <span className={`text-sm font-medium ${
+                            (preferences.llm_model || "claude-sonnet-4-20250514") === m.value
+                              ? "text-blue-600 dark:text-blue-400"
+                              : "text-gray-700 dark:text-gray-300"
+                          }`}>
+                            {m.label}
+                          </span>
+                          <span className="text-xs text-gray-400 ml-2">{m.desc}</span>
+                          <span className="text-xs text-gray-300 dark:text-gray-600 ml-1 font-mono">{m.value}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

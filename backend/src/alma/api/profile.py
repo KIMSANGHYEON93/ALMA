@@ -17,7 +17,7 @@ class PreferencesUpdate(BaseModel):
     response_style: Literal["concise", "detailed", "casual", "professional"] | None = None
     interests: list[str] | None = None
     timezone: str | None = None
-    llm_model: Literal["claude", "openai", "gemini"] | None = None
+    llm_model: str | None = None  # full model ID e.g. "claude-sonnet-4-20250514"
     telegram_id: str | None = None
     discord_id: str | None = None
     google_client_id: str | None = None

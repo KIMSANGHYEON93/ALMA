@@ -104,7 +104,19 @@ class ChatService:
         # 사용자 선호 LLM 모델 사용 (LLMRouter인 경우)
         llm_model = preferences.get("llm_model")
         if hasattr(self.llm, "providers") and llm_model:
-            response = await self.llm.complete(request, provider_name=llm_model)
+            # full model ID → provider name 추출
+            provider_name = llm_model  # 기본: model ID 그대로
+            if llm_model.startswith("claude"):
+                provider_name = "claude"
+            elif llm_model.startswith("gpt"):
+                provider_name = "openai"
+            elif llm_model.startswith("gemini"):
+                provider_name = "gemini"
+            # provider의 model 오버라이드
+            provider = self.llm.providers.get(provider_name)
+            if provider:
+                provider.model = llm_model
+            response = await self.llm.complete(request, provider_name=provider_name)
         else:
             response = await self.llm.complete(request)
 
