@@ -15,6 +15,8 @@ from alma.api.automations import router as automations_router
 from alma.api.integrations import router as integrations_router
 from alma.api.knowledge import router as knowledge_router
 from alma.api.llm import router as llm_router
+from alma.api.notifications import router as notifications_router
+from alma.api.ontology import router as ontology_router
 from alma.gateway.discord_bot import router as discord_router
 from alma.gateway.telegram import router as telegram_router
 from alma.api.messages import router as messages_router
@@ -31,6 +33,12 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
 
 
 app = FastAPI(title="ALMA", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
+
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok"}
+
 
 # EventStore: 모든 이벤트를 DB에 저장
 event_store_handler = EventStoreHandler(async_session)
@@ -62,4 +70,47 @@ app.include_router(knowledge_router)
 app.include_router(llm_router)
 app.include_router(chat_rest_router)
 app.include_router(telegram_router)
+app.include_router(notifications_router)
+app.include_router(ontology_router)
 app.include_router(discord_router)
+
+# Ontology adapters (lazy initialization per event)
+
+
+async def _ontology_adapter_handler(event):
+    """Lazy adapter handler: creates session per event."""
+    from alma.domain.ontology.adapters.goal_adapter import GoalAdapter
+    from alma.domain.ontology.adapters.habit_adapter import HabitAdapter
+    from alma.domain.ontology.adapters.memory_adapter import MemoryAdapter
+    from alma.domain.ontology.dedup import DeduplicationService
+    from alma.domain.ontology.pipeline import PurificationPipeline
+    from alma.domain.ontology.service import OntologyService
+    from alma.domain.ontology.validator import SchemaValidator
+
+    async with async_session() as session:
+        service = OntologyService(session, embedding_provider=None)
+        pipeline = PurificationPipeline(DeduplicationService(session), SchemaValidator(), service)
+
+        adapters = {
+            "goal.created": GoalAdapter(pipeline, service),
+            "goal.updated": GoalAdapter(pipeline, service),
+            "goal.deleted": GoalAdapter(pipeline, service),
+            "habit.created": HabitAdapter(pipeline, service),
+            "habit.deleted": HabitAdapter(pipeline, service),
+            "memory.created": MemoryAdapter(pipeline, service),
+        }
+        adapter = adapters.get(event.event_type)
+        if adapter:
+            try:
+                await adapter.handle(event)
+                await session.commit()
+            except Exception:
+                import logging
+
+                logging.getLogger(__name__).warning(
+                    "Ontology adapter failed for %s", event.event_type, exc_info=True
+                )
+
+
+for _evt in ["goal.created", "goal.updated", "goal.deleted", "habit.created", "habit.deleted", "memory.created"]:
+    event_bus.subscribe(_evt, _ontology_adapter_handler)
