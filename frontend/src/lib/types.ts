@@ -332,3 +332,57 @@ export interface AutomationRuleCreate {
   action_config: Record<string, unknown>;
   description?: string;
 }
+
+// ─── Ontology ───
+
+export interface OntologyObjectType {
+  id: string;
+  name: string;
+  parent_category: string;
+  description: string | null;
+  schema: Record<string, string>;
+  is_system: boolean;
+}
+
+export interface OntologyLinkType {
+  id: string;
+  name: string;
+  cardinality: string;
+  description: string | null;
+  is_system: boolean;
+}
+
+export interface OntologyNode {
+  id: string;
+  name: string;
+  type_name: string;
+  parent_category: string;
+  properties: Record<string, unknown>;
+  status: string;
+  confidence: number;
+  source_type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OntologyEdge {
+  id: string;
+  source_id: string;
+  target_id: string;
+  relation: string;
+  properties: Record<string, unknown>;
+  confidence: number;
+}
+
+export interface OntologyGraph {
+  nodes: OntologyNode[];
+  edges: OntologyEdge[];
+}
+
+export interface OntologyStats {
+  total_nodes: number;
+  total_edges: number;
+  nodes_by_category: Record<string, number>;
+  draft_count: number;
+  avg_confidence: number;
+}

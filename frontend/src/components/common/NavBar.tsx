@@ -12,6 +12,7 @@ const navItems = [
   { href: "/insights", label: "인사이트" },
   { href: "/knowledge", label: "지식" },
   { href: "/automations", label: "자동화" },
+  { href: "/ontology", label: "온톨로지" },
   { href: "/settings", label: "설정" },
 ];
 

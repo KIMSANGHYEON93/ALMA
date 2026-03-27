@@ -1,0 +1,62 @@
+"use client";
+
+import { useState } from "react";
+import NavBar from "@/components/common/NavBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOntologyStats, useOntologyObjects } from "@/hooks/useOntology";
+import OntologyStats from "@/components/ontology/OntologyStats";
+import ObjectList from "@/components/ontology/ObjectList";
+import DraftReview from "@/components/ontology/DraftReview";
+
+export default function OntologyPage() {
+  const { isLoading, token } = useAuth();
+  const { stats, loading: statsLoading, refresh: refreshStats } = useOntologyStats();
+  const { objects, loading: objLoading, refresh: refreshObjects } = useOntologyObjects();
+  const [tab, setTab] = useState<"all" | "drafts">("all");
+
+  if (isLoading || !token) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="text-gray-400">로딩 중...</span>
+      </div>
+    );
+  }
+
+  const drafts = objects.filter((o) => o.status === "draft");
+  const verified = objects.filter((o) => o.status === "verified");
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-950 text-white">
+      <NavBar />
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">Ontology</h1>
+
+        {!statsLoading && stats && <OntologyStats stats={stats} />}
+
+        <div className="flex gap-2 mt-6 mb-4">
+          <button
+            onClick={() => setTab("all")}
+            className={`px-4 py-2 rounded ${tab === "all" ? "bg-blue-600" : "bg-gray-800"}`}
+          >
+            All Nodes ({verified.length})
+          </button>
+          <button
+            onClick={() => setTab("drafts")}
+            className={`px-4 py-2 rounded ${tab === "drafts" ? "bg-yellow-600" : "bg-gray-800"}`}
+          >
+            Drafts ({drafts.length})
+          </button>
+        </div>
+
+        {tab === "all" ? (
+          <ObjectList objects={verified} loading={objLoading} />
+        ) : (
+          <DraftReview
+            drafts={drafts}
+            onAction={() => { refreshObjects(); refreshStats(); }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
