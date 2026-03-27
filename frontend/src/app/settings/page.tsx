@@ -129,7 +129,7 @@ export default function SettingsPage() {
             {/* API Keys */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                API 키 (선택 — 입력하면 개인 키 사용)
+                API 키 (입력하면 .env 대신 개인 키 사용)
               </label>
               <div className="space-y-2">
                 <div>
@@ -138,7 +138,6 @@ export default function SettingsPage() {
                     type="password"
                     value={anthropicKey}
                     onChange={(e) => setAnthropicKey(e.target.value)}
-                    onBlur={() => anthropicKey !== (preferences.anthropic_api_key || "") && updatePreferences({ anthropic_api_key: anthropicKey })}
                     placeholder={(preferences.anthropic_api_key as string) || "sk-ant-..."}
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -149,7 +148,6 @@ export default function SettingsPage() {
                     type="password"
                     value={openaiKey}
                     onChange={(e) => setOpenaiKey(e.target.value)}
-                    onBlur={() => openaiKey !== (preferences.openai_api_key || "") && updatePreferences({ openai_api_key: openaiKey })}
                     placeholder={(preferences.openai_api_key as string) || "sk-..."}
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -160,12 +158,31 @@ export default function SettingsPage() {
                     type="password"
                     value={geminiKey}
                     onChange={(e) => setGeminiKey(e.target.value)}
-                    onBlur={() => geminiKey !== (preferences.gemini_api_key || "") && updatePreferences({ gemini_api_key: geminiKey })}
                     placeholder={(preferences.gemini_api_key as string) || "AI..."}
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <p className="text-xs text-gray-400">입력한 키는 암호화되어 저장됩니다. 비우면 서버 기본 키를 사용합니다.</p>
+                <div className="flex items-center gap-3 pt-1">
+                  <button
+                    onClick={async () => {
+                      const updates: Record<string, string> = {};
+                      if (anthropicKey) updates.anthropic_api_key = anthropicKey;
+                      if (openaiKey) updates.openai_api_key = openaiKey;
+                      if (geminiKey) updates.gemini_api_key = geminiKey;
+                      if (Object.keys(updates).length > 0) {
+                        await updatePreferences(updates);
+                        setAnthropicKey("");
+                        setOpenaiKey("");
+                        setGeminiKey("");
+                      }
+                    }}
+                    disabled={!anthropicKey && !openaiKey && !geminiKey}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                  >
+                    API 키 저장
+                  </button>
+                  <p className="text-xs text-gray-400">암호화되어 저장됩니다</p>
+                </div>
               </div>
             </div>
 
@@ -353,7 +370,6 @@ export default function SettingsPage() {
                     type="text"
                     value={googleClientId}
                     onChange={(e) => setGoogleClientId(e.target.value)}
-                    onBlur={() => googleClientId !== (preferences.google_client_id || "") && updatePreferences({ google_client_id: googleClientId })}
                     placeholder="Google Client ID"
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -361,10 +377,26 @@ export default function SettingsPage() {
                     type="password"
                     value={googleClientSecret}
                     onChange={(e) => setGoogleClientSecret(e.target.value)}
-                    onBlur={() => googleClientSecret !== (preferences.google_client_secret || "") && updatePreferences({ google_client_secret: googleClientSecret })}
                     placeholder="Google Client Secret"
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={async () => {
+                        if (googleClientId || googleClientSecret) {
+                          const updates: Record<string, string> = {};
+                          if (googleClientId) updates.google_client_id = googleClientId;
+                          if (googleClientSecret) updates.google_client_secret = googleClientSecret;
+                          await updatePreferences(updates);
+                        }
+                      }}
+                      disabled={!googleClientId && !googleClientSecret}
+                      className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                    >
+                      OAuth 키 저장
+                    </button>
+                    <p className="text-xs text-gray-400">암호화 저장</p>
+                  </div>
                   <p className="text-xs text-gray-400">
                     리다이렉트 URI:{" "}
                     <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">
