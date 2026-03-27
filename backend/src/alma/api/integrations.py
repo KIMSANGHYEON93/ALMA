@@ -113,13 +113,43 @@ async def google_callback(
     client_id = prefs.get("google_client_id") or settings.google_client_id
     client_secret = prefs.get("google_client_secret") or settings.google_client_secret
 
+    # Retrieve code_verifier from pending integration
+    repo = IntegrationRepository(session)
+    pending = await repo.get_active(
+        uuid.UUID(user_id) if isinstance(user_id, str) else user_id,
+        "google_calendar",
+    )
+    code_verifier = None
+    if not pending:
+        # Try pending status
+        from sqlalchemy import select
+        from alma.models.models import Integration
+        result = await session.execute(
+            select(Integration).where(
+                Integration.user_id == (uuid.UUID(user_id) if isinstance(user_id, str) else user_id),
+                Integration.provider == "google_calendar",
+                Integration.status == "pending",
+            )
+        )
+        pending = result.scalar_one_or_none()
+    if pending:
+        try:
+            code_verifier = decrypt_token(pending.access_token)
+        except Exception:
+            pass
+
     # Exchange code for tokens
     try:
         tokens = GoogleOAuthService.exchange_code(
-            code, client_id=client_id, client_secret=client_secret
+            code, client_id=client_id, client_secret=client_secret,
+            code_verifier=code_verifier,
         )
-    except Exception:
-        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=token_exchange")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception("Google token exchange failed")
+        import urllib.parse
+        error_msg = urllib.parse.quote(str(e)[:200])
+        return RedirectResponse(url=f"http://localhost:3000/settings?integration=error&reason=token_exchange&detail={error_msg}")
 
     # Store encrypted tokens
     repo = IntegrationRepository(session)
