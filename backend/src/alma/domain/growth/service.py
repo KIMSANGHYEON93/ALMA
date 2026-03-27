@@ -55,10 +55,28 @@ class GoalService:
         for key, value in kwargs.items():
             if hasattr(goal, key):
                 setattr(goal, key, value)
-        return await self.goal_repo.update(goal)
+        updated = await self.goal_repo.update(goal)
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "goal.updated", "growth",
+                {"goal_id": str(goal.id), "changed": {k: v for k, v in kwargs.items() if v is not None}},
+                user_id=str(goal.user_id), aggregate_id=str(goal.id),
+            )
+        except Exception:
+            pass
+        return updated
 
     async def delete_goal(self, goal_id: uuid.UUID) -> None:
         await self.goal_repo.delete(goal_id)
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "goal.deleted", "growth",
+                {"goal_id": str(goal_id)},
+            )
+        except Exception:
+            pass
 
     async def update_goal_status(self, goal: Goal, status: str) -> Goal:
         goal.status = status

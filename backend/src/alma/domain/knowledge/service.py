@@ -73,6 +73,19 @@ class KnowledgeService:
                 )
             except Exception:
                 pass
+
+            try:
+                from alma.core.events.helpers import emit
+
+                await emit(
+                    "knowledge.document_ready",
+                    "knowledge",
+                    {"document_id": str(doc.id), "title": doc.title, "content": doc.content[:2000]},
+                    user_id=str(user_id),
+                    aggregate_id=str(doc.id),
+                )
+            except Exception:
+                pass
         except Exception as e:
             logger.warning("Failed to process document: %s", e, exc_info=True)
             await self.doc_repo.update_status(doc, "error")

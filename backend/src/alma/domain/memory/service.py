@@ -23,12 +23,21 @@ class MemoryService:
 
     async def store_message(self, conversation_id: str, role: str, content: str) -> None:
         embedding = await self._get_embedding(content)
-        await self.message_repo.create(
+        msg = await self.message_repo.create(
             conversation_id=uuid.UUID(conversation_id),
             role=role,
             content=content,
             embedding=embedding,
         )
+        try:
+            from alma.core.events.helpers import emit
+            await emit(
+                "memory.created", "memory",
+                {"memory_id": str(msg.id), "content": content, "category": role},
+                user_id=str(conversation_id), aggregate_id=str(msg.id),
+            )
+        except Exception:
+            pass
 
     async def search_similar(self, user_id: str, query: str, limit: int = 5) -> list[ChatMessage]:
         embedding = await self._get_embedding(query)
