@@ -39,6 +39,8 @@ export default function SettingsPage() {
   } = usePushNotification();
   const [interestInput, setInterestInput] = useState("");
   const [connectError, setConnectError] = useState("");
+  const [googleClientId, setGoogleClientId] = useState(preferences.google_client_id as string || "");
+  const [googleClientSecret, setGoogleClientSecret] = useState(preferences.google_client_secret as string || "");
 
   if (authLoading || prefLoading || intLoading) {
     return (
@@ -303,15 +305,17 @@ export default function SettingsPage() {
                   </p>
                   <input
                     type="text"
-                    value={(preferences.google_client_id as string) || ""}
-                    onChange={(e) => updatePreferences({ google_client_id: e.target.value })}
+                    value={googleClientId}
+                    onChange={(e) => setGoogleClientId(e.target.value)}
+                    onBlur={() => googleClientId !== (preferences.google_client_id || "") && updatePreferences({ google_client_id: googleClientId })}
                     placeholder="Google Client ID"
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
                     type="password"
-                    value={(preferences.google_client_secret as string) || ""}
-                    onChange={(e) => updatePreferences({ google_client_secret: e.target.value })}
+                    value={googleClientSecret}
+                    onChange={(e) => setGoogleClientSecret(e.target.value)}
+                    onBlur={() => googleClientSecret !== (preferences.google_client_secret || "") && updatePreferences({ google_client_secret: googleClientSecret })}
                     placeholder="Google Client Secret"
                     className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
