@@ -435,3 +435,212 @@ class DocumentChunk(Base):
             postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
     )
+
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    endpoint: Mapped[str] = mapped_column(Text, nullable=False)
+    keys: Mapped[dict] = mapped_column(JSONB, default=dict)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_push_sub_user", "user_id"),
+        UniqueConstraint("user_id", "endpoint", name="uq_push_sub_user_endpoint"),
+    )
+
+
+class ObjectType(Base):
+    __tablename__ = "ontology_object_types"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    parent_category: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    property_schema: Mapped[dict] = mapped_column("schema", JSONB, default=dict, server_default="{}")
+    embedding = mapped_column(Vector(768), nullable=True)
+    is_system: Mapped[bool] = mapped_column(default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "name", name="uq_object_types_user_name"),
+        Index("idx_object_types_user", "user_id", "parent_category"),
+        Index(
+            "idx_object_types_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+        CheckConstraint(
+            "parent_category IN ('Entity','Action','Concept','Attribute','Temporal')",
+            name="ck_object_types_category",
+        ),
+    )
+
+
+class OntologyObject(Base):
+    __tablename__ = "ontology_objects"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    type_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    properties: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    source_type: Mapped[str] = mapped_column(nullable=False)
+    source_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    embedding = mapped_column(Vector(768), nullable=True)
+    confidence: Mapped[float] = mapped_column(default=1.0)
+    status: Mapped[str] = mapped_column(nullable=False, default="draft")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index("idx_objects_user_type", "user_id", "type_id"),
+        Index("idx_objects_user_status", "user_id", "status"),
+        Index("idx_objects_source", "source_type", "source_id"),
+        Index(
+            "idx_objects_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+        CheckConstraint(
+            "source_type IN ('chat','goal','habit','memory','knowledge','manual','llm_extracted')",
+            name="ck_objects_source_type",
+        ),
+        CheckConstraint(
+            "status IN ('draft','verified','merged','archived')",
+            name="ck_objects_status",
+        ),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_objects_confidence"),
+    )
+
+
+class LinkType(Base):
+    __tablename__ = "ontology_link_types"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    source_type_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=True
+    )
+    target_type_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=True
+    )
+    cardinality: Mapped[str] = mapped_column(nullable=False, default="N:M")
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_system: Mapped[bool] = mapped_column(default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "name", name="uq_link_types_user_name"),
+        Index("idx_link_types_user", "user_id"),
+        CheckConstraint(
+            "cardinality IN ('1:1','1:N','N:M')",
+            name="ck_link_types_cardinality",
+        ),
+    )
+
+
+class OntologyLink(Base):
+    __tablename__ = "ontology_links"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    type_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_link_types.id", ondelete="RESTRICT"), nullable=False
+    )
+    source_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_objects.id", ondelete="CASCADE"), nullable=False
+    )
+    target_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_objects.id", ondelete="CASCADE"), nullable=False
+    )
+    properties: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    confidence: Mapped[float] = mapped_column(default=1.0)
+    source_origin: Mapped[str] = mapped_column(nullable=False, default="system")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index("idx_links_source", "source_id"),
+        Index("idx_links_target", "target_id"),
+        Index("idx_links_user_type", "user_id", "type_id"),
+        UniqueConstraint("type_id", "source_id", "target_id", name="uq_links_type_source_target"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_links_confidence"),
+        CheckConstraint(
+            "source_origin IN ('llm','system','manual')",
+            name="ck_links_source_origin",
+        ),
+        CheckConstraint("source_id != target_id", name="ck_links_no_self_ref"),
+    )
+
+
+class OntologyActionType(Base):
+    __tablename__ = "ontology_action_types"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    target_type_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("ontology_object_types.id", ondelete="SET NULL"), nullable=True
+    )
+    param_schema: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    side_effects: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    permissions: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    is_system: Mapped[bool] = mapped_column(default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "name", name="uq_action_types_user_name"),
+        Index("idx_action_types_user", "user_id"),
+    )
+
+
+class OntologyActionLog(Base):
+    __tablename__ = "ontology_action_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    action_type_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_action_types.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    actor: Mapped[str] = mapped_column(nullable=False)
+    input_params: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    result: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    affected_objects: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
+    status: Mapped[str] = mapped_column(nullable=False, default="success")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_onto_action_logs_user", "user_id", "created_at"),
+        Index("idx_onto_action_logs_type", "action_type_id"),
+        CheckConstraint(
+            "actor IN ('user','agent','system','adapter')",
+            name="ck_onto_action_logs_actor",
+        ),
+        CheckConstraint(
+            "status IN ('success','failed','rolled_back')",
+            name="ck_onto_action_logs_status",
+        ),
+    )
