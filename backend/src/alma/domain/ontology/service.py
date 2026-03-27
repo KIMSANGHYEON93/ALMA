@@ -18,7 +18,7 @@ from alma.domain.ontology.repository import (
     ObjectRepository,
     ObjectTypeRepository,
 )
-from alma.models.models import OntologyActionLog, OntologyLink, OntologyObject
+from alma.models.models import OntologyObject
 
 logger = logging.getLogger(__name__)
 
@@ -52,18 +52,16 @@ class OntologyService:
                 name=candidate.sub_type,
                 parent_category=candidate.parent_category,
             )
-        obj = OntologyObject(
+        obj = await self.obj_repo.create(
             user_id=user_id,
             type_id=type_obj.id,
             name=candidate.name,
             properties=candidate.properties,
             source_type=candidate.source_type,
             source_id=candidate.source_id,
-            embedding=candidate.embedding,
             confidence=candidate.confidence,
             status=candidate.status,
         )
-        await self.obj_repo.create(obj)
         await self._log_action("create_object", user_id, "system", {"name": candidate.name}, str(obj.id))
         return obj.id
 
@@ -124,16 +122,15 @@ class OntologyService:
         link_type = await self.lt_repo.get_by_name(user_id, relation)
         if not link_type:
             link_type = await self.lt_repo.create(user_id=user_id, name=relation)
-        link = OntologyLink(
+        link = await self.link_repo.create(
             user_id=user_id,
             type_id=link_type.id,
             source_id=source_id,
             target_id=target_id,
-            properties=properties or {},
+            properties=properties,
             confidence=confidence,
             source_origin=source_origin,
         )
-        await self.link_repo.create(link)
         await self._log_action("create_link", user_id, "system", {"relation": relation}, str(link.id))
         return link.id
 
@@ -203,13 +200,12 @@ class OntologyService:
         try:
             action_type = await self.at_repo.get_by_name(user_id, action_name)
             if action_type:
-                log = OntologyActionLog(
+                await self.al_repo.create(
                     action_type_id=action_type.id,
                     user_id=user_id,
                     actor=actor,
                     input_params=params,
                     affected_objects=[affected],
                 )
-                await self.al_repo.create(log)
         except Exception:
             logger.warning("Action log failed for %s", action_name, exc_info=True)

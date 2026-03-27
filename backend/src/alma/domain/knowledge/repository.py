@@ -11,12 +11,19 @@ class DocumentRepository:
         self.session = session
 
     async def create(
-        self, user_id: uuid.UUID, title: str, content: str,
-        source_type: str = "text", source_url: str | None = None,
+        self,
+        user_id: uuid.UUID,
+        title: str,
+        content: str,
+        source_type: str = "text",
+        source_url: str | None = None,
     ) -> Document:
         doc = Document(
-            user_id=user_id, title=title, content=content,
-            source_type=source_type, source_url=source_url,
+            user_id=user_id,
+            title=title,
+            content=content,
+            source_type=source_type,
+            source_url=source_url,
             status="processing",
         )
         self.session.add(doc)
@@ -25,15 +32,12 @@ class DocumentRepository:
         return doc
 
     async def get(self, doc_id: uuid.UUID) -> Document | None:
-        result = await self.session.execute(
-            select(Document).where(Document.id == doc_id)
-        )
+        result = await self.session.execute(select(Document).where(Document.id == doc_id))
         return result.scalar_one_or_none()
 
     async def list_by_user(self, user_id: uuid.UUID) -> list[Document]:
         result = await self.session.execute(
-            select(Document).where(Document.user_id == user_id)
-            .order_by(desc(Document.created_at))
+            select(Document).where(Document.user_id == user_id).order_by(desc(Document.created_at))
         )
         return list(result.scalars().all())
 
@@ -56,14 +60,19 @@ class DocumentChunkRepository:
         self.session = session
 
     async def create_batch(
-        self, document_id: uuid.UUID, user_id: uuid.UUID,
+        self,
+        document_id: uuid.UUID,
+        user_id: uuid.UUID,
         chunks: list[tuple[int, str, list[float] | None]],
     ) -> int:
         """청크 배치 생성. chunks: [(index, content, embedding)]"""
         for idx, content, embedding in chunks:
             chunk = DocumentChunk(
-                document_id=document_id, user_id=user_id,
-                chunk_index=idx, content=content, embedding=embedding,
+                document_id=document_id,
+                user_id=user_id,
+                chunk_index=idx,
+                content=content,
+                embedding=embedding,
             )
             self.session.add(chunk)
         await self.session.commit()
@@ -91,8 +100,11 @@ class DocumentChunkRepository:
         chunks = []
         for row in rows:
             chunk = DocumentChunk(
-                id=row[0], document_id=row[1], user_id=row[2],
-                chunk_index=row[3], content=row[4],
+                id=row[0],
+                document_id=row[1],
+                user_id=row[2],
+                chunk_index=row[3],
+                content=row[4],
             )
             chunks.append(chunk)
         return chunks

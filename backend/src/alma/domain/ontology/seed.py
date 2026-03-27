@@ -28,11 +28,11 @@ SYSTEM_LINK_TYPES = [
     {"name": "supports", "cardinality": "N:M", "desc": "A supports/promotes B"},
     {"name": "blocks", "cardinality": "N:M", "desc": "A blocks/hinders B"},
     {"name": "causes", "cardinality": "N:M", "desc": "A causes B"},
-    {"name": "part_of", "cardinality": "N:1", "desc": "A is part of B"},
+    {"name": "part_of", "cardinality": "N:M", "desc": "A is part of B"},
     {"name": "related_to", "cardinality": "N:M", "desc": "A is related to B"},
     {"name": "depends_on", "cardinality": "N:M", "desc": "A depends on B"},
     {"name": "measured_by", "cardinality": "N:M", "desc": "A is measured by B"},
-    {"name": "belongs_to", "cardinality": "N:1", "desc": "A belongs to B"},
+    {"name": "belongs_to", "cardinality": "N:M", "desc": "A belongs to B"},
     {"name": "precedes", "cardinality": "N:M", "desc": "A precedes B"},
     {"name": "contradicts", "cardinality": "N:M", "desc": "A contradicts B"},
 ]
