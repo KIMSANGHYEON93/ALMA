@@ -89,10 +89,10 @@ async def google_callback(
     session: AsyncSession = Depends(get_session),
 ):
     if error:
-        return RedirectResponse(url="/settings?integration=denied")
+        return RedirectResponse(url="http://localhost:3000/settings?integration=denied")
 
     if not code or not state:
-        return RedirectResponse(url="/settings?integration=error&reason=missing_params")
+        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=missing_params")
 
     # Verify state JWT
     from alma.domain.integration.oauth import GoogleOAuthService
@@ -101,7 +101,7 @@ async def google_callback(
         payload = GoogleOAuthService.verify_state(state)
         user_id = payload["user_id"]
     except Exception:
-        return RedirectResponse(url="/settings?integration=error&reason=invalid_state")
+        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=invalid_state")
 
     # Get user's Google OAuth credentials from preferences
     import uuid
@@ -119,7 +119,7 @@ async def google_callback(
             code, client_id=client_id, client_secret=client_secret
         )
     except Exception:
-        return RedirectResponse(url="/settings?integration=error&reason=token_exchange")
+        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=token_exchange")
 
     # Store encrypted tokens
     repo = IntegrationRepository(session)
@@ -135,7 +135,7 @@ async def google_callback(
         status="active",
     )
 
-    return RedirectResponse(url="/settings?integration=connected")
+    return RedirectResponse(url="http://localhost:3000/settings?integration=connected")
 
 
 @router.delete("/{integration_id}", status_code=204)
