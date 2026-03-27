@@ -1,4 +1,3 @@
-import json
 import logging
 import uuid
 
@@ -173,9 +172,9 @@ class OntologyService:
                 for o in objects
             ],
             edges=[
-                {"id": str(l.id), "source": str(l.source_id), "target": str(l.target_id),
-                 "type_id": str(l.type_id), "properties": l.properties}
-                for l in links
+                {"id": str(link.id), "source": str(link.source_id), "target": str(link.target_id),
+                 "type_id": str(link.type_id), "properties": link.properties}
+                for link in links
             ],
         )
 

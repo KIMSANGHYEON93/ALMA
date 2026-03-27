@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_ontology_models_importable():
     from alma.models.models import (
         LinkType,
