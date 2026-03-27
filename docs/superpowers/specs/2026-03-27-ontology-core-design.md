@@ -7,7 +7,7 @@ ALMA의 중심 데이터 구조를 온톨로지로 재설계한다. 모든 사�
 **설계 원칙 (팔란티어 3원칙 + 제1원칙):**
 1. **스키마 선행** — Object/Link Type을 먼저 정의, 데이터는 틀에 맞춰야 진입
 2. **정제 게이트** — 중복 제거/검증을 통과해야만 온톨로지에 도달
-3. **Action 추상화** — 직접 CRUD 불가, Action을 통해서만 변경
+3. **Action 로깅** — 모든 온톨로지 변경은 Action으로 기록 (감사 추적)
 4. **PostgreSQL 순수 구현** — 기존 Supabase 인프라 유지, nodes/edges + Recursive CTE
 
 **접근법:** 온톨로지 코어 + 도메인 어댑터
@@ -65,7 +65,7 @@ ALMA의 중심 데이터 구조를 온톨로지로 재설계한다. 모든 사�
 
 ```python
 class ObjectType(Base):
-    __tablename__ = "object_types"
+    __tablename__ = "ontology_object_types"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -105,7 +105,7 @@ class OntologyObject(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     type_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("object_types.id", ondelete="RESTRICT"), nullable=False
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=False
     )
     name: Mapped[str] = mapped_column(nullable=False)
     properties: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
@@ -145,7 +145,7 @@ class OntologyObject(Base):
 
 ```python
 class LinkType(Base):
-    __tablename__ = "link_types"
+    __tablename__ = "ontology_link_types"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -153,10 +153,10 @@ class LinkType(Base):
     )
     name: Mapped[str] = mapped_column(nullable=False)
     source_type_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("object_types.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=True
     )
     target_type_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("object_types.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("ontology_object_types.id", ondelete="RESTRICT"), nullable=True
     )
     cardinality: Mapped[str] = mapped_column(nullable=False, default="N:M")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -184,7 +184,7 @@ class OntologyLink(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     type_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("link_types.id", ondelete="RESTRICT"), nullable=False
+        ForeignKey("ontology_link_types.id", ondelete="RESTRICT"), nullable=False
     )
     source_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("ontology_objects.id", ondelete="CASCADE"), nullable=False
@@ -196,6 +196,7 @@ class OntologyLink(Base):
     confidence: Mapped[float] = mapped_column(default=1.0)
     source_origin: Mapped[str] = mapped_column(nullable=False, default="system")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (
         Index("idx_links_source", "source_id"),
@@ -229,7 +230,7 @@ class OntologyActionType(Base):
     )
     name: Mapped[str] = mapped_column(nullable=False)
     target_type_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("object_types.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("ontology_object_types.id", ondelete="SET NULL"), nullable=True
     )
     param_schema: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
     side_effects: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
@@ -259,7 +260,7 @@ class OntologyActionLog(Base):
     actor: Mapped[str] = mapped_column(nullable=False)
     input_params: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
     result: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
-    affected_objects: Mapped[dict] = mapped_column(JSONB, default=list, server_default="[]")
+    affected_objects: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
     status: Mapped[str] = mapped_column(nullable=False, default="success")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
@@ -328,6 +329,9 @@ EXTRACTION_SYSTEM_PROMPT = """
 ### 4.2 SemanticExtractor 서비스
 
 ```python
+from alma.infrastructure.llm.base import LLMRequest, ChatMessage
+from alma.infrastructure.llm.router import LLMRouter
+
 class SemanticExtractor:
     def __init__(self, llm_router: LLMRouter, ontology_service: OntologyService):
         self.llm_router = llm_router
@@ -337,7 +341,7 @@ class SemanticExtractor:
         # 1. 기존 스키마 컨텍스트 로드
         context = await self.ontology_service.get_user_schema_context(user_id)
 
-        # 2. LLM 호출
+        # 2. LLM 호출 (기존 LLMRouter.complete() 인터페이스 사용)
         user_prompt = f"""
 기존 Object Types: {context.object_type_names}
 기존 Link Types: {context.link_type_names}
@@ -346,12 +350,16 @@ class SemanticExtractor:
 ---
 추출할 텍스트:
 {text}
+
+반드시 JSON 형식으로만 응답하세요.
 """
-        response = await self.llm_router.chat(
-            system=EXTRACTION_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_prompt}],
-            response_format="json",
+        request = LLMRequest(
+            messages=[ChatMessage(role="user", content=user_prompt)],
+            system_prompt=EXTRACTION_SYSTEM_PROMPT,
+            max_tokens=2048,
+            temperature=0.3,  # 추출은 낮은 temperature로 일관성 확보
         )
+        response = await self.llm_router.complete(request)
 
         # 3. 파싱 + 임베딩 생성
         parsed = RawExtraction.from_llm_response(response.content)
@@ -510,156 +518,192 @@ class PurificationPipeline:
 
 ### 6.1 Base Adapter Protocol
 
+어댑터는 기존 이벤트 버스의 `DomainEvent`를 직접 받는다. `DomainEvent.payload: dict`에서 필요한 데이터를 추출한다.
+
 ```python
-from typing import Protocol
+from alma.core.events.models import DomainEvent
 
-class DomainAdapter(Protocol):
-    """도메인 이벤트 → 온톨로지 싱크를 위한 프로토콜"""
+class DomainAdapter:
+    """도메인 이벤트 → 온톨로지 싱크 베이스 클래스"""
 
-    async def on_created(self, event: dict) -> None: ...
-    async def on_updated(self, event: dict) -> None: ...
-    async def on_deleted(self, event: dict) -> None: ...
+    def __init__(self, pipeline: PurificationPipeline, ontology: OntologyService):
+        self.pipeline = pipeline
+        self.ontology = ontology
+
+    async def handle(self, event: DomainEvent) -> None:
+        """이벤트 타입에 따라 적절한 핸들러로 라우팅"""
+        raise NotImplementedError
 ```
 
 ### 6.2 GoalAdapter
 
 ```python
-class GoalAdapter:
-    def __init__(self, pipeline: PurificationPipeline, ontology: OntologyService):
-        self.pipeline = pipeline
-        self.ontology = ontology
+class GoalAdapter(DomainAdapter):
+    async def handle(self, event: DomainEvent) -> None:
+        """goal.created, goal.updated, goal.deleted 이벤트 처리"""
+        p = event.payload
+        user_id = uuid.UUID(event.user_id)
 
-    async def on_created(self, event: GoalCreatedEvent):
-        extraction = RawExtraction(
-            node_candidates=[
-                NodeCandidate(
-                    name=event.title,
-                    parent_category="Action",
-                    sub_type="Goal",
-                    properties={
-                        "category": event.category,
-                        "status": event.status,
-                        "target_date": str(event.target_date) if event.target_date else None,
-                        "description": event.description,
-                    },
-                    confidence=1.0,  # 시스템 생성 = 최대 신뢰도
-                    source_type="goal",
-                    source_id=event.goal_id,
-                )
-            ],
-            edge_candidates=[],
-        )
-        await self.pipeline.process(extraction, event.user_id)
+        if event.event_type == "goal.created":
+            extraction = RawExtraction(
+                node_candidates=[
+                    NodeCandidate(
+                        name=p["title"],
+                        parent_category="Action",
+                        sub_type="Goal",
+                        properties={k: v for k, v in p.items() if k != "goal_id"},
+                        confidence=1.0,  # 시스템 생성 = 최대 신뢰도
+                        source_type="goal",
+                        source_id=uuid.UUID(p["goal_id"]),
+                    )
+                ],
+                edge_candidates=[],
+            )
+            await self.pipeline.process(extraction, user_id)
 
-    async def on_updated(self, event: GoalUpdatedEvent):
-        obj = await self.ontology.find_by_source("goal", event.goal_id)
-        if obj:
-            await self.ontology.update_object_properties(obj.id, event.changed_fields)
+        elif event.event_type == "goal.updated":
+            obj = await self.ontology.find_by_source("goal", uuid.UUID(p["goal_id"]))
+            if obj:
+                await self.ontology.update_object_properties(obj.id, p.get("changed", {}))
 
-    async def on_deleted(self, event: GoalDeletedEvent):
-        obj = await self.ontology.find_by_source("goal", event.goal_id)
-        if obj:
-            await self.ontology.archive_object(obj.id)
+        elif event.event_type == "goal.deleted":
+            obj = await self.ontology.find_by_source("goal", uuid.UUID(p["goal_id"]))
+            if obj:
+                await self.ontology.archive_object(obj.id)
 ```
+
+> **Note**: 현재 GoalService는 `goal.created`만 발행 중. `goal.updated`, `goal.deleted` 이벤트 발행을 GoalService에 추가해야 함 (Backend - Modify 참조).
 
 ### 6.3 HabitAdapter
 
 ```python
-class HabitAdapter:
-    async def on_created(self, event: HabitCreatedEvent):
-        extraction = RawExtraction(
-            node_candidates=[
-                NodeCandidate(
-                    name=event.title,
-                    parent_category="Action",
-                    sub_type="Habit",
-                    properties={
-                        "frequency": event.frequency_type,
-                        "target_value": event.target_value,
-                        "target_unit": event.target_unit,
-                    },
-                    confidence=1.0,
-                    source_type="habit",
-                    source_id=event.habit_id,
-                )
-            ],
-            edge_candidates=[],
-        )
-        # Habit에 goal_id가 있으면 "supports" 관계 추가
-        if event.goal_id:
-            extraction.edge_candidates.append(
-                EdgeCandidate(
-                    source_name=event.title,
-                    target_name="",  # goal 이름은 lookup 필요
-                    relation="supports",
-                    properties={},
-                    confidence=1.0,
-                    source_origin="system",
-                )
-            )
-            # goal_id로 Object 찾아서 target_name 설정
-            goal_obj = await self.ontology.find_by_source("goal", event.goal_id)
-            if goal_obj:
-                extraction.edge_candidates[0].target_name = goal_obj.name
+class HabitAdapter(DomainAdapter):
+    async def handle(self, event: DomainEvent) -> None:
+        """habit.created, habit.deleted 이벤트 처리"""
+        p = event.payload
+        user_id = uuid.UUID(event.user_id)
 
-        await self.pipeline.process(extraction, event.user_id)
+        if event.event_type == "habit.created":
+            extraction = RawExtraction(
+                node_candidates=[
+                    NodeCandidate(
+                        name=p["title"],
+                        parent_category="Action",
+                        sub_type="Habit",
+                        properties={
+                            "frequency": p.get("frequency_type"),
+                        },
+                        confidence=1.0,
+                        source_type="habit",
+                        source_id=uuid.UUID(p["habit_id"]),
+                    )
+                ],
+                edge_candidates=[],
+            )
+            # Habit에 goal_id가 있으면 "supports" 관계 추가
+            goal_id = p.get("goal_id")
+            if goal_id:
+                goal_obj = await self.ontology.find_by_source("goal", uuid.UUID(goal_id))
+                if goal_obj:
+                    # goal_obj가 존재할 때만 엣지 추가 (빈 target_name 방지)
+                    extraction.edge_candidates.append(
+                        EdgeCandidate(
+                            source_name=p["title"],
+                            target_name=goal_obj.name,
+                            relation="supports",
+                            properties={},
+                            confidence=1.0,
+                            source_origin="system",
+                        )
+                    )
+
+            await self.pipeline.process(extraction, user_id)
+
+        elif event.event_type == "habit.deleted":
+            obj = await self.ontology.find_by_source("habit", uuid.UUID(p["habit_id"]))
+            if obj:
+                await self.ontology.archive_object(obj.id)
 ```
 
 ### 6.4 ChatAdapter
 
 ```python
+# 의미 추출 가치가 낮은 패턴 (LLM 호출 비용 절감)
+SKIP_PATTERNS = re.compile(
+    r'^(네|예|아니요|알겠|좋아|감사|ㅇㅇ|ㅋ|ㅎ|ok|yes|no|thanks|sure)',
+    re.IGNORECASE
+)
+MIN_CONTENT_LENGTH = 30  # 최소 30자 (20자는 너무 짧음)
+
 class ChatAdapter:
     def __init__(self, extractor: SemanticExtractor, pipeline: PurificationPipeline):
         self.extractor = extractor
         self.pipeline = pipeline
 
-    async def on_message_received(self, event: MessageReceivedEvent):
+    async def handle(self, event: DomainEvent) -> None:
+        """message.received 이벤트 처리"""
+        p = event.payload
+
         # 사용자 메시지만 처리 (assistant 메시지는 무시)
-        if event.role != "user":
+        if p.get("role") != "user":
             return
 
-        # 짧은 메시지는 스킵 (의미 추출 가치 없음)
-        if len(event.content) < 20:
+        content = p.get("content", "")
+
+        # 비용 절감 필터: 짧은 메시지, 확인형 메시지 스킵
+        if len(content) < MIN_CONTENT_LENGTH:
+            return
+        if SKIP_PATTERNS.match(content.strip()):
             return
 
         # LLM 의미 추출 → 파이프라인
-        extraction = await self.extractor.extract(event.content, event.user_id)
+        user_id = uuid.UUID(event.user_id)
+        extraction = await self.extractor.extract(content, user_id)
         if extraction.node_candidates or extraction.edge_candidates:
-            await self.pipeline.process(extraction, event.user_id)
+            await self.pipeline.process(extraction, user_id)
 ```
 
 ### 6.5 MemoryAdapter, KnowledgeAdapter
 
 ```python
-class MemoryAdapter:
-    async def on_created(self, event: MemoryCreatedEvent):
+class MemoryAdapter(DomainAdapter):
+    async def handle(self, event: DomainEvent) -> None:
+        """memory.created 이벤트 처리"""
+        p = event.payload
+        user_id = uuid.UUID(event.user_id)
         extraction = RawExtraction(
             node_candidates=[
                 NodeCandidate(
-                    name=event.content[:100],  # 메모리 내용 요약
+                    name=p["content"][:100],
                     parent_category="Concept",
-                    sub_type=event.category,   # preference, fact, context 등
-                    properties={"full_content": event.content},
+                    sub_type=p.get("category", "fact"),
+                    properties={"full_content": p["content"]},
                     confidence=0.9,
                     source_type="memory",
-                    source_id=event.memory_id,
+                    source_id=uuid.UUID(p["memory_id"]) if p.get("memory_id") else None,
                 )
             ],
             edge_candidates=[],
         )
-        await self.pipeline.process(extraction, event.user_id)
+        await self.pipeline.process(extraction, user_id)
 
 class KnowledgeAdapter:
-    async def on_document_ready(self, event: DocumentReadyEvent):
-        # 문서가 ready 상태가 되면 제목/내용에서 의미 추출
+    def __init__(self, extractor: SemanticExtractor, pipeline: PurificationPipeline):
+        self.extractor = extractor
+        self.pipeline = pipeline
+
+    async def handle(self, event: DomainEvent) -> None:
+        """knowledge.document_ready 이벤트 처리"""
+        p = event.payload
+        user_id = uuid.UUID(event.user_id)
         extraction = await self.extractor.extract(
-            f"문서: {event.title}\n{event.content[:2000]}",
-            event.user_id,
+            f"문서: {p['title']}\n{p.get('content', '')[:2000]}",
+            user_id,
         )
         for node in extraction.node_candidates:
             node.source_type = "knowledge"
-            node.source_id = event.document_id
-        await self.pipeline.process(extraction, event.user_id)
+            node.source_id = uuid.UUID(p["document_id"])
+        await self.pipeline.process(extraction, user_id)
 ```
 
 ---
@@ -714,6 +758,46 @@ SYSTEM_ACTION_TYPES = [
 
 시딩은 사용자 최초 가입 시 또는 마이그레이션에서 실행. `is_system=True`로 표시하여 사용자 삭제 방지.
 
+### 7.1 SchemaValidator 상세
+
+```python
+class SchemaValidator:
+    """JSONB 속성을 object_type.schema 정의에 따라 검증/정규화"""
+
+    # 지원 타입 매핑
+    TYPE_MAP = {"str": str, "int": int, "float": float, "bool": bool, "date": str, "datetime": str}
+
+    def validate_type(self, user_id: UUID, parent_category: str, sub_type: str) -> bool:
+        """상위 카테고리 유효성 + object_type 존재 여부 확인"""
+        valid_categories = {"Entity", "Action", "Concept", "Attribute", "Temporal"}
+        return parent_category in valid_categories
+
+    def validate_properties(self, candidate: NodeCandidate) -> bool:
+        """속성 값이 스키마 타입과 일치하는지 검증 (느슨한 검증: 추가 키 허용, 타입 불일치만 거부)"""
+        # object_type.schema에 정의된 키의 값 타입만 검증
+        # 스키마에 없는 추가 키는 허용 (유연한 동적 생성 지원)
+        return True  # 타입 불일치 시에만 False
+
+    def normalize(self, properties: dict) -> dict:
+        """속성 값 정규화: 날짜 형식 통일, 문자열 trim, None 제거"""
+        return {k: v for k, v in properties.items() if v is not None}
+
+    def infer_schema(self, properties: dict) -> dict:
+        """속성에서 스키마 추론 (새 object_type 자동 생성 시 사용)"""
+        return {k: type(v).__name__ for k, v in properties.items() if v is not None}
+```
+
+### 7.2 설정값 (config.py 추가)
+
+```python
+# Deduplication thresholds (하드코딩 대신 설정으로 외부화)
+ONTOLOGY_DEDUP_AUTO_MERGE_THRESHOLD: float = 0.98
+ONTOLOGY_DEDUP_REVIEW_THRESHOLD: float = 0.92
+ONTOLOGY_CONFIDENCE_AUTO_VERIFY: float = 0.8
+ONTOLOGY_CONFIDENCE_REJECT: float = 0.5
+ONTOLOGY_CHAT_MIN_LENGTH: int = 30
+```
+
 ---
 
 ## 8. OntologyService (코어 서비스)
@@ -735,9 +819,9 @@ class OntologyService:
             recent_node_names=[o.name for o in recent],
         )
 
-    # === Graph Query (Recursive CTE) ===
+    # === Graph Query (Recursive CTE with cycle detection) ===
     async def get_neighbors(self, object_id: UUID, depth: int = 2) -> list[GraphNode]:
-        """N홉 이웃 노드 조회 — Recursive CTE"""
+        """N홉 이웃 노드 조회 — Recursive CTE (PG14+ CYCLE 절로 순환 방지)"""
         query = text("""
             WITH RECURSIVE graph AS (
                 -- Base: 시작 노드
@@ -756,8 +840,8 @@ class OntologyService:
                 )
                 WHERE g.depth < :max_depth
                   AND o2.status = 'verified'
-            )
-            SELECT DISTINCT id, name, type_id, depth FROM graph ORDER BY depth
+            ) CYCLE id SET is_cycle USING path
+            SELECT DISTINCT id, name, type_id, depth FROM graph WHERE NOT is_cycle ORDER BY depth
         """)
         result = await self.session.execute(query, {"start_id": object_id, "max_depth": depth})
         return [GraphNode(**row._mapping) for row in result]
@@ -772,7 +856,7 @@ class OntologyService:
             edges=[{"source": str(l.source_id), "target": str(l.target_id), "type": str(l.type_id), "properties": l.properties} for l in links],
         )
 
-    # === Object CRUD (Action을 통해서만) ===
+    # === Object CRUD (변경 시 Action 로그 기록) ===
     async def create_object(self, user_id: UUID, candidate: NodeCandidate) -> UUID:
         type_obj = await self.repo.get_object_type_by_name(user_id, candidate.sub_type)
         obj = OntologyObject(
@@ -794,14 +878,20 @@ class OntologyService:
         return obj.id
 
     async def merge_object(self, target_id: UUID, candidate: NodeCandidate):
-        """기존 노드에 새 정보 병합"""
+        """기존 노드에 새 정보 병합 — 기존 값 우선 전략"""
         target = await self.repo.get_object(target_id)
-        # 속성 병합 (기존 값 유지, 새 값 추가)
-        merged_props = {**target.properties, **candidate.properties}
+        # 병합 전략: 기존 값 우선, 새 키만 추가 (기존 데이터 보호)
+        # 기존에 없는 키만 candidate에서 가져옴
+        merged_props = {**candidate.properties, **target.properties}
         target.properties = merged_props
         target.updated_at = func.now()
+        # confidence는 더 높은 쪽으로
+        if candidate.confidence > target.confidence:
+            target.confidence = candidate.confidence
         await self._log_action("merge_objects", target.user_id, "system",
-                               {"merged_from": candidate.name}, str(target_id))
+                               {"merged_from": candidate.name, "new_keys": list(
+                                   set(candidate.properties) - set(target.properties)
+                               )}, str(target_id))
 
     async def find_by_source(self, source_type: str, source_id: UUID) -> OntologyObject | None:
         return await self.repo.find_by_source(source_type, source_id)
@@ -829,7 +919,8 @@ class OntologyService:
 | `DELETE /api/ontology/objects/{id}` | DELETE | 아카이브 (soft delete) |
 | `GET /api/ontology/links` | GET | 관계 목록 |
 | `GET /api/ontology/graph` | GET | 시각화용 전체 그래프 |
-| `POST /api/ontology/extract` | POST | 텍스트 수동 의미 추출 |
+| `POST /api/ontology/extract/preview` | POST | 텍스트 → 추출 미리보기 (저장하지 않음) |
+| `POST /api/ontology/extract/confirm` | POST | 미리보기 결과 확인 후 파이프라인 실행 |
 | `GET /api/ontology/stats` | GET | 노드/엣지 통계 |
 | `GET /api/ontology/actions/log` | GET | Action 실행 이력 |
 
@@ -874,21 +965,25 @@ class GraphStats(BaseModel):
 ### 10.1 이벤트 버스 연결
 
 ```python
-# main.py — 어댑터 등록
+# main.py — 어댑터 등록 (DomainEvent.handle() 메서드 사용)
+from alma.core.events import event_bus
+
 goal_adapter = GoalAdapter(pipeline, ontology_service)
 habit_adapter = HabitAdapter(pipeline, ontology_service)
 chat_adapter = ChatAdapter(extractor, pipeline)
 memory_adapter = MemoryAdapter(pipeline, ontology_service)
 knowledge_adapter = KnowledgeAdapter(extractor, pipeline)
 
-event_bus.subscribe("goal.created", goal_adapter.on_created)
-event_bus.subscribe("goal.updated", goal_adapter.on_updated)
-event_bus.subscribe("goal.deleted", goal_adapter.on_deleted)
-event_bus.subscribe("habit.created", habit_adapter.on_created)
-event_bus.subscribe("habit.updated", habit_adapter.on_updated)
-event_bus.subscribe("message.received", chat_adapter.on_message_received)
-event_bus.subscribe("memory.created", memory_adapter.on_created)
-event_bus.subscribe("knowledge.document_ready", knowledge_adapter.on_document_ready)
+# 각 어댑터의 handle() 메서드를 이벤트 타입별로 구독
+event_bus.subscribe("goal.created", goal_adapter.handle)
+event_bus.subscribe("goal.updated", goal_adapter.handle)
+event_bus.subscribe("goal.deleted", goal_adapter.handle)
+event_bus.subscribe("habit.created", habit_adapter.handle)
+event_bus.subscribe("habit.deleted", habit_adapter.handle)
+event_bus.subscribe("habit.checkin_completed", habit_adapter.handle)
+event_bus.subscribe("message.received", chat_adapter.handle)
+event_bus.subscribe("memory.created", memory_adapter.handle)
+event_bus.subscribe("knowledge.document_ready", knowledge_adapter.handle)
 ```
 
 ### 10.2 ChatService 수정
@@ -917,15 +1012,15 @@ if self.ontology_service:
 
 ```
 frontend/
-├── app/ontology/page.tsx          # 온톨로지 메인 페이지
-├── components/
-│   ├── OntologyStats.tsx          # 노드/엣지 통계 카드
-│   ├── ObjectList.tsx             # 노드 목록 (필터/검색)
-│   ├── ObjectDetail.tsx           # 노드 상세 + 연결 관계
-│   ├── DraftReview.tsx            # draft 노드 검토/승인 UI
-│   └── ManualExtract.tsx          # 수동 텍스트 → 추출 입력
+├── app/ontology/page.tsx              # 온톨로지 메인 페이지
+├── components/ontology/               # 온톨로지 전용 서브디렉토리
+│   ├── OntologyStats.tsx              # 노드/엣지 통계 카드
+│   ├── ObjectList.tsx                 # 노드 목록 (필터/검색)
+│   ├── ObjectDetail.tsx               # 노드 상세 + 연결 관계
+│   ├── DraftReview.tsx                # draft 노드 검토/승인 UI
+│   └── ManualExtract.tsx              # 수동 텍스트 → 추출 입력
 └── hooks/
-    └── useOntology.ts             # API 훅
+    └── useOntology.ts                 # API 훅
 ```
 
 ### 11.2 페이지 구성
@@ -973,7 +1068,10 @@ frontend/
 |------|------|
 | `models/models.py` | +ObjectType, +OntologyObject, +LinkType, +OntologyLink, +OntologyActionType, +OntologyActionLog |
 | `main.py` | +ontology_router 등록, +어댑터 이벤트 구독 |
-| `domain/chat/service.py` | +ontology_service DI, 온톨로지 컨텍스트 주입 |
+| `domain/chat/service.py` | +ontology_service DI, 온톨로지 컨텍스트 주입, +message.received 이벤트 발행 |
+| `domain/growth/service.py` | +goal.updated, goal.deleted 이벤트 발행 추가 (goal.created는 이미 존재) |
+| `domain/memory/service.py` | +memory.created 이벤트 발행 추가 |
+| `domain/knowledge/service.py` | +knowledge.document_ready 이벤트 발행 추가 |
 | Alembic migration | +6개 테이블, +인덱스 |
 
 ### Frontend — Create
@@ -1017,13 +1115,13 @@ frontend/
 | 13 | test_goal_adapter_creates_object | Goal 생성 이벤트 → Object 생성 |
 | 14 | test_habit_adapter_with_goal_link | Habit + goal_id → Object + supports Link |
 | 15 | test_chat_adapter_extracts | 채팅 메시지 → 의미 추출 → 파이프라인 |
-| 16 | test_chat_adapter_skips_short | 20자 미만 메시지 → 스킵 |
+| 16 | test_chat_adapter_skips_short | 30자 미만 + 확인형 패턴 메시지 → 스킵 |
 | 17 | test_graph_neighbors_depth | N홉 이웃 조회 (depth=1,2,3) |
 | 18 | test_full_graph_response | 시각화용 전체 그래프 응답 구조 |
 | 19 | test_verify_draft_object | draft → verified 상태 전환 |
 | 20 | test_merge_objects_api | API를 통한 수동 병합 |
 | 21 | test_action_log_recorded | 모든 변경에 Action 로그 기록 |
-| 22 | test_manual_extract_endpoint | POST /extract → 미리보기 → 저장 |
+| 22 | test_manual_extract_endpoint | POST /extract → 추출 결과 반환 (preview), 이후 별도 create 호출로 저장 |
 | 23 | test_bidirectional_goal_sync | Goal 수정 → Object 속성 업데이트 |
 | 24 | test_archive_cascades_links | Object 아카이브 시 관련 Link 처리 |
 
