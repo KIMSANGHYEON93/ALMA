@@ -20,6 +20,8 @@ class PreferencesUpdate(BaseModel):
     llm_model: Literal["claude", "openai", "gemini"] | None = None
     telegram_id: str | None = None
     discord_id: str | None = None
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
 
 
 @router.get("/preferences")

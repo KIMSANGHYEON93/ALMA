@@ -11,8 +11,12 @@ SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 
 class GoogleOAuthService:
     @staticmethod
-    def generate_auth_url(user_id: str) -> tuple[str, str]:
+    def generate_auth_url(
+        user_id: str,
+        client_id: str | None = None,
+    ) -> tuple[str, str]:
         """Returns (auth_url, nonce)"""
+        cid = client_id or settings.google_client_id
         nonce = secrets.token_urlsafe(32)
         state = jwt.encode(
             {
@@ -27,7 +31,7 @@ class GoogleOAuthService:
         flow = Flow.from_client_config(
             {
                 "web": {
-                    "client_id": settings.google_client_id,
+                    "client_id": cid,
                     "client_secret": settings.google_client_secret,
                     "redirect_uris": [settings.google_redirect_uri],
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -50,13 +54,19 @@ class GoogleOAuthService:
         return jwt.decode(state, settings.jwt_secret, algorithms=["HS256"])
 
     @staticmethod
-    def exchange_code(code: str) -> dict:
+    def exchange_code(
+        code: str,
+        client_id: str | None = None,
+        client_secret: str | None = None,
+    ) -> dict:
         """Exchange auth code for tokens."""
+        cid = client_id or settings.google_client_id
+        csecret = client_secret or settings.google_client_secret
         flow = Flow.from_client_config(
             {
                 "web": {
-                    "client_id": settings.google_client_id,
-                    "client_secret": settings.google_client_secret,
+                    "client_id": cid,
+                    "client_secret": csecret,
                     "redirect_uris": [settings.google_redirect_uri],
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",

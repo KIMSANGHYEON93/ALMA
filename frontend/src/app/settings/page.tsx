@@ -5,6 +5,7 @@ import NavBar from "@/components/common/NavBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useIntegrations } from "@/hooks/useIntegrations";
+import { usePushNotification } from "@/hooks/usePushNotification";
 
 const models = [
   { value: "claude", label: "Claude (Anthropic)", desc: "고품질 응답" },
@@ -29,6 +30,13 @@ export default function SettingsPage() {
   const { isLoading: authLoading } = useAuth();
   const { preferences, loading: prefLoading, saving, updatePreferences } = useProfile();
   const { googleCalendar, loading: intLoading, connectGoogle, disconnect } = useIntegrations();
+  const {
+    isSupported: pushSupported,
+    isSubscribed: pushSubscribed,
+    subscribe: pushSubscribe,
+    unsubscribe: pushUnsubscribe,
+    testNotification: pushTest,
+  } = usePushNotification();
   const [interestInput, setInterestInput] = useState("");
   const [connectError, setConnectError] = useState("");
 
@@ -67,12 +75,7 @@ export default function SettingsPage() {
       await connectGoogle();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "연결 실패";
-      // 개발 환경 에러를 사용자 친화적 메시지로 변환
-      if (msg.includes("not configured") || msg.includes("503")) {
-        setConnectError("Google Calendar 연동은 현재 준비 중입니다. 곧 사용 가능합니다.");
-      } else {
-        setConnectError(msg);
-      }
+      setConnectError(msg);
     }
   };
 
@@ -204,6 +207,43 @@ export default function SettingsPage() {
               )}
             </div>
 
+            {/* Push Notifications */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                푸시 알림
+              </label>
+              {pushSupported ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                    <div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">브라우저 알림</p>
+                      <p className="text-xs text-gray-400">습관 리마인더를 브라우저 알림으로 받습니다</p>
+                    </div>
+                    <button
+                      onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
+                      className={`px-3 py-1.5 text-xs rounded-lg transition ${
+                        pushSubscribed
+                          ? "bg-red-100 text-red-600 hover:bg-red-200"
+                          : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+                      }`}
+                    >
+                      {pushSubscribed ? "해제" : "활성화"}
+                    </button>
+                  </div>
+                  {pushSubscribed && (
+                    <button
+                      onClick={pushTest}
+                      className="text-xs text-blue-500 hover:text-blue-600"
+                    >
+                      테스트 알림 보내기
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">이 브라우저는 푸시 알림을 지원하지 않습니다</p>
+              )}
+            </div>
+
             {saving && (
               <p className="mt-3 text-xs text-blue-500">저장 중...</p>
             )}
@@ -216,47 +256,76 @@ export default function SettingsPage() {
             </h2>
 
             {/* Google Calendar */}
-            <div className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
-                  </svg>
+            <div className="p-4 border dark:border-gray-700 rounded-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                      Google Calendar
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {googleCalendar?.status === "active"
+                        ? "연결됨"
+                        : googleCalendar?.status === "expired"
+                          ? "토큰 만료 — 재연결 필요"
+                          : "연결되지 않음"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                    Google Calendar
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {googleCalendar?.status === "active"
-                      ? "연결됨"
-                      : googleCalendar?.status === "expired"
-                        ? "토큰 만료 — 재연결 필요"
-                        : "연결되지 않음"}
-                  </p>
-                </div>
+
+                {googleCalendar?.status === "active" ? (
+                  <button
+                    onClick={() => disconnect(googleCalendar.id)}
+                    className="px-4 py-2 text-sm text-red-600 border border-red-300 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition"
+                  >
+                    연결 해제
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleConnect}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    연결하기
+                  </button>
+                )}
               </div>
 
-              {googleCalendar?.status === "active" ? (
-                <button
-                  onClick={() => disconnect(googleCalendar.id)}
-                  className="px-4 py-2 text-sm text-red-600 border border-red-300 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition"
-                >
-                  연결 해제
-                </button>
-              ) : (
-                <button
-                  onClick={handleConnect}
-                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  연결하기
-                </button>
+              {/* OAuth credentials input — show when not connected */}
+              {(!googleCalendar || googleCalendar.status !== "active") && (
+                <div className="space-y-2 pt-2 border-t dark:border-gray-800">
+                  <p className="text-xs text-gray-400">
+                    Google Cloud Console에서 OAuth 2.0 인증 정보를 발급받아 입력하세요
+                  </p>
+                  <input
+                    type="text"
+                    value={(preferences.google_client_id as string) || ""}
+                    onChange={(e) => updatePreferences({ google_client_id: e.target.value })}
+                    placeholder="Google Client ID"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <input
+                    type="password"
+                    value={(preferences.google_client_secret as string) || ""}
+                    onChange={(e) => updatePreferences({ google_client_secret: e.target.value })}
+                    placeholder="Google Client Secret"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-400">
+                    리다이렉트 URI:{" "}
+                    <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">
+                      http://localhost:8000/api/integrations/google/callback
+                    </code>
+                  </p>
+                </div>
               )}
-            </div>
 
-            {connectError && (
-              <p className="mt-2 text-sm text-red-500">{connectError}</p>
-            )}
+              {connectError && <p className="text-sm text-red-500">{connectError}</p>}
+            </div>
           </section>
         </div>
       </main>

@@ -50,12 +50,26 @@ async def connect_google(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    if not settings.google_client_id:
-        raise HTTPException(status_code=503, detail="Google OAuth not configured")
+    # 사용자 설정에서 먼저 확인, 없으면 글로벌 설정 사용
+    from alma.domain.identity.profile import UserProfileService
+
+    profile = UserProfileService(session)
+    prefs = await profile.get_preferences(str(user.id))
+
+    client_id = prefs.get("google_client_id") or settings.google_client_id
+    client_secret = prefs.get("google_client_secret") or settings.google_client_secret
+
+    if not client_id or not client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Google OAuth not configured. Please set Client ID and Secret in Settings.",
+        )
 
     from alma.domain.integration.oauth import GoogleOAuthService
 
-    auth_url, nonce = GoogleOAuthService.generate_auth_url(str(user.id))
+    auth_url, nonce = GoogleOAuthService.generate_auth_url(
+        str(user.id), client_id=client_id
+    )
     # Store pending integration with nonce in access_token field temporarily
     repo = IntegrationRepository(session)
     await repo.create_or_update(
@@ -75,10 +89,10 @@ async def google_callback(
     session: AsyncSession = Depends(get_session),
 ):
     if error:
-        return RedirectResponse(url="/chat?integration=denied")
+        return RedirectResponse(url="/settings?integration=denied")
 
     if not code or not state:
-        return RedirectResponse(url="/chat?integration=error&reason=missing_params")
+        return RedirectResponse(url="/settings?integration=error&reason=missing_params")
 
     # Verify state JWT
     from alma.domain.integration.oauth import GoogleOAuthService
@@ -87,18 +101,30 @@ async def google_callback(
         payload = GoogleOAuthService.verify_state(state)
         user_id = payload["user_id"]
     except Exception:
-        return RedirectResponse(url="/chat?integration=error&reason=invalid_state")
+        return RedirectResponse(url="/settings?integration=error&reason=invalid_state")
+
+    # Get user's Google OAuth credentials from preferences
+    import uuid
+
+    from alma.domain.identity.profile import UserProfileService
+
+    profile = UserProfileService(session)
+    prefs = await profile.get_preferences(user_id)
+    client_id = prefs.get("google_client_id") or settings.google_client_id
+    client_secret = prefs.get("google_client_secret") or settings.google_client_secret
 
     # Exchange code for tokens
     try:
-        tokens = GoogleOAuthService.exchange_code(code)
+        tokens = GoogleOAuthService.exchange_code(
+            code, client_id=client_id, client_secret=client_secret
+        )
     except Exception:
-        return RedirectResponse(url="/chat?integration=error&reason=token_exchange")
+        return RedirectResponse(url="/settings?integration=error&reason=token_exchange")
 
     # Store encrypted tokens
     repo = IntegrationRepository(session)
     await repo.create_or_update(
-        user_id=user_id,
+        user_id=uuid.UUID(user_id) if isinstance(user_id, str) else user_id,
         provider="google_calendar",
         access_token=encrypt_token(tokens["access_token"]),
         refresh_token=(
@@ -109,7 +135,7 @@ async def google_callback(
         status="active",
     )
 
-    return RedirectResponse(url="/chat?integration=connected")
+    return RedirectResponse(url="/settings?integration=connected")
 
 
 @router.delete("/{integration_id}", status_code=204)

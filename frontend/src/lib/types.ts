@@ -106,6 +106,8 @@ export interface UserPreferences {
   response_style?: string;
   interests?: string[];
   timezone?: string;
+  google_client_id?: string;
+  google_client_secret?: string;
   [key: string]: unknown;  // explicit preferences are user-defined
 }
 
