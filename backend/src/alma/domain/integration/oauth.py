@@ -14,9 +14,11 @@ class GoogleOAuthService:
     def generate_auth_url(
         user_id: str,
         client_id: str | None = None,
+        client_secret: str | None = None,
     ) -> tuple[str, str]:
         """Returns (auth_url, nonce)"""
         cid = client_id or settings.google_client_id
+        csecret = client_secret or settings.google_client_secret
         nonce = secrets.token_urlsafe(32)
         state = jwt.encode(
             {
@@ -32,7 +34,7 @@ class GoogleOAuthService:
             {
                 "web": {
                     "client_id": cid,
-                    "client_secret": settings.google_client_secret,
+                    "client_secret": csecret,
                     "redirect_uris": [settings.google_redirect_uri],
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",

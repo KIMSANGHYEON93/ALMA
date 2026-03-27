@@ -68,7 +68,7 @@ async def connect_google(
     from alma.domain.integration.oauth import GoogleOAuthService
 
     auth_url, nonce = GoogleOAuthService.generate_auth_url(
-        str(user.id), client_id=client_id
+        str(user.id), client_id=client_id, client_secret=client_secret
     )
     # Store pending integration with nonce in access_token field temporarily
     repo = IntegrationRepository(session)
