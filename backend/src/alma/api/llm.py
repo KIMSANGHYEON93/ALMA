@@ -9,15 +9,34 @@ from alma.infrastructure.llm.router import LLMRouter
 router = APIRouter(prefix="/api/llm", tags=["llm"])
 
 
-def create_llm_router() -> LLMRouter:
-    """설정된 API 키를 기반으로 사용 가능한 프로바이더만 등록"""
+def create_llm_router(user_prefs: dict | None = None) -> LLMRouter:
+    """Create LLM router with user-specific or global API keys"""
     providers: dict = {}
-    if settings.anthropic_api_key:
+
+    # User keys take priority over global settings
+    anthropic_key = (user_prefs or {}).get("anthropic_api_key") or settings.anthropic_api_key
+    openai_key = (user_prefs or {}).get("openai_api_key") or settings.openai_api_key
+    gemini_key = (user_prefs or {}).get("gemini_api_key") or settings.gemini_api_key
+
+    if anthropic_key:
         providers["claude"] = ClaudeProvider()
-    if settings.openai_api_key:
+        # Override the client's API key if user-specific
+        if user_prefs and user_prefs.get("anthropic_api_key"):
+            import anthropic
+
+            providers["claude"].client = anthropic.AsyncAnthropic(api_key=anthropic_key)
+    if openai_key:
         providers["openai"] = OpenAIProvider()
-    if settings.gemini_api_key:
+        if user_prefs and user_prefs.get("openai_api_key"):
+            import openai
+
+            providers["openai"].client = openai.AsyncOpenAI(api_key=openai_key)
+    if gemini_key:
         providers["gemini"] = GeminiProvider()
+        if user_prefs and user_prefs.get("gemini_api_key"):
+            from google import genai
+
+            providers["gemini"].client = genai.Client(api_key=gemini_key)
 
     default = "claude" if "claude" in providers else next(iter(providers), "claude")
     return LLMRouter(providers, default=default)

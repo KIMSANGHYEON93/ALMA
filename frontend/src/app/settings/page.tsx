@@ -41,6 +41,9 @@ export default function SettingsPage() {
   const [connectError, setConnectError] = useState("");
   const [googleClientId, setGoogleClientId] = useState(preferences.google_client_id as string || "");
   const [googleClientSecret, setGoogleClientSecret] = useState(preferences.google_client_secret as string || "");
+  const [anthropicKey, setAnthropicKey] = useState("");
+  const [openaiKey, setOpenaiKey] = useState("");
+  const [geminiKey, setGeminiKey] = useState("");
 
   if (authLoading || prefLoading || intLoading) {
     return (
@@ -120,6 +123,49 @@ export default function SettingsPage() {
                     <span className="text-xs text-gray-400 ml-2">{m.desc}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* API Keys */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                API 키 (선택 — 입력하면 개인 키 사용)
+              </label>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Anthropic (Claude)</label>
+                  <input
+                    type="password"
+                    value={anthropicKey}
+                    onChange={(e) => setAnthropicKey(e.target.value)}
+                    onBlur={() => anthropicKey !== (preferences.anthropic_api_key || "") && updatePreferences({ anthropic_api_key: anthropicKey })}
+                    placeholder={(preferences.anthropic_api_key as string) || "sk-ant-..."}
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">OpenAI (GPT)</label>
+                  <input
+                    type="password"
+                    value={openaiKey}
+                    onChange={(e) => setOpenaiKey(e.target.value)}
+                    onBlur={() => openaiKey !== (preferences.openai_api_key || "") && updatePreferences({ openai_api_key: openaiKey })}
+                    placeholder={(preferences.openai_api_key as string) || "sk-..."}
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Google (Gemini)</label>
+                  <input
+                    type="password"
+                    value={geminiKey}
+                    onChange={(e) => setGeminiKey(e.target.value)}
+                    onBlur={() => geminiKey !== (preferences.gemini_api_key || "") && updatePreferences({ gemini_api_key: geminiKey })}
+                    placeholder={(preferences.gemini_api_key as string) || "AI..."}
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <p className="text-xs text-gray-400">입력한 키는 암호화되어 저장됩니다. 비우면 서버 기본 키를 사용합니다.</p>
               </div>
             </div>
 

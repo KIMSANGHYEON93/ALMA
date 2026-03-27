@@ -66,8 +66,8 @@ class ChatService:
         for msg in history:
             messages.append(msg)
 
-        # 사용자 선호도 기반 system prompt 개인화
-        preferences = await self.profile.get_preferences(user_id)
+        # 사용자 선호도 기반 system prompt 개인화 (decrypted for internal use)
+        preferences = await self.profile.get_decrypted_preferences(user_id)
         safe_prefs = {
             "language": preferences.get("language", "ko"),
             "response_style": preferences.get("response_style", "concise"),

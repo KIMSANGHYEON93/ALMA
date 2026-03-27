@@ -7,6 +7,7 @@ from alma.config import settings
 from alma.domain.chat.service import ChatService
 from alma.domain.growth.service import GoalService
 from alma.domain.habit.service import HabitService
+from alma.domain.identity.profile import UserProfileService
 from alma.domain.knowledge.service import KnowledgeService
 from alma.domain.memory.embedding import create_embedding_provider
 from alma.gateway.models import UnifiedMessage, UnifiedResponse
@@ -28,8 +29,12 @@ class ChannelService:
             conv = await conv_repo.create(uuid.UUID(msg.user_id))
             conv_id = str(conv.id)
 
+        # Get user's decrypted preferences for API keys
+        profile_service = UserProfileService(self.session)
+        user_prefs = await profile_service.get_decrypted_preferences(msg.user_id)
+
         # ChatService 구성
-        llm = create_llm_router()
+        llm = create_llm_router(user_prefs=user_prefs)
         goal_service = GoalService(self.session)
         habit_service = HabitService(self.session)
         embedding = create_embedding_provider(settings)

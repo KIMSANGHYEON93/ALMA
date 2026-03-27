@@ -4,6 +4,7 @@ import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from alma.domain.identity.service import decode_token
+from alma.domain.identity.profile import UserProfileService
 from alma.database import async_session
 from alma.api.llm import create_llm_router
 from alma.config import settings
@@ -35,7 +36,11 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
     await websocket.accept()
 
     async with async_session() as session:
-        llm_router = create_llm_router()
+        # Get user's decrypted preferences for API keys
+        profile_service = UserProfileService(session)
+        user_prefs = await profile_service.get_decrypted_preferences(user_id)
+
+        llm_router = create_llm_router(user_prefs=user_prefs)
         goal_service = GoalService(session)
         habit_service = HabitService(session)
         embedding_provider = create_embedding_provider(settings)

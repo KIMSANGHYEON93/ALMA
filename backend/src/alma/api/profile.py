@@ -22,6 +22,9 @@ class PreferencesUpdate(BaseModel):
     discord_id: str | None = None
     google_client_id: str | None = None
     google_client_secret: str | None = None
+    anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
+    gemini_api_key: str | None = None
 
 
 @router.get("/preferences")
