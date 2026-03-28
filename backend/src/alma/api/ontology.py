@@ -263,28 +263,37 @@ async def list_objects(
 ):
     service = OntologyService(session, embedding_provider=None)
 
+    # Build type lookup (single query)
+    all_types = await service.ot_repo.list_by_user(user.id)
+    type_map: dict[uuid.UUID, tuple[str, str]] = {t.id: (t.name, t.parent_category) for t in all_types}
+
     type_id = None
     if type_name:
         ot = await service.ot_repo.get_by_name(user.id, type_name)
         if not ot:
             return []
         type_id = ot.id
+    elif category:
+        # category 필터: 해당 카테고리의 모든 type_ids 수집 → DB 레벨 필터링
+        cat_type_ids = [tid for tid, (_, pcat) in type_map.items() if pcat == category]
+        if not cat_type_ids:
+            return []
+        # type_id 필터 대신 여러 type_ids로 필터 — 첫 번째만 사용 (list_by_user는 단일 type_id)
+        # 단순화: category에 해당하는 objects만 가져오기
+        all_objects = []
+        for tid in cat_type_ids:
+            objs = await service.obj_repo.list_by_user(user.id, status=status, type_id=tid)
+            all_objects.extend(objs)
+        # 정렬 + offset/limit 적용
+        all_objects.sort(key=lambda o: o.updated_at or o.created_at, reverse=True)
+        paged = all_objects[offset:offset + limit]
+        return [_node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in paged]
 
     objects = await service.obj_repo.list_by_user(
         user.id, status=status, type_id=type_id, limit=limit, offset=offset,
     )
 
-    # Build type lookup for response (single query)
-    all_types = await service.ot_repo.list_by_user(user.id)
-    type_map: dict[uuid.UUID, tuple[str, str]] = {t.id: (t.name, t.parent_category) for t in all_types}
-
-    result = []
-    for obj in objects:
-        tname, pcat = type_map.get(obj.type_id, ("unknown", "unknown"))
-        if category and pcat != category:
-            continue
-        result.append(_node_response(obj, tname, pcat))
-    return result
+    return [_node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in objects]
 
 
 @router.get("/objects/{object_id}", response_model=NodeResponse)

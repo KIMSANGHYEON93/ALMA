@@ -100,10 +100,12 @@ class ObjectRepository:
         source_id: uuid.UUID,
     ) -> list[OntologyObject]:
         result = await self.session.execute(
-            select(OntologyObject).where(
+            select(OntologyObject)
+            .where(
                 OntologyObject.source_type == source_type,
                 OntologyObject.source_id == source_id,
             )
+            .order_by(desc(OntologyObject.created_at))
         )
         return list(result.scalars().all())
 

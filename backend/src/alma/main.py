@@ -134,6 +134,7 @@ async def _ontology_adapter_handler(event):
                     await adapter.handle(event)
                     await session.commit()
                 except Exception:
+                    await session.rollback()
                     logging.getLogger(__name__).warning(
                         "Ontology adapter failed for %s", event.event_type, exc_info=True
                     )
@@ -153,6 +154,7 @@ async def _ontology_adapter_handler(event):
                 await adapter.handle(event)
                 await session.commit()
             except Exception:
+                await session.rollback()
                 logging.getLogger(__name__).warning(
                     "Ontology adapter failed for %s", event.event_type, exc_info=True
                 )

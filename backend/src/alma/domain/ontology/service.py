@@ -164,14 +164,19 @@ class OntologyService:
     async def get_full_graph(self, user_id: uuid.UUID) -> GraphData:
         objects = await self.obj_repo.list_by_user(user_id, status="verified")
         links = await self.link_repo.list_by_user(user_id)
+        # Build link_type name map for relation resolution
+        link_types = await self.lt_repo.list_by_user(user_id)
+        lt_name_map = {str(lt.id): lt.name for lt in link_types}
         return GraphData(
             nodes=[
-                {"id": str(o.id), "name": o.name, "type_id": str(o.type_id), "properties": o.properties, "confidence": o.confidence}
+                {"id": str(o.id), "name": o.name, "type_id": str(o.type_id),
+                 "properties": o.properties, "confidence": o.confidence}
                 for o in objects
             ],
             edges=[
                 {"id": str(link.id), "source": str(link.source_id), "target": str(link.target_id),
-                 "type_id": str(link.type_id), "properties": link.properties}
+                 "type_id": str(link.type_id), "relation": lt_name_map.get(str(link.type_id), ""),
+                 "properties": link.properties, "confidence": link.confidence}
                 for link in links
             ],
         )
