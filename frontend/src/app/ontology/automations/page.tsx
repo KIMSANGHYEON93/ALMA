@@ -23,11 +23,10 @@ const INSIGHT_TYPES = [
 ];
 
 const ACTION_TYPES = [
-  { value: "notify", label: "알림 전송" },
-  { value: "auto_link", label: "자동 링크 생성" },
-  { value: "flag_review", label: "검토 요청" },
-  { value: "create_node", label: "노드 자동 생성" },
-  { value: "merge_nodes", label: "노드 병합" },
+  { value: "create_link", label: "링크 생성" },
+  { value: "create_node", label: "노드 생성" },
+  { value: "notification", label: "알림" },
+  { value: "suggest", label: "제안" },
 ];
 
 const LOG_STATUS_CONFIG: Record<string, { label: string; color: string }> = {

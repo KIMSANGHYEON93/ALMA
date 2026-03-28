@@ -104,7 +104,8 @@ class OntologyService:
             )
 
     async def find_by_source(self, source_type: str, source_id: uuid.UUID) -> OntologyObject | None:
-        return await self.obj_repo.find_by_source(source_type, source_id)
+        results = await self.obj_repo.find_by_source(source_type, source_id)
+        return results[0] if results else None
 
     async def find_object_by_name(self, user_id: uuid.UUID, name: str) -> OntologyObject | None:
         return await self.obj_repo.find_by_name(user_id, name)
@@ -165,7 +166,7 @@ class OntologyService:
         links = await self.link_repo.list_by_user(user_id)
         return GraphData(
             nodes=[
-                {"id": str(o.id), "name": o.name, "type_id": str(o.type_id), "properties": o.properties}
+                {"id": str(o.id), "name": o.name, "type_id": str(o.type_id), "properties": o.properties, "confidence": o.confidence}
                 for o in objects
             ],
             edges=[

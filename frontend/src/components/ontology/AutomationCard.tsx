@@ -12,11 +12,10 @@ const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const ACTION_CONFIG: Record<string, { label: string; color: string }> = {
-  notify: { label: "알림", color: "bg-blue-800" },
-  auto_link: { label: "자동 링크", color: "bg-green-800" },
-  flag_review: { label: "검토 요청", color: "bg-orange-800" },
-  create_node: { label: "노드 생성", color: "bg-violet-800" },
-  merge_nodes: { label: "노드 병합", color: "bg-pink-800" },
+  create_link: { label: "링크 생성", color: "bg-blue-600" },
+  create_node: { label: "노드 생성", color: "bg-green-600" },
+  notification: { label: "알림", color: "bg-yellow-600" },
+  suggest: { label: "제안", color: "bg-purple-600" },
 };
 
 interface AutomationCardProps {

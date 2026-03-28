@@ -15,7 +15,7 @@ export function useOntologyInsights(params?: { type?: string; status?: string })
     try {
       setLoading(true);
       const searchParams = new URLSearchParams();
-      if (params?.type) searchParams.set("type", params.type);
+      if (params?.type) searchParams.set("insight_type", params.type);
       if (params?.status) searchParams.set("status", params.status);
       const qs = searchParams.toString();
       const url = `/api/ontology/insights${qs ? "?" + qs : ""}`;
@@ -51,7 +51,7 @@ export function useInsightSummary() {
 }
 
 export async function generateInsights(token: string) {
-  return apiClient<{ insights_count: number; analysis: Record<string, unknown> }>(
+  return apiClient<{ analysis: Record<string, unknown>; insights: OntologyInsight[]; llm_used: boolean }>(
     "/api/ontology/insights/generate",
     { method: "POST", token }
   );

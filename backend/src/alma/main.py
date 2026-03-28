@@ -83,6 +83,8 @@ app.include_router(discord_router)
 
 async def _ontology_adapter_handler(event):
     """Lazy adapter handler: creates session per event."""
+    import logging
+
     from alma.domain.ontology.adapters.goal_adapter import GoalAdapter
     from alma.domain.ontology.adapters.habit_adapter import HabitAdapter
     from alma.domain.ontology.adapters.memory_adapter import MemoryAdapter
@@ -94,6 +96,48 @@ async def _ontology_adapter_handler(event):
     async with async_session() as session:
         service = OntologyService(session, embedding_provider=None)
         pipeline = PurificationPipeline(DeduplicationService(session), SchemaValidator(), service)
+
+        # Chat/Knowledge adapters require SemanticExtractor with LLMRouter
+        if event.event_type in ("message.received", "knowledge.document_ready"):
+            llm_router = None
+            try:
+                from alma.config import settings
+                from alma.infrastructure.llm.router import LLMRouter
+
+                providers: dict = {}
+                if settings.anthropic_api_key:
+                    from alma.infrastructure.llm.claude import ClaudeProvider
+
+                    providers["claude"] = ClaudeProvider()
+                if settings.openai_api_key:
+                    from alma.infrastructure.llm.openai_provider import OpenAIProvider
+
+                    providers["openai"] = OpenAIProvider()
+                if providers:
+                    llm_router = LLMRouter(providers)
+            except Exception:
+                pass
+
+            if llm_router:
+                from alma.domain.ontology.adapters.chat_adapter import ChatAdapter
+                from alma.domain.ontology.adapters.knowledge_adapter import KnowledgeAdapter
+                from alma.domain.ontology.extractor import SemanticExtractor
+
+                extractor = SemanticExtractor(llm_router, service)
+
+                if event.event_type == "message.received":
+                    adapter = ChatAdapter(extractor, pipeline)
+                else:
+                    adapter = KnowledgeAdapter(extractor, pipeline)
+
+                try:
+                    await adapter.handle(event)
+                    await session.commit()
+                except Exception:
+                    logging.getLogger(__name__).warning(
+                        "Ontology adapter failed for %s", event.event_type, exc_info=True
+                    )
+            return
 
         adapters = {
             "goal.created": GoalAdapter(pipeline, service),
@@ -109,12 +153,14 @@ async def _ontology_adapter_handler(event):
                 await adapter.handle(event)
                 await session.commit()
             except Exception:
-                import logging
-
                 logging.getLogger(__name__).warning(
                     "Ontology adapter failed for %s", event.event_type, exc_info=True
                 )
 
 
-for _evt in ["goal.created", "goal.updated", "goal.deleted", "habit.created", "habit.deleted", "memory.created"]:
+for _evt in [
+    "goal.created", "goal.updated", "goal.deleted",
+    "habit.created", "habit.deleted", "memory.created",
+    "message.received", "knowledge.document_ready",
+]:
     event_bus.subscribe(_evt, _ontology_adapter_handler)

@@ -71,8 +71,7 @@ class GraphAnalyzer:
                 "target_id": v,
             }
             for u, v, data in self.G.edges(data=True)
-            if "contradicts" in str(data.get("type_id", ""))
-            or "contradicts" in str(data.get("relation", ""))
+            if data.get("relation") == "contradicts"
         ]
 
     def opportunities(self, max_suggestions: int = 5) -> list[dict]:

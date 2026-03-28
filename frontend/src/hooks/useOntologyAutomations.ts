@@ -82,7 +82,7 @@ export async function deleteAutomation(id: string, token: string) {
 }
 
 export async function executeAutomation(insightId: string, token: string) {
-  return apiClient<{ executed: number; results: unknown[] }>(
+  return apiClient<{ results: Record<string, unknown>[] }>(
     `/api/ontology/automations/execute`,
     {
       method: "POST",

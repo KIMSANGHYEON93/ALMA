@@ -340,7 +340,7 @@ export interface OntologyObjectType {
   name: string;
   parent_category: string;
   description: string | null;
-  schema: Record<string, string>;
+  property_schema: Record<string, string>;
   is_system: boolean;
 }
 
@@ -360,9 +360,9 @@ export interface OntologyNode {
   properties: Record<string, unknown>;
   status: string;
   confidence: number;
-  source_type: string;
-  created_at: string;
-  updated_at: string;
+  source_type?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface OntologyEdge {
