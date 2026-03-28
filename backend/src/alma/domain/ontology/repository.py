@@ -8,6 +8,7 @@ from alma.models.models import (
     ObjectType,
     OntologyActionLog,
     OntologyActionType,
+    OntologyInsight,
     OntologyLink,
     OntologyObject,
 )
@@ -344,3 +345,74 @@ class ActionLogRepository:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+
+class InsightRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(
+        self,
+        user_id: uuid.UUID,
+        insight_type: str,
+        title: str,
+        description: str,
+        evidence: dict | None = None,
+        confidence: float = 0.5,
+        actionable: bool = False,
+        action_suggestion: str | None = None,
+    ) -> OntologyInsight:
+        insight = OntologyInsight(
+            user_id=user_id,
+            insight_type=insight_type,
+            title=title,
+            description=description,
+            evidence=evidence or {},
+            confidence=confidence,
+            actionable=actionable,
+            action_suggestion=action_suggestion,
+        )
+        self.session.add(insight)
+        await self.session.flush()
+        return insight
+
+    async def list_by_user(
+        self,
+        user_id: uuid.UUID,
+        insight_type: str | None = None,
+        status: str | None = None,
+        limit: int = 50,
+    ) -> list[OntologyInsight]:
+        query = select(OntologyInsight).where(OntologyInsight.user_id == user_id)
+        if insight_type:
+            query = query.where(OntologyInsight.insight_type == insight_type)
+        if status:
+            query = query.where(OntologyInsight.status == status)
+        query = query.order_by(desc(OntologyInsight.created_at)).limit(limit)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+
+    async def get(self, insight_id: uuid.UUID) -> OntologyInsight | None:
+        result = await self.session.execute(
+            select(OntologyInsight).where(OntologyInsight.id == insight_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def update_status(
+        self, insight_id: uuid.UUID, new_status: str
+    ) -> OntologyInsight | None:
+        insight = await self.get(insight_id)
+        if insight:
+            insight.status = new_status
+            await self.session.flush()
+        return insight
+
+    async def get_summary(self, user_id: uuid.UUID) -> dict:
+        all_insights = await self.list_by_user(user_id, limit=500)
+        by_type: dict[str, int] = {}
+        new_count = 0
+        for i in all_insights:
+            by_type[i.insight_type] = by_type.get(i.insight_type, 0) + 1
+            if i.status == "new":
+                new_count += 1
+        return {"total": len(all_insights), "new_count": new_count, "by_type": by_type}

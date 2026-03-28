@@ -644,3 +644,35 @@ class OntologyActionLog(Base):
             name="ck_onto_action_logs_status",
         ),
     )
+
+
+class OntologyInsight(Base):
+    __tablename__ = "ontology_insights"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    insight_type: Mapped[str] = mapped_column(nullable=False)
+    title: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    confidence: Mapped[float] = mapped_column(default=0.5)
+    actionable: Mapped[bool] = mapped_column(default=False, server_default="false")
+    action_suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(nullable=False, default="new")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_insights_user_status", "user_id", "status"),
+        Index("idx_insights_user_type", "user_id", "insight_type"),
+        CheckConstraint(
+            "insight_type IN ('hub_node','isolated','strong_path','conflict','opportunity','trend')",
+            name="ck_insights_type",
+        ),
+        CheckConstraint(
+            "status IN ('new','read','acted','dismissed')",
+            name="ck_insights_status",
+        ),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_insights_confidence"),
+    )
