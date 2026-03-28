@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOntologyStats, useOntologyObjects } from "@/hooks/useOntology";
@@ -29,7 +30,15 @@ export default function OntologyPage() {
     <div className="flex flex-col min-h-screen bg-gray-950 text-white">
       <NavBar />
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Ontology</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Ontology</h1>
+          <Link
+            href="/ontology/graph"
+            className="px-4 py-2 rounded bg-blue-600 text-sm font-medium hover:bg-blue-500 transition"
+          >
+            Graph View
+          </Link>
+        </div>
 
         {!statsLoading && stats && <OntologyStats stats={stats} />}
 

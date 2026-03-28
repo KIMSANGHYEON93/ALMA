@@ -386,3 +386,27 @@ export interface OntologyStats {
   draft_count: number;
   avg_confidence: number;
 }
+
+// ─── Graph Visualization ───
+
+export interface GraphNodeData {
+  id: string;
+  name: string;
+  typeName: string;
+  parentCategory: string;
+  properties: Record<string, unknown>;
+  confidence: number;
+  status: string;
+  val: number;
+  color: string;
+  x?: number;
+  y?: number;
+}
+
+export interface GraphLinkData {
+  source: string;
+  target: string;
+  relation: string;
+  confidence: number;
+  properties: Record<string, unknown>;
+}
