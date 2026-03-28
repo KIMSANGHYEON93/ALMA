@@ -35,9 +35,10 @@ class OntologyService:
         self.al_repo = ActionLogRepository(session)
 
     async def ensure_seeded(self, user_id: uuid.UUID) -> None:
-        """Lazy seed: run system seed if no object types exist for this user."""
+        """Lazy seed: run system seed if system types are missing."""
         existing = await self.ot_repo.list_by_user(user_id)
-        if not existing:
+        has_system = any(getattr(t, "is_system", False) for t in existing)
+        if not has_system:
             from alma.domain.ontology.seed import SystemSeed
             seed = SystemSeed(self.session)
             await seed.seed_for_user(user_id)
