@@ -387,6 +387,27 @@ export interface OntologyStats {
   avg_confidence: number;
 }
 
+// ─── Ontology Insights ───
+
+export interface OntologyInsight {
+  id: string;
+  insight_type: string;
+  title: string;
+  description: string;
+  evidence: Record<string, unknown>;
+  confidence: number;
+  actionable: boolean;
+  action_suggestion: string | null;
+  status: string;
+  created_at: string;
+}
+
+export interface InsightSummary {
+  total: number;
+  new_count: number;
+  by_type: Record<string, number>;
+}
+
 // ─── Graph Visualization ───
 
 export interface GraphNodeData {
