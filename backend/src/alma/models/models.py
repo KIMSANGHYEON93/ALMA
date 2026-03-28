@@ -676,3 +676,47 @@ class OntologyInsight(Base):
         ),
         CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_insights_confidence"),
     )
+
+
+class OntologyAutomation(Base):
+    __tablename__ = "ontology_automations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False)
+    insight_type: Mapped[str] = mapped_column(nullable=False)
+    action_type: Mapped[str] = mapped_column(nullable=False)
+    config: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    auto_execute: Mapped[bool] = mapped_column(default=False, server_default="false")
+    enabled: Mapped[bool] = mapped_column(default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_ont_automations_user", "user_id"),
+        CheckConstraint(
+            "insight_type IN ('hub_node','isolated','strong_path','conflict','opportunity','trend')",
+            name="ck_ont_automations_insight_type",
+        ),
+        CheckConstraint(
+            "action_type IN ('create_link','create_node','notification','suggest')",
+            name="ck_ont_automations_action_type",
+        ),
+    )
+
+
+class OntologyAutomationLog(Base):
+    __tablename__ = "ontology_automation_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    automation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ontology_automations.id", ondelete="CASCADE"), nullable=False)
+    insight_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("ontology_insights.id", ondelete="SET NULL"), nullable=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    action_taken: Mapped[str] = mapped_column(Text, nullable=False)
+    result: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    status: Mapped[str] = mapped_column(nullable=False, default="success")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_ont_auto_logs_user", "user_id", "created_at"),
+        CheckConstraint("status IN ('success','failed','pending_approval')", name="ck_ont_auto_logs_status"),
+    )

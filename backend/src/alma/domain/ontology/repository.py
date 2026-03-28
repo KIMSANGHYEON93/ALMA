@@ -8,6 +8,8 @@ from alma.models.models import (
     ObjectType,
     OntologyActionLog,
     OntologyActionType,
+    OntologyAutomation,
+    OntologyAutomationLog,
     OntologyInsight,
     OntologyLink,
     OntologyObject,
@@ -416,3 +418,112 @@ class InsightRepository:
             if i.status == "new":
                 new_count += 1
         return {"total": len(all_insights), "new_count": new_count, "by_type": by_type}
+
+
+class AutomationRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(
+        self,
+        user_id: uuid.UUID,
+        name: str,
+        insight_type: str,
+        action_type: str,
+        config: dict | None = None,
+        auto_execute: bool = False,
+    ) -> OntologyAutomation:
+        automation = OntologyAutomation(
+            user_id=user_id,
+            name=name,
+            insight_type=insight_type,
+            action_type=action_type,
+            config=config or {},
+            auto_execute=auto_execute,
+        )
+        self.session.add(automation)
+        await self.session.flush()
+        return automation
+
+    async def list_by_user(self, user_id: uuid.UUID) -> list[OntologyAutomation]:
+        result = await self.session.execute(
+            select(OntologyAutomation)
+            .where(OntologyAutomation.user_id == user_id)
+            .order_by(desc(OntologyAutomation.created_at))
+        )
+        return list(result.scalars().all())
+
+    async def get(self, automation_id: uuid.UUID) -> OntologyAutomation | None:
+        result = await self.session.execute(
+            select(OntologyAutomation).where(OntologyAutomation.id == automation_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def update(self, automation_id: uuid.UUID, **kwargs) -> OntologyAutomation | None:
+        automation = await self.get(automation_id)
+        if not automation:
+            return None
+        for key, value in kwargs.items():
+            if hasattr(automation, key):
+                setattr(automation, key, value)
+        await self.session.flush()
+        return automation
+
+    async def delete(self, automation_id: uuid.UUID) -> bool:
+        automation = await self.get(automation_id)
+        if not automation:
+            return False
+        await self.session.delete(automation)
+        await self.session.flush()
+        return True
+
+    async def find_by_insight_type(
+        self, user_id: uuid.UUID, insight_type: str
+    ) -> list[OntologyAutomation]:
+        result = await self.session.execute(
+            select(OntologyAutomation).where(
+                OntologyAutomation.user_id == user_id,
+                OntologyAutomation.insight_type == insight_type,
+                OntologyAutomation.enabled.is_(True),
+            )
+        )
+        return list(result.scalars().all())
+
+
+class AutomationLogRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(
+        self,
+        automation_id: uuid.UUID,
+        user_id: uuid.UUID,
+        action_taken: str,
+        result: dict | None = None,
+        status: str = "success",
+        insight_id: uuid.UUID | None = None,
+    ) -> OntologyAutomationLog:
+        log = OntologyAutomationLog(
+            automation_id=automation_id,
+            insight_id=insight_id,
+            user_id=user_id,
+            action_taken=action_taken,
+            result=result or {},
+            status=status,
+        )
+        self.session.add(log)
+        await self.session.flush()
+        return log
+
+    async def list_by_user(
+        self,
+        user_id: uuid.UUID,
+        limit: int = 50,
+    ) -> list[OntologyAutomationLog]:
+        result = await self.session.execute(
+            select(OntologyAutomationLog)
+            .where(OntologyAutomationLog.user_id == user_id)
+            .order_by(desc(OntologyAutomationLog.created_at))
+            .limit(limit)
+        )
+        return list(result.scalars().all())
