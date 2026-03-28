@@ -408,6 +408,29 @@ export interface InsightSummary {
   by_type: Record<string, number>;
 }
 
+// ─── Ontology Automations ───
+
+export interface OntologyAutomation {
+  id: string;
+  name: string;
+  insight_type: string;
+  action_type: string;
+  config: Record<string, unknown>;
+  auto_execute: boolean;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface OntologyAutomationLog {
+  id: string;
+  automation_id: string;
+  insight_id: string | null;
+  action_taken: string;
+  result: Record<string, unknown>;
+  status: string;
+  created_at: string;
+}
+
 // ─── Graph Visualization ───
 
 export interface GraphNodeData {

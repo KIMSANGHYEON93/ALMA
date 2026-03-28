@@ -40,6 +40,12 @@ export default function OntologyPage() {
               Insights
             </Link>
             <Link
+              href="/ontology/automations"
+              className="px-4 py-2 rounded bg-green-600 text-sm font-medium hover:bg-green-500 transition"
+            >
+              Automations
+            </Link>
+            <Link
               href="/ontology/graph"
               className="px-4 py-2 rounded bg-blue-600 text-sm font-medium hover:bg-blue-500 transition"
             >
