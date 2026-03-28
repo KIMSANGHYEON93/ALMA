@@ -34,6 +34,14 @@ class OntologyService:
         self.at_repo = ActionTypeRepository(session)
         self.al_repo = ActionLogRepository(session)
 
+    async def ensure_seeded(self, user_id: uuid.UUID) -> None:
+        """Lazy seed: run system seed if no object types exist for this user."""
+        existing = await self.ot_repo.list_by_user(user_id)
+        if not existing:
+            from alma.domain.ontology.seed import SystemSeed
+            seed = SystemSeed(self.session)
+            await seed.seed_for_user(user_id)
+
     async def get_user_schema_context(self, user_id: uuid.UUID) -> SchemaContext:
         types = await self.ot_repo.list_by_user(user_id)
         link_types = await self.lt_repo.list_by_user(user_id)

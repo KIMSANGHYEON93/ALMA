@@ -116,6 +116,13 @@ class NeighborNode(BaseModel):
 # --- Helpers ---
 
 
+async def _get_service(session: AsyncSession, user_id) -> OntologyService:
+    """Create OntologyService and ensure system seed for user."""
+    service = OntologyService(session, embedding_provider=None)
+    await service.ensure_seeded(user_id)
+    return service
+
+
 async def _get_llm_router():
     """Try to construct LLMRouter. Returns None if no API keys configured."""
     try:
@@ -169,7 +176,7 @@ async def list_types(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    service = OntologyService(session, embedding_provider=None)
+    service = await _get_service(session, user.id)
     obj_types = await service.ot_repo.list_by_user(user.id)
     link_types = await service.lt_repo.list_by_user(user.id)
     return TypesResponse(
@@ -261,7 +268,7 @@ async def list_objects(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    service = OntologyService(session, embedding_provider=None)
+    service = await _get_service(session, user.id)
 
     # Build type lookup (single query)
     all_types = await service.ot_repo.list_by_user(user.id)
@@ -433,7 +440,7 @@ async def get_full_graph(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    service = OntologyService(session, embedding_provider=None)
+    service = await _get_service(session, user.id)
     graph_data = await service.get_full_graph(user.id)
 
     # Build type lookups
@@ -527,7 +534,7 @@ async def get_stats(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    service = OntologyService(session, embedding_provider=None)
+    service = await _get_service(session, user.id)
     stats = await service.get_stats(user.id)
     return GraphStats(**stats)
 
