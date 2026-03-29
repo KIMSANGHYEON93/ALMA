@@ -431,6 +431,36 @@ export interface OntologyAutomationLog {
   created_at: string;
 }
 
+// ─── Ontology Import ───
+
+export interface ScanFileItem {
+  path: string;
+  status: "new" | "modified" | "unchanged";
+  size: number;
+  hash: string;
+}
+
+export interface ScanResponse {
+  files: ScanFileItem[];
+  summary: { new: number; modified: number; unchanged: number };
+}
+
+export interface ProcessResponse {
+  processed: number;
+  draft_count: number;
+  skipped: number;
+  errors: string[];
+}
+
+export interface ImportSourceItem {
+  id: string;
+  source_type: string;
+  source_path: string;
+  node_count: number;
+  status: string;
+  last_imported_at: string;
+}
+
 // ─── Graph Visualization ───
 
 export interface GraphNodeData {

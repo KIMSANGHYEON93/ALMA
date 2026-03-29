@@ -34,6 +34,12 @@ export default function OntologyPage() {
           <h1 className="text-2xl font-bold">Ontology</h1>
           <div className="flex gap-2">
             <Link
+              href="/ontology/import"
+              className="px-4 py-2 rounded bg-orange-600 text-sm font-medium hover:bg-orange-500 transition"
+            >
+              Import
+            </Link>
+            <Link
               href="/ontology/insights"
               className="px-4 py-2 rounded bg-purple-600 text-sm font-medium hover:bg-purple-500 transition"
             >
