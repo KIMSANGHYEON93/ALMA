@@ -4,6 +4,7 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from alma.models.models import (
+    ImportSource,
     LinkType,
     ObjectType,
     OntologyActionLog,
@@ -529,3 +530,54 @@ class AutomationLogRepository:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+
+class ImportSourceRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create(self, user_id, source_type, source_path, file_hash=None, node_count=0):
+        source = ImportSource(
+            user_id=user_id, source_type=source_type, source_path=source_path,
+            file_hash=file_hash, node_count=node_count,
+        )
+        self.session.add(source)
+        await self.session.flush()
+        return source
+
+    async def get_by_path(self, user_id, source_path):
+        result = await self.session.execute(
+            select(ImportSource).where(
+                ImportSource.user_id == user_id, ImportSource.source_path == source_path
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_by_user(self, user_id):
+        result = await self.session.execute(
+            select(ImportSource).where(ImportSource.user_id == user_id)
+            .order_by(desc(ImportSource.last_imported_at))
+        )
+        return list(result.scalars().all())
+
+    async def get(self, source_id):
+        result = await self.session.execute(
+            select(ImportSource).where(ImportSource.id == source_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def delete(self, source_id):
+        source = await self.get(source_id)
+        if source:
+            await self.session.delete(source)
+            await self.session.flush()
+        return source
+
+    async def update_hash(self, source_id, file_hash, node_count):
+        source = await self.get(source_id)
+        if source:
+            source.file_hash = file_hash
+            source.node_count = node_count
+            source.last_imported_at = func.now()
+            await self.session.flush()
+        return source

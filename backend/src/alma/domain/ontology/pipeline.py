@@ -18,7 +18,7 @@ class PurificationPipeline:
         self.validator = schema_validator
         self.ontology = ontology_service
 
-    async def process(self, extraction: RawExtraction, user_id: uuid.UUID) -> PurificationResult:
+    async def process(self, extraction: RawExtraction, user_id: uuid.UUID, force_draft: bool = False) -> PurificationResult:
         result = PurificationResult()
 
         # Stage 1: Deduplication
@@ -57,6 +57,9 @@ class PurificationPipeline:
             if candidate.action == "reject":
                 result.rejected_count += 1
                 continue
+            if force_draft:
+                candidate.status = "draft"
+                continue  # skip auto-verify
             if candidate.confidence < settings.ontology_confidence_reject:
                 candidate.action = "reject"
                 result.rejected_count += 1

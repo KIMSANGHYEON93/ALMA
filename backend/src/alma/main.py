@@ -18,6 +18,7 @@ from alma.api.llm import router as llm_router
 from alma.api.notifications import router as notifications_router
 from alma.api.ontology import router as ontology_router
 from alma.api.ontology_automations import router as ontology_automations_router
+from alma.api.ontology_import import router as ontology_import_router
 from alma.api.ontology_insights import router as ontology_insights_router
 from alma.gateway.discord_bot import router as discord_router
 from alma.gateway.telegram import router as telegram_router
@@ -74,6 +75,7 @@ app.include_router(chat_rest_router)
 app.include_router(telegram_router)
 app.include_router(notifications_router)
 app.include_router(ontology_router)
+app.include_router(ontology_import_router)
 app.include_router(ontology_insights_router)
 app.include_router(ontology_automations_router)
 app.include_router(discord_router)

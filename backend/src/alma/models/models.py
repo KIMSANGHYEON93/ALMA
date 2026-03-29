@@ -720,3 +720,30 @@ class OntologyAutomationLog(Base):
         Index("idx_ont_auto_logs_user", "user_id", "created_at"),
         CheckConstraint("status IN ('success','failed','pending_approval')", name="ck_ont_auto_logs_status"),
     )
+
+
+class ImportSource(Base):
+    __tablename__ = "ontology_import_sources"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    source_type: Mapped[str] = mapped_column(nullable=False)
+    source_path: Mapped[str] = mapped_column(nullable=False)
+    file_hash: Mapped[str | None] = mapped_column(nullable=True)
+    node_count: Mapped[int] = mapped_column(default=0)
+    status: Mapped[str] = mapped_column(nullable=False, default="imported")
+    last_imported_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_import_sources_user", "user_id"),
+        UniqueConstraint("user_id", "source_path", name="uq_import_sources_user_path"),
+        CheckConstraint(
+            "source_type IN ('markdown','db_goals','db_habits','db_memories','db_messages')",
+            name="ck_import_sources_type",
+        ),
+        CheckConstraint(
+            "status IN ('imported','outdated','deleted')",
+            name="ck_import_sources_status",
+        ),
+    )
