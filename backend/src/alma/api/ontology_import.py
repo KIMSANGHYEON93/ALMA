@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/ontology/import", tags=["ontology-import"])
 
-# Project root: parent of backend/
-PROJECT_ROOT = str(Path(__file__).resolve().parents[3])
+# Project root: alma/ (parent of backend/)
+PROJECT_ROOT = str(Path(__file__).resolve().parents[4])
 
 
 # --- Schemas ---
