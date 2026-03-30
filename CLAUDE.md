@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-ALMA (Adaptive Life Management Agent) — 자기학습 AI 개인 비서
+VIVARA (formerly ALMA — Adaptive Life Management Agent) — 자기학습 AI 개인 비서
 - Mission: "인간이 원하는 삶의 성장을 목표로 하는 미래를 만들어가는 AI 비서"
 - Architecture: DDD (Domain-Driven Design) + SDD (Spec-Driven Design)
 - Stack: FastAPI + Next.js 14 + Supabase PostgreSQL 17/pgvector + Claude API + Gemini/OpenAI Embeddings

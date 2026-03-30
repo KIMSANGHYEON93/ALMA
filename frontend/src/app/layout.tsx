@@ -3,7 +3,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ALMA - Adaptive Life Management Agent",
+  title: "VIVARA",
   description: "인간이 원하는 삶의 성장을 목표로 하는 AI 비서",
 };
 

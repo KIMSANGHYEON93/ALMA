@@ -7,7 +7,7 @@ export default function LandingPage() {
         <iframe
           src="https://my.spline.design/treeplanterinteraction-8BPVN3fV6W7FxQnP/"
           className="absolute inset-0 w-full h-full border-0 z-0 opacity-80"
-          title="ALMA 3D Tree"
+          title="VIVARA 3D Tree"
           loading="lazy"
         />
 
@@ -15,7 +15,7 @@ export default function LandingPage() {
         <div className="relative z-10 text-center px-6">
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-4">
             <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              ALMA
+              VIVARA
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-2">
@@ -133,7 +133,7 @@ export default function LandingPage() {
           당신의 성장을 함께할 준비가 되었습니다
         </h2>
         <p className="text-gray-400 mb-10 max-w-md mx-auto">
-          ALMA와 함께 목표를 설정하고, 대화하고, 성장하세요.
+          VIVARA와 함께 목표를 설정하고, 대화하고, 성장하세요.
         </p>
         <a
           href="/login"
@@ -145,7 +145,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-gray-800 text-center text-gray-500 text-sm">
-        ALMA — Adaptive Life Management Agent
+        VIVARA — Adaptive Life Management Agent
       </footer>
     </div>
   );

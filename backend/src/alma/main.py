@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     yield
 
 
-app = FastAPI(title="ALMA", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
+app = FastAPI(title="VIVARA", version="0.1.0", lifespan=lifespan, redirect_slashes=False)
 
 
 @app.get("/api/health")

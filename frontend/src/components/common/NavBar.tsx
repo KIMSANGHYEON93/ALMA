@@ -28,7 +28,7 @@ export default function NavBar() {
           href="/chat"
           className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent"
         >
-          ALMA
+          VIVARA
         </Link>
         <div className="flex gap-1">
           {navItems.map((item) => (

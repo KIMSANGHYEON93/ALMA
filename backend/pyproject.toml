@@ -1,7 +1,7 @@
 [project]
 name = "alma"
 version = "0.1.0"
-description = "ALMA - Adaptive Life Management Agent"
+description = "VIVARA - Adaptive Life Management Agent"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.135.0",

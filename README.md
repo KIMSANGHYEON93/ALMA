@@ -1,8 +1,8 @@
-# ALMA — Adaptive Life Management Agent
+# VIVARA — Adaptive Life Management Agent
 
 > Self-learning AI personal assistant that grows with you.
 
-ALMA는 사용자의 목표, 습관, 지식을 관리하고 성장을 돕는 AI 비서입니다. 대화를 기억하고, 패턴을 학습하며, 반복 작업을 자동화합니다.
+VIVARA (formerly ALMA)는 사용자의 목표, 습관, 지식을 관리하고 성장을 돕는 AI 비서입니다. 대화를 기억하고, 패턴을 학습하며, 반복 작업을 자동화합니다.
 
 ## Features
 

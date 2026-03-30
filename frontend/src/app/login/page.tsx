@@ -33,7 +33,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm p-8 bg-white dark:bg-gray-900 rounded-xl shadow-lg space-y-4"
       >
-        <h1 className="text-2xl font-bold text-center">ALMA</h1>
+        <h1 className="text-2xl font-bold text-center">VIVARA</h1>
         <p className="text-sm text-gray-500 text-center">
           {isRegister ? "회원가입" : "로그인"}
         </p>
