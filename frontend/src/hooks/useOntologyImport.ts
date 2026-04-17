@@ -7,7 +7,19 @@ import type {
   ScanResponse,
   ProcessResponse,
   ImportSourceItem,
+  BrowseResponse,
 } from "@/lib/types";
+
+export async function browseDirectory(
+  path: string,
+  token: string
+): Promise<BrowseResponse> {
+  return apiClient<BrowseResponse>("/api/ontology/import/browse", {
+    method: "POST",
+    token,
+    body: { path },
+  });
+}
 
 export async function scanDirectory(
   directory: string,
@@ -44,32 +56,45 @@ export async function importDB(
   });
 }
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && (err.name === "AbortError" || /aborted/i.test(err.message));
+}
+
 export function useImportSources() {
   const { token } = useAuth();
   const [sources, setSources] = useState<ImportSourceItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchSources = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const data = await apiClient<ImportSourceItem[]>(
-        "/api/ontology/import/sources",
-        { token }
-      );
-      setSources(data);
-    } catch {
-      // 401 handled by apiClient
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchSources = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        setLoading(true);
+        const data = await apiClient<ImportSourceItem[]>(
+          "/api/ontology/import/sources",
+          { token, signal }
+        );
+        setSources(data);
+      } catch (err) {
+        if (!isAbortError(err)) {
+          setError(err instanceof Error ? err.message : "임포트 소스 조회 실패");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchSources();
+    const ctrl = new AbortController();
+    fetchSources(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchSources]);
 
-  return { sources, loading, refresh: fetchSources };
+  return { sources, loading, error, refresh: () => fetchSources() };
 }
 
 export async function deleteImportSource(

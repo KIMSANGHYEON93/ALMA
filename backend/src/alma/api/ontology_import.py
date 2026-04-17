@@ -29,6 +29,23 @@ PROJECT_ROOT = str(Path(__file__).resolve().parents[4])
 # --- Schemas ---
 
 
+class BrowseRequest(BaseModel):
+    path: str = ""
+
+
+class BrowseEntry(BaseModel):
+    name: str
+    path: str
+    is_dir: bool
+    size: int = 0
+
+
+class BrowseResponse(BaseModel):
+    current: str
+    parent: str | None
+    entries: list[BrowseEntry]
+
+
 class ScanRequest(BaseModel):
     directory: str
     pattern: str = "**/*.md"
@@ -113,6 +130,64 @@ def _source_response(source) -> SourceResponse:
 
 
 # --- Routes ---
+
+
+BROWSE_ALLOWED_EXTENSIONS = {
+    ".md", ".txt", ".pdf", ".docx", ".json", ".yaml", ".yml", ".csv", ".tsv",
+}
+
+
+@router.post("/browse", response_model=BrowseResponse)
+async def browse_directory(
+    req: BrowseRequest,
+    user: User = Depends(get_current_user),
+):
+    """Browse directories relative to PROJECT_ROOT for file import."""
+    target = Path(os.path.normpath(os.path.join(PROJECT_ROOT, req.path)))
+    root = Path(PROJECT_ROOT)
+
+    # Security: prevent path traversal outside PROJECT_ROOT
+    try:
+        target.relative_to(root)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="접근할 수 없는 경로입니다")
+
+    if not target.exists():
+        raise HTTPException(status_code=404, detail="경로를 찾을 수 없습니다")
+
+    if not target.is_dir():
+        raise HTTPException(status_code=400, detail="디렉토리가 아닙니다")
+
+    entries: list[BrowseEntry] = []
+    try:
+        for item in sorted(target.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
+            # Skip hidden files/dirs and common noise
+            if item.name.startswith(".") or item.name in {
+                "node_modules", "__pycache__", ".git", ".next", ".venv", "venv",
+            }:
+                continue
+
+            if item.is_dir():
+                entries.append(BrowseEntry(
+                    name=item.name,
+                    path=str(item.relative_to(root)),
+                    is_dir=True,
+                ))
+            elif item.suffix.lower() in BROWSE_ALLOWED_EXTENSIONS:
+                entries.append(BrowseEntry(
+                    name=item.name,
+                    path=str(item.relative_to(root)),
+                    is_dir=False,
+                    size=item.stat().st_size,
+                ))
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="디렉토리 접근 권한이 없습니다")
+
+    # Calculate relative current/parent paths
+    current_rel = str(target.relative_to(root)) if target != root else ""
+    parent_rel = str(target.parent.relative_to(root)) if target != root else None
+
+    return BrowseResponse(current=current_rel, parent=parent_rel, entries=entries)
 
 
 @router.post("/scan", response_model=ScanResponse)

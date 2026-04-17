@@ -452,6 +452,19 @@ export interface ProcessResponse {
   errors: string[];
 }
 
+export interface BrowseEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size: number;
+}
+
+export interface BrowseResponse {
+  current: string;
+  parent: string | null;
+  entries: BrowseEntry[];
+}
+
 export interface ImportSourceItem {
   id: string;
   source_type: string;
