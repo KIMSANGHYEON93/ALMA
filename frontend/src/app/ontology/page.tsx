@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
+import Spinner from "@/components/common/Spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOntologyStats, useOntologyObjects } from "@/hooks/useOntology";
 import OntologyStats from "@/components/ontology/OntologyStats";
@@ -11,14 +12,14 @@ import DraftReview from "@/components/ontology/DraftReview";
 
 export default function OntologyPage() {
   const { isLoading, token } = useAuth();
-  const { stats, loading: statsLoading, refresh: refreshStats } = useOntologyStats();
-  const { objects, loading: objLoading, refresh: refreshObjects } = useOntologyObjects();
+  const { stats, loading: statsLoading, error: statsError, refresh: refreshStats } = useOntologyStats();
+  const { objects, loading: objLoading, error: objError, refresh: refreshObjects } = useOntologyObjects();
   const [tab, setTab] = useState<"all" | "drafts">("all");
 
   if (isLoading || !token) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">로딩 중...</span>
+        <Spinner size="md" label="온톨로지 로드 중" />
       </div>
     );
   }
@@ -53,19 +54,34 @@ export default function OntologyPage() {
             </Link>
             <Link
               href="/ontology/graph"
-              className="px-4 py-2 rounded bg-blue-600 text-sm font-medium hover:bg-blue-500 transition"
+              className="px-4 py-2 rounded bg-sky-600 text-sm font-medium hover:bg-sky-500 transition"
             >
               Graph View
             </Link>
           </div>
         </div>
 
+        {(statsError || objError) && (
+          <div
+            role="alert"
+            className="mb-4 p-3 bg-red-900/40 border border-red-700 rounded-lg flex items-start justify-between gap-2"
+          >
+            <p className="text-sm text-red-300">{statsError || objError}</p>
+            <button
+              onClick={() => { refreshStats(); refreshObjects(); }}
+              className="text-xs font-medium text-red-200 hover:underline shrink-0"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+
         {!statsLoading && stats && <OntologyStats stats={stats} />}
 
         <div className="flex gap-2 mt-6 mb-4">
           <button
             onClick={() => setTab("all")}
-            className={`px-4 py-2 rounded ${tab === "all" ? "bg-blue-600" : "bg-gray-800"}`}
+            className={`px-4 py-2 rounded ${tab === "all" ? "bg-sky-600" : "bg-gray-800"}`}
           >
             All Nodes ({verified.length})
           </button>

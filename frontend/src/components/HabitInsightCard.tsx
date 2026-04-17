@@ -18,7 +18,7 @@ export default function HabitInsightCard({ insight, loading, onGenerate }: Props
         <button
           onClick={onGenerate}
           disabled={loading}
-          className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+          className="px-3 py-1.5 text-xs bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
         >
           {loading ? "분석 중..." : "AI 분석"}
         </button>

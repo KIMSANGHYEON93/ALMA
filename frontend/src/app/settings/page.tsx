@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NavBar from "@/components/common/NavBar";
+import Spinner from "@/components/common/Spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useIntegrations } from "@/hooks/useIntegrations";
@@ -31,8 +32,8 @@ const modelGroups = [
     label: "Google",
     models: [
       { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", desc: "빠른 응답" },
-      { value: "gemini-2.5-flash-preview-05-20", label: "Gemini 2.5 Flash", desc: "최신 프리뷰" },
-      { value: "gemini-2.5-pro-preview-05-06", label: "Gemini 2.5 Pro", desc: "고성능 프리뷰" },
+      { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash", desc: "최신 경량" },
+      { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro", desc: "고성능" },
     ],
   },
 ];
@@ -72,7 +73,7 @@ export default function SettingsPage() {
   if (authLoading || prefLoading || intLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">로딩 중...</span>
+        <Spinner size="md" label="설정 로드 중" />
       </div>
     );
   }
@@ -118,7 +119,7 @@ export default function SettingsPage() {
           {/* Profile Preferences */}
           <section className="bg-white dark:bg-gray-900 rounded-xl p-6 border dark:border-gray-800">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              ALMA 응답 설정
+              VIVARA 응답 설정
             </h2>
 
             {/* AI Model */}
@@ -137,13 +138,13 @@ export default function SettingsPage() {
                           onClick={() => updatePreferences({ llm_model: m.value })}
                           className={`w-full text-left px-4 py-2.5 rounded-lg border transition ${
                             (preferences.llm_model || "claude-sonnet-4-20250514") === m.value
-                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                              ? "border-sky-500 bg-sky-50 dark:bg-sky-900/30"
                               : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                           }`}
                         >
                           <span className={`text-sm font-medium ${
                             (preferences.llm_model || "claude-sonnet-4-20250514") === m.value
-                              ? "text-blue-600 dark:text-blue-400"
+                              ? "text-sky-600 dark:text-sky-400"
                               : "text-gray-700 dark:text-gray-300"
                           }`}>
                             {m.label}
@@ -171,7 +172,7 @@ export default function SettingsPage() {
                     value={anthropicKey}
                     onChange={(e) => setAnthropicKey(e.target.value)}
                     placeholder={(preferences.anthropic_api_key as string) || "sk-ant-..."}
-                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
                 <div>
@@ -181,7 +182,7 @@ export default function SettingsPage() {
                     value={openaiKey}
                     onChange={(e) => setOpenaiKey(e.target.value)}
                     placeholder={(preferences.openai_api_key as string) || "sk-..."}
-                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
                 <div>
@@ -191,7 +192,7 @@ export default function SettingsPage() {
                     value={geminiKey}
                     onChange={(e) => setGeminiKey(e.target.value)}
                     placeholder={(preferences.gemini_api_key as string) || "AI..."}
-                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
                 <div className="flex items-center gap-3 pt-1">
@@ -206,7 +207,7 @@ export default function SettingsPage() {
                       }
                     }}
                     disabled={!anthropicKey && !openaiKey && !geminiKey}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                    className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
                   >
                     API 키 저장
                   </button>
@@ -227,7 +228,7 @@ export default function SettingsPage() {
                     onClick={() => handleLanguageChange(lang.value)}
                     className={`px-4 py-2 text-sm rounded-lg border transition ${
                       (preferences.language || "ko") === lang.value
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600"
+                        ? "border-sky-500 bg-sky-50 dark:bg-sky-900/30 text-sky-600"
                         : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                     }`}
                   >
@@ -249,7 +250,7 @@ export default function SettingsPage() {
                     onClick={() => handleStyleChange(s.value)}
                     className={`px-4 py-2 text-sm rounded-lg border transition ${
                       (preferences.response_style || "concise") === s.value
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600"
+                        ? "border-sky-500 bg-sky-50 dark:bg-sky-900/30 text-sky-600"
                         : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                     }`}
                   >
@@ -288,12 +289,12 @@ export default function SettingsPage() {
                     onChange={(e) => setInterestInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddInterest()}
                     placeholder="새 관심사 입력..."
-                    className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                   <button
                     onClick={handleAddInterest}
                     disabled={!interestInput.trim()}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                    className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
                   >
                     추가
                   </button>
@@ -327,7 +328,7 @@ export default function SettingsPage() {
                   {pushSubscribed && (
                     <button
                       onClick={pushTest}
-                      className="text-xs text-blue-500 hover:text-blue-600"
+                      className="text-xs text-sky-500 hover:text-sky-600"
                     >
                       테스트 알림 보내기
                     </button>
@@ -339,7 +340,7 @@ export default function SettingsPage() {
             </div>
 
             {saving && (
-              <p className="mt-3 text-xs text-blue-500">저장 중...</p>
+              <p className="mt-3 text-xs text-sky-500">저장 중...</p>
             )}
           </section>
 
@@ -353,8 +354,8 @@ export default function SettingsPage() {
             <div className="p-4 border dark:border-gray-700 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                  <div className="w-10 h-10 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
                     </svg>
                   </div>
@@ -382,7 +383,7 @@ export default function SettingsPage() {
                 ) : (
                   <button
                     onClick={handleConnect}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition"
                   >
                     연결하기
                   </button>
@@ -400,14 +401,14 @@ export default function SettingsPage() {
                     value={googleClientId}
                     onChange={(e) => setGoogleClientId(e.target.value)}
                     placeholder="Google Client ID"
-                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                   <input
                     type="password"
                     value={googleClientSecret}
                     onChange={(e) => setGoogleClientSecret(e.target.value)}
                     placeholder="Google Client Secret"
-                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                   <div className="flex items-center gap-3">
                     <button
@@ -420,7 +421,7 @@ export default function SettingsPage() {
                         }
                       }}
                       disabled={!googleClientId && !googleClientSecret}
-                      className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                      className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
                     >
                       OAuth 키 저장
                     </button>

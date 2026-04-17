@@ -1,6 +1,28 @@
 import type { Metadata } from "next";
+import { Lora, Raleway, Noto_Sans_KR } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
+
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-lora",
+  display: "swap",
+});
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-raleway",
+  display: "swap",
+});
+
+const notoSansKR = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-noto",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "VIVARA",
@@ -22,12 +44,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html
+      lang="ko"
+      suppressHydrationWarning
+      className={`${lora.variable} ${raleway.variable} ${notoSansKR.variable}`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-screen bg-vivara-surface dark:bg-vivara-surface-dark font-body">
+        <a href="#main-content" className="skip-to-content">본문으로 건너뛰기</a>
+        <AuthProvider>
+          <main id="main-content">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

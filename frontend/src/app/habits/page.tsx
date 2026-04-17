@@ -3,23 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
+import Spinner from "@/components/common/Spinner";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import HabitCard from "@/components/HabitCard";
 import HabitForm from "@/components/HabitForm";
 import HabitTodaySummary from "@/components/HabitTodaySummary";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHabits } from "@/hooks/useHabits";
-import type { HabitCreate } from "@/lib/types";
 
 export default function HabitsPage() {
   const { isLoading: authLoading } = useAuth();
-  const { habits, todaySummary, loading, createHabit, updateHabit, deleteHabit, checkin } = useHabits();
+  const { habits, todaySummary, loading, error, createHabit, updateHabit, deleteHabit, checkin, refresh } =
+    useHabits();
   const [showCreate, setShowCreate] = useState(false);
   const [editingHabit, setEditingHabit] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">로딩 중...</span>
+        <Spinner size="md" label="습관 로드 중" />
       </div>
     );
   }
@@ -44,15 +47,39 @@ export default function HabitsPage() {
         <div className="max-w-2xl mx-auto">
           <HabitTodaySummary summary={todaySummary} />
           <div className="px-4 pt-2">
-            <Link href="/habits/analytics" className="text-sm text-blue-500 hover:text-blue-600">
+            <Link href="/habits/analytics" className="text-sm text-sky-500 hover:text-sky-600">
               통계 보기 →
             </Link>
           </div>
+          {error && (
+            <div
+              role="alert"
+              className="mx-4 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start justify-between gap-2"
+            >
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              <button
+                onClick={refresh}
+                className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline shrink-0"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
           <div className="p-4 space-y-3">
             {sortedHabits.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <p className="text-lg mb-2">아직 습관이 없습니다</p>
-                <p className="text-sm">+ 버튼을 눌러 첫 습관을 추가해보세요</p>
+              <div className="text-center py-12">
+                <p className="text-lg mb-2 text-gray-700 dark:text-gray-300">
+                  아직 습관이 없습니다
+                </p>
+                <p className="text-sm mb-4 text-gray-500 dark:text-gray-400">
+                  매일 실천할 작은 습관부터 시작해보세요
+                </p>
+                <button
+                  onClick={() => setShowCreate(true)}
+                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium"
+                >
+                  + 첫 습관 만들기
+                </button>
               </div>
             ) : (
               sortedHabits.map((habit) => {
@@ -79,11 +106,7 @@ export default function HabitsPage() {
                     }}
                     onEdit={() => setEditingHabit(habit.id)}
                     onPause={() => updateHabit(habit.id, { status: "paused" })}
-                    onDelete={() => {
-                      if (confirm("이 습관을 삭제하시겠습니까?")) {
-                        deleteHabit(habit.id);
-                      }
-                    }}
+                    onDelete={() => setConfirmDeleteId(habit.id)}
                   />
                 );
               })
@@ -94,10 +117,25 @@ export default function HabitsPage() {
         {/* FAB */}
         <button
           onClick={() => setShowCreate(true)}
+          aria-label="습관 추가"
           className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center justify-center text-2xl"
         >
           +
         </button>
+
+        <ConfirmDialog
+          open={confirmDeleteId !== null}
+          title="습관 삭제"
+          message="이 습관을 삭제하시겠습니까? 기록된 체크인은 유지되지만 목록에서 사라집니다."
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          variant="danger"
+          onConfirm={() => {
+            if (confirmDeleteId) deleteHabit(confirmDeleteId);
+            setConfirmDeleteId(null);
+          }}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
 
         {showCreate && (
           <HabitForm

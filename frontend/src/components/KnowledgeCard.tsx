@@ -33,7 +33,7 @@ export default function KnowledgeCard({ doc, onDelete }: Props) {
                 href={doc.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-500 hover:underline truncate max-w-[200px]"
+                className="text-xs text-sky-500 hover:underline truncate max-w-[200px]"
               >
                 {doc.source_url}
               </a>
@@ -42,9 +42,10 @@ export default function KnowledgeCard({ doc, onDelete }: Props) {
         </div>
         <button
           onClick={onDelete}
-          className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition shrink-0"
+          aria-label={`${doc.title} 삭제`}
+          className="text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 focus:opacity-100 transition shrink-0"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>

@@ -11,7 +11,7 @@ const categoryLabels: Record<string, string> = {
 
 const categoryColors: Record<string, string> = {
   personal: "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-  career: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+  career: "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300",
   health: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
   learning: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
   finance: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
@@ -37,7 +37,7 @@ export default function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
       onClick={onClick}
       className={`w-full text-left p-4 rounded-xl border transition hover:shadow-sm ${
         isActive
-          ? "border-blue-500 bg-blue-50 dark:bg-gray-800 dark:border-blue-400"
+          ? "border-sky-500 bg-sky-50 dark:bg-gray-800 dark:border-sky-400"
           : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
       }`}
     >
@@ -66,7 +66,7 @@ export default function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
             className={`h-full rounded-full transition-all ${
               goal.progress === 100
                 ? "bg-emerald-500"
-                : "bg-blue-500"
+                : "bg-sky-500"
             }`}
             style={{ width: `${goal.progress}%` }}
           />

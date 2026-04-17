@@ -20,7 +20,7 @@ const statusActions: Record<string, { label: string; next: string; color: string
     { label: "일시정지", next: "paused", color: "bg-yellow-600 hover:bg-yellow-700" },
   ],
   paused: [
-    { label: "재개", next: "active", color: "bg-blue-600 hover:bg-blue-700" },
+    { label: "재개", next: "active", color: "bg-sky-600 hover:bg-sky-700" },
     { label: "포기", next: "abandoned", color: "bg-red-600 hover:bg-red-700" },
   ],
   completed: [],
@@ -73,7 +73,7 @@ export default function GoalDetailView({
           <div className="flex-1 h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
-                detail.progress === 100 ? "bg-emerald-500" : "bg-blue-500"
+                detail.progress === 100 ? "bg-emerald-500" : "bg-sky-500"
               }`}
               style={{ width: `${detail.progress}%` }}
             />
@@ -126,14 +126,16 @@ export default function GoalDetailView({
                   ms.status === "pending" && onCompleteMilestone(ms.id)
                 }
                 disabled={ms.status === "completed"}
+                aria-label={`${ms.title} 완료 토글`}
+                aria-pressed={ms.status === "completed"}
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition shrink-0 ${
                   ms.status === "completed"
                     ? "bg-emerald-500 border-emerald-500"
-                    : "border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                    : "border-gray-300 dark:border-gray-600 hover:border-sky-500"
                 }`}
               >
                 {ms.status === "completed" && (
-                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
@@ -141,7 +143,7 @@ export default function GoalDetailView({
               <span
                 className={`flex-1 text-sm ${
                   ms.status === "completed"
-                    ? "text-gray-400 line-through"
+                    ? "text-gray-400 dark:text-gray-500 line-through"
                     : "text-gray-800 dark:text-gray-200"
                 }`}
               >
@@ -149,9 +151,10 @@ export default function GoalDetailView({
               </span>
               <button
                 onClick={() => onDeleteMilestone(ms.id)}
-                className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
+                aria-label={`${ms.title} 마일스톤 삭제`}
+                className="text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -168,12 +171,12 @@ export default function GoalDetailView({
               onChange={(e) => setNewMilestone(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddMilestone()}
               placeholder="새 마일스톤 추가..."
-              className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 text-sm border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
             <button
               onClick={handleAddMilestone}
               disabled={!newMilestone.trim() || isAdding}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+              className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
             >
               추가
             </button>

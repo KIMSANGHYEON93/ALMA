@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Modal from "./common/Modal";
 import type { AutomationRuleCreate } from "@/lib/types";
 
 interface Props {
@@ -28,9 +29,11 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
   const [actionType, setActionType] = useState("notification");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!name.trim() || submitting) return;
+    setError(null);
     setSubmitting(true);
     try {
       const actionConfig: Record<string, unknown> =
@@ -46,14 +49,16 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
         action_config: actionConfig,
       });
       onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "규칙 생성에 실패했습니다");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 space-y-4">
+    <Modal open onClose={onClose} ariaLabel="새 자동화 규칙" maxWidth="max-w-md">
+      <div className="p-6 space-y-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">새 자동화 규칙</h2>
 
         <input
@@ -61,8 +66,7 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="규칙 이름"
-          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
-          autoFocus
+          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
         />
 
         <input
@@ -70,7 +74,7 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="설명 (선택)"
-          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
         />
 
         <div>
@@ -78,7 +82,7 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
           <select
             value={triggerEvent}
             onChange={(e) => setTriggerEvent(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
           >
             {TRIGGER_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -92,11 +96,12 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
             {ACTION_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
+                type="button"
                 onClick={() => setActionType(opt.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   actionType === opt.value
-                    ? "bg-blue-50 dark:bg-blue-900/30 border-blue-300 text-blue-600"
-                    : "border-gray-200 dark:border-gray-700 text-gray-600"
+                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 text-sky-600"
+                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {opt.label}
@@ -110,22 +115,36 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={actionType === "notification" ? "알림 메시지" : "로그 메시지"}
-          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+          className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
         />
 
+        {error && (
+          <p
+            role="alert"
+            className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-lg"
+          >
+            {error}
+          </p>
+        )}
+
         <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+          >
             취소
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={!name.trim() || submitting}
-            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "생성 중..." : "추가"}
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

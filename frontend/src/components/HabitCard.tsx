@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TodayHabitItem } from "@/lib/types";
 
 interface Props {
@@ -17,6 +17,30 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
   const [noteText, setNoteText] = useState(item.note || "");
   const [valueInput, setValueInput] = useState(item.value?.toString() || "");
   const [loading, setLoading] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu on outside click / ESC / blur
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowMenu(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [showMenu]);
 
   const hasTarget = item.target_value !== null;
 
@@ -67,6 +91,8 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
             <button
               onClick={handleToggle}
               disabled={loading}
+              aria-label={`${item.title} 완료 토글`}
+              aria-pressed={item.completed}
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${
                 item.completed
                   ? "bg-emerald-500 border-emerald-500 text-white"
@@ -74,7 +100,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
               }`}
             >
               {item.completed && (
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               )}
@@ -86,27 +112,53 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
             </span>
             {item.streak > 0 && (
               <span className="ml-2 text-xs text-orange-500 font-medium">
-                🔥 {item.streak}{item.frequency_type === "times_per_week" ? "주" : "일"}
+                <svg className="w-3.5 h-3.5 inline -mt-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 23a7.5 7.5 0 01-5.138-12.963C8.204 8.774 11.5 6.5 11 1.5c6 4 9 8 3 14 1 0 2.5-1.5 3-3.5.5 2.5-.5 5-2 7A7.5 7.5 0 0112 23z" /></svg>
+                {" "}{item.streak}{item.frequency_type === "times_per_week" ? "주" : "일"}
               </span>
             )}
           </div>
         </div>
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
+            ref={menuButtonRef}
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            aria-label={`${item.title} 옵션 메뉴`}
+            aria-haspopup="menu"
+            aria-expanded={showMenu}
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="5" r="1.5" />
               <circle cx="12" cy="12" r="1.5" />
               <circle cx="12" cy="19" r="1.5" />
             </svg>
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg z-10 py-1 min-w-[100px]">
-              <button onClick={() => { onEdit(); setShowMenu(false); }} className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700">수정</button>
-              <button onClick={() => { onPause(); setShowMenu(false); }} className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700">일시정지</button>
-              <button onClick={() => { onDelete(); setShowMenu(false); }} className="w-full px-3 py-1.5 text-left text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">삭제</button>
+            <div
+              role="menu"
+              className="absolute right-0 mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg z-10 py-1 min-w-[120px]"
+            >
+              <button
+                role="menuitem"
+                onClick={() => { onEdit(); setShowMenu(false); }}
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                수정
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => { onPause(); setShowMenu(false); }}
+                className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                일시정지
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => { onDelete(); setShowMenu(false); }}
+                className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                삭제
+              </button>
             </div>
           )}
         </div>

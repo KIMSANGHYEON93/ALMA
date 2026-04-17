@@ -40,7 +40,7 @@ export default function AutomationCard({ rule, onToggle, onDelete }: Props) {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{rule.description}</p>
           )}
           <div className="flex flex-wrap gap-2 mt-2">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400">
               트리거: {EVENT_LABELS[rule.trigger_event] || rule.trigger_event}
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
@@ -56,6 +56,9 @@ export default function AutomationCard({ rule, onToggle, onDelete }: Props) {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => onToggle(!rule.is_active)}
+            role="switch"
+            aria-checked={rule.is_active}
+            aria-label={`${rule.name} 활성화 토글`}
             className={`w-10 h-5 rounded-full transition relative ${
               rule.is_active ? "bg-emerald-500" : "bg-gray-300 dark:bg-gray-700"
             }`}

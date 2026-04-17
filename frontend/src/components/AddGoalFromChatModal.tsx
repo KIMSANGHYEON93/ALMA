@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Modal from "./common/Modal";
 import { apiClient } from "@/lib/api";
 import { emitGoalsChanged } from "@/lib/events";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,17 +65,19 @@ export default function AddGoalFromChatModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 space-y-4 mx-4"
-      >
+    <Modal open onClose={onClose} ariaLabel="대화에서 목표 추가" maxWidth="max-w-md">
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           대화에서 목표 추가
         </h2>
 
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p
+            role="alert"
+            className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-lg"
+          >
+            {error}
+          </p>
         )}
 
         <div>
@@ -88,7 +91,7 @@ export default function AddGoalFromChatModal({
             onChange={(e) => setTitle(e.target.value)}
             required
             autoFocus
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
@@ -101,7 +104,7 @@ export default function AddGoalFromChatModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none text-sm"
           />
         </div>
 
@@ -117,7 +120,7 @@ export default function AddGoalFromChatModal({
                 onClick={() => setCategory(cat.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   category === cat.value
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                    ? "border-sky-500 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                 }`}
               >
@@ -138,12 +141,12 @@ export default function AddGoalFromChatModal({
           <button
             type="submit"
             disabled={!title.trim() || saving}
-            className="flex-1 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition"
+            className="flex-1 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {saving ? "추가 중..." : "목표 추가"}
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }

@@ -3,7 +3,7 @@
 import type { OntologyInsight } from "@/lib/types";
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  hub_node: { label: "허브", color: "bg-blue-600" },
+  hub_node: { label: "허브", color: "bg-sky-600" },
   isolated: { label: "고립", color: "bg-yellow-600" },
   strong_path: { label: "경로", color: "bg-green-600" },
   conflict: { label: "상충", color: "bg-red-600" },

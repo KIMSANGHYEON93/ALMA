@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NavBar from "@/components/common/NavBar";
+import Spinner from "@/components/common/Spinner";
 import GoalCard from "@/components/GoalCard";
 import GoalDetailView from "@/components/GoalDetail";
 import CreateGoalModal from "@/components/CreateGoalModal";
@@ -10,16 +11,18 @@ import { useGoals, useGoalDetail } from "@/hooks/useGoals";
 
 export default function GoalsPage() {
   const { isLoading: authLoading } = useAuth();
-  const { goals, summary, loading, createGoal, deleteGoal, updateGoalStatus, refresh } = useGoals();
+  const { goals, summary, loading, error, createGoal, deleteGoal, updateGoalStatus, refresh } =
+    useGoals();
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState<string>("all");
-  const { detail, addMilestone, completeMilestone, deleteMilestone, refresh: refreshDetail } = useGoalDetail(selectedGoalId);
+  const { detail, addMilestone, completeMilestone, deleteMilestone, refresh: refreshDetail } =
+    useGoalDetail(selectedGoalId);
 
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">로딩 중...</span>
+        <Spinner size="md" label="목표 로드 중" />
       </div>
     );
   }
@@ -62,7 +65,7 @@ export default function GoalsPage() {
                   <p className="text-xs text-gray-500">완료</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-blue-600">
+                  <p className="text-lg font-bold text-sky-600">
                     {summary.average_progress}%
                   </p>
                   <p className="text-xs text-gray-500">평균</p>
@@ -75,7 +78,7 @@ export default function GoalsPage() {
           <div className="p-3 border-b dark:border-gray-800 space-y-2">
             <button
               onClick={() => setShowCreate(true)}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+              className="w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition text-sm"
             >
               + 새 목표
             </button>
@@ -90,7 +93,7 @@ export default function GoalsPage() {
                   onClick={() => setFilter(f.key)}
                   className={`flex-1 py-1 text-xs rounded-md transition ${
                     filter === f.key
-                      ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600"
+                      ? "bg-sky-100 dark:bg-sky-900/30 text-sky-600"
                       : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -100,12 +103,38 @@ export default function GoalsPage() {
             </div>
           </div>
 
+          {/* Error */}
+          {error && (
+            <div
+              role="alert"
+              className="mx-3 mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            >
+              <p className="text-xs text-red-700 dark:text-red-400 mb-2">{error}</p>
+              <button
+                onClick={refresh}
+                className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
+
           {/* Goal list */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {filteredGoals.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 mt-8">
-                {filter === "all" ? "아직 목표가 없습니다" : "해당하는 목표가 없습니다"}
-              </p>
+              <div className="text-center mt-8 px-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  {filter === "all" ? "아직 목표가 없습니다" : "해당하는 목표가 없습니다"}
+                </p>
+                {filter === "all" && (
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    className="text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline"
+                  >
+                    + 첫 목표 만들기
+                  </button>
+                )}
+              </div>
             ) : (
               filteredGoals.map((goal) => (
                 <GoalCard

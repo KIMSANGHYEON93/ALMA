@@ -129,7 +129,7 @@ export default function OntologyInsightsPage() {
             </div>
             {byTypeEntries.slice(0, 2).map(([type, count]) => (
               <div key={type} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
-                <p className="text-3xl font-bold text-blue-400">{count}</p>
+                <p className="text-3xl font-bold text-sky-400">{count}</p>
                 <p className="text-xs text-gray-400 mt-1">{TYPE_LABELS[type] ?? type}</p>
               </div>
             ))}
@@ -141,7 +141,7 @@ export default function OntologyInsightsPage() {
           <button
             onClick={() => setFilterType(undefined)}
             className={`px-3 py-1.5 rounded text-xs font-medium transition ${
-              filterType === undefined ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              filterType === undefined ? "bg-sky-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
             전체
@@ -151,7 +151,7 @@ export default function OntologyInsightsPage() {
               key={type}
               onClick={() => setFilterType(filterType === type ? undefined : type)}
               className={`px-3 py-1.5 rounded text-xs font-medium transition ${
-                filterType === type ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                filterType === type ? "bg-sky-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
               }`}
             >
               {label}

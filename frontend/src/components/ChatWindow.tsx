@@ -26,29 +26,68 @@ export default function ChatWindow({
   const [goalModalContent, setGoalModalContent] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [habitReminder, setHabitReminder] = useState<string | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
+  const [isWaitingForAi, setIsWaitingForAi] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const {
     messages,
     hasMore,
     isLoadingHistory,
     isLoadingMore,
+    historyError,
+    loadMoreError,
     loadHistory,
     loadMore,
     addMessage,
+    appendStreamingChunk,
+    finalizeStreamingMessage,
+    removeStreamingPlaceholderIfEmpty,
   } = useMessages(conversationId, token, scrollContainerRef);
 
-  const handleWsMessage = useCallback(
-    (content: string, id?: string) => {
-      addMessage({ id: id ?? "", role: "assistant", content });
+  const handleChunk = useCallback(
+    (delta: string) => {
+      appendStreamingChunk(delta);
+      setIsWaitingForAi(false); // 첫 chunk가 도착하면 thinking indicator 해제
       shouldAutoScroll.current = true;
     },
-    [addMessage]
+    [appendStreamingChunk]
   );
 
-  const { isConnected, isConnecting, sendMessage: wsSend } = useChatWebSocket(
+  const handleDone = useCallback(() => {
+    finalizeStreamingMessage();
+    setIsStreaming(false);
+    setIsWaitingForAi(false);
+  }, [finalizeStreamingMessage]);
+
+  const handleCancelled = useCallback(() => {
+    finalizeStreamingMessage();
+    setIsStreaming(false);
+    setIsWaitingForAi(false);
+    setToast({ message: "응답이 취소되었습니다", type: "success" });
+  }, [finalizeStreamingMessage]);
+
+  const handleError = useCallback(
+    (message: string) => {
+      removeStreamingPlaceholderIfEmpty();
+      setIsStreaming(false);
+      setIsWaitingForAi(false);
+      setToast({ message, type: "error" });
+    },
+    [removeStreamingPlaceholderIfEmpty]
+  );
+
+  const {
+    isConnected,
+    isConnecting,
+    reconnectAttempt,
+    sendMessage: wsSend,
+    cancelStream: wsCancel,
+    reconnect,
+  } = useChatWebSocket(
     conversationId,
     token,
-    handleWsMessage,
+    { onChunk: handleChunk, onDone: handleDone, onCancelled: handleCancelled, onError: handleError },
     (message) => setHabitReminder(message)
   );
 
@@ -79,6 +118,7 @@ export default function ChatWindow({
 
   const sendMessage = () => {
     if (!input.trim() || input.length > MAX_LENGTH) return;
+    if (isStreaming) return; // 스트리밍 중에는 새 메시지 보내기 금지
     if (!isConnected) {
       setToast({ message: "연결이 끊겼습니다. 잠시 후 다시 시도해주세요.", type: "error" });
       return;
@@ -86,13 +126,24 @@ export default function ChatWindow({
     addMessage({ id: "", role: "user", content: input });
     wsSend(input);
     setInput("");
+    setIsStreaming(true);
+    setIsWaitingForAi(true);
     shouldAutoScroll.current = true;
+  };
+
+  const handleStopStream = () => {
+    if (!isStreaming) return;
+    wsCancel();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      if (isStreaming) {
+        handleStopStream();
+      } else {
+        sendMessage();
+      }
     }
   };
 
@@ -103,6 +154,23 @@ export default function ChatWindow({
   const handleGoalSuccess = () => {
     setGoalModalContent(null);
     setToast({ message: "목표가 추가되었습니다", type: "success" });
+  };
+
+  const handleCopyAll = async () => {
+    if (messages.length === 0) {
+      setToast({ message: "복사할 대화가 없습니다", type: "error" });
+      return;
+    }
+    const formatted = messages
+      .map((m) => `[${m.role === "user" ? "나" : "VIVARA"}]\n${m.content}`)
+      .join("\n\n");
+    try {
+      await navigator.clipboard.writeText(formatted);
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 2000);
+    } catch {
+      setToast({ message: "복사에 실패했습니다", type: "error" });
+    }
   };
 
   return (
@@ -123,19 +191,47 @@ export default function ChatWindow({
         </div>
       )}
       <div className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800">
-        <h2 className="font-semibold">ALMA</h2>
-        <span
-          role="status"
-          className={`text-xs px-2 py-1 rounded-full ${
-            isConnecting
-              ? "bg-yellow-100 text-yellow-700"
-              : isConnected
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-          }`}
-        >
-          {isConnecting ? "연결 중..." : isConnected ? "연결됨" : "연결 끊김"}
-        </span>
+        <h2 className="font-semibold">VIVARA</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyAll}
+            disabled={messages.length === 0}
+            aria-label="전체 대화 복사"
+            className="text-xs px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1"
+          >
+            <span>{copiedAll ? "✓" : "⎘"}</span>
+            <span>{copiedAll ? "복사됨" : "대화 복사"}</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <span
+              role="status"
+              aria-live="polite"
+              className={`text-xs px-2 py-1 rounded-full ${
+                isConnecting
+                  ? "bg-yellow-100 text-yellow-700"
+                  : isConnected
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+              }`}
+            >
+              {isConnecting
+                ? reconnectAttempt > 0
+                  ? `재연결 중 (${reconnectAttempt})`
+                  : "연결 중..."
+                : isConnected
+                  ? "연결됨"
+                  : "연결 끊김"}
+            </span>
+            {!isConnected && !isConnecting && (
+              <button
+                onClick={reconnect}
+                className="text-xs px-2 py-1 rounded-md border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 transition"
+              >
+                재연결
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div
@@ -144,6 +240,21 @@ export default function ChatWindow({
       >
         <div ref={loadMoreRef} className="h-1" aria-hidden="true" />
 
+        {loadMoreError && (
+          <div
+            role="alert"
+            className="mx-auto max-w-md p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center justify-between gap-2"
+          >
+            <p className="text-xs text-red-700 dark:text-red-400">{loadMoreError}</p>
+            <button
+              onClick={loadMore}
+              className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline shrink-0"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+
         {isLoadingMore && (
           <div className="flex justify-center py-2 text-gray-400">
             <Spinner size="sm" label="이전 메시지 로드 중" />
@@ -151,19 +262,52 @@ export default function ChatWindow({
         )}
 
         {isLoadingHistory && (
-          <div className="flex justify-center items-center py-12 text-blue-500">
+          <div className="flex justify-center items-center py-12 text-sky-500">
             <Spinner size="md" label="대화 히스토리 로드 중" />
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <MessageBubble
-            key={msg.id || `ws-${i}`}
-            role={msg.role}
-            content={msg.content}
-            onAddGoal={msg.role === "assistant" ? handleAddGoal : undefined}
-          />
-        ))}
+        {historyError && !isLoadingHistory && (
+          <div
+            role="alert"
+            className="mx-auto max-w-md p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-center"
+          >
+            <p className="text-sm text-red-700 dark:text-red-400 mb-2">{historyError}</p>
+            <button
+              onClick={loadHistory}
+              className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+
+        {messages.map((msg, i) => {
+          const isLast = i === messages.length - 1;
+          const showStreamingCursor =
+            isLast && isStreaming && msg.role === "assistant" && msg.id === "streaming";
+          return (
+            <MessageBubble
+              key={msg.id === "streaming" ? "streaming" : msg.id || `ws-${i}`}
+              role={msg.role}
+              content={msg.content}
+              isStreaming={showStreamingCursor}
+              onAddGoal={msg.role === "assistant" && !showStreamingCursor ? handleAddGoal : undefined}
+            />
+          );
+        })}
+
+        {/* AI 응답 대기 인디케이터 (첫 chunk 도착 전에만 표시) */}
+        {isWaitingForAi && (
+          <div className="flex justify-start" aria-live="polite" aria-label="AI 응답 생성 중">
+            <div className="bg-gray-200 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-pulse" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400 animate-pulse" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -181,7 +325,7 @@ export default function ChatWindow({
               placeholder="메시지를 입력하세요..."
               rows={1}
               maxLength={MAX_LENGTH}
-              className={`w-full px-4 py-2 border rounded-lg resize-none dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full px-4 py-2 border rounded-lg resize-none dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
                 input.length >= MAX_LENGTH ? "border-red-400" : ""
               }`}
             />
@@ -195,13 +339,25 @@ export default function ChatWindow({
               </span>
             )}
           </div>
-          <button
-            onClick={sendMessage}
-            disabled={!isConnected || !input.trim() || input.length > MAX_LENGTH}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            전송
-          </button>
+          {isStreaming ? (
+            <button
+              onClick={handleStopStream}
+              aria-label="응답 중지"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-1.5"
+            >
+              <span className="w-2.5 h-2.5 bg-white rounded-sm" aria-hidden="true" />
+              <span>중지</span>
+            </button>
+          ) : (
+            <button
+              onClick={sendMessage}
+              disabled={!isConnected || !input.trim() || input.length > MAX_LENGTH}
+              aria-label="메시지 전송"
+              className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              전송
+            </button>
+          )}
         </div>
       </div>
 

@@ -21,26 +21,38 @@ export default function ConversationList({
 }: ConversationListProps) {
   const { token } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchConversations = useCallback(async () => {
-    if (!token) return;
-    try {
-      const data = await apiClient<Conversation[]>("/api/conversations", {
-        token,
-      });
-      setConversations(data);
-    } catch {
-      // 401 handled
-    }
-  }, [token]);
+  const fetchConversations = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        const data = await apiClient<Conversation[]>("/api/conversations", {
+          token,
+          signal,
+        });
+        setConversations(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "대화 목록 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   const createConversation = async () => {
     if (!token || isCreating) return;
+    setCreateError(null);
     setIsCreating(true);
     try {
       const data = await apiClient<Conversation>("/api/conversations", {
@@ -50,8 +62,8 @@ export default function ConversationList({
       });
       setConversations((prev) => [data, ...prev]);
       onSelect(data.id);
-    } catch {
-      // 401 handled
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "대화 생성 실패");
     } finally {
       setIsCreating(false);
     }
@@ -98,7 +110,9 @@ export default function ConversationList({
   };
 
   useEffect(() => {
-    fetchConversations();
+    const ctrl = new AbortController();
+    fetchConversations(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchConversations]);
 
   // 제목 자동 갱신 (첫 메시지 후 서버에서 제목 생성됨)
@@ -114,18 +128,49 @@ export default function ConversationList({
         <button
           onClick={createConversation}
           disabled={isCreating}
-          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+          className="w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
         >
           {isCreating ? "생성 중..." : "+ 새 대화"}
         </button>
+        {createError && (
+          <p role="alert" className="mt-2 text-xs text-red-600 dark:text-red-400">
+            {createError}
+          </p>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto">
+        {loading && (
+          <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
+            대화 목록 로드 중...
+          </div>
+        )}
+        {error && !loading && (
+          <div role="alert" className="m-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-xs text-red-700 dark:text-red-400 mb-2">{error}</p>
+            <button
+              onClick={() => fetchConversations()}
+              className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+        {!loading && !error && conversations.length === 0 && (
+          <div className="p-6 text-center">
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+              아직 대화가 없습니다
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              위의 &quot;+ 새 대화&quot; 버튼으로 시작해보세요
+            </p>
+          </div>
+        )}
         {conversations.map((conv) => (
           <div
             key={conv.id}
             className={`group relative border-b dark:border-gray-800 ${
               activeId === conv.id
-                ? "bg-blue-50 dark:bg-gray-800"
+                ? "bg-sky-50 dark:bg-gray-800"
                 : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
             }`}
           >
@@ -142,7 +187,7 @@ export default function ConversationList({
                     if (e.key === "Escape") setEditingId(null);
                   }}
                   onBlur={() => renameConversation(conv.id, editTitle)}
-                  className="w-full px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-sky-500"
                 />
               </div>
             ) : deleteConfirmId === conv.id ? (
@@ -186,7 +231,7 @@ export default function ConversationList({
                     e.stopPropagation();
                     startEdit(conv);
                   }}
-                  className="p-1 text-gray-400 hover:text-blue-500 transition"
+                  className="p-1 text-gray-400 hover:text-sky-500 transition"
                   title="이름 변경"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

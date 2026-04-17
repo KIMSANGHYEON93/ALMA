@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Modal from "./common/Modal";
 
 interface CreateGoalModalProps {
   onClose: () => void;
@@ -22,10 +23,14 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
   const [category, setCategory] = useState("personal");
   const [targetDate, setTargetDate] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || isCreating) return;
+    setError(null);
     setIsCreating(true);
     try {
       await onCreate({
@@ -35,17 +40,16 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
         target_date: targetDate || undefined,
       });
       onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "목표 생성에 실패했습니다");
     } finally {
       setIsCreating(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 space-y-4 mx-4"
-      >
+    <Modal open onClose={onClose} ariaLabel="새 목표 만들기" maxWidth="max-w-md">
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           새 목표 만들기
         </h2>
@@ -62,7 +66,7 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
             placeholder="달성하고 싶은 목표를 입력하세요"
             required
             autoFocus
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
@@ -76,7 +80,7 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
             onChange={(e) => setDescription(e.target.value)}
             placeholder="목표에 대한 설명..."
             rows={2}
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
           />
         </div>
 
@@ -92,7 +96,7 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
                 onClick={() => setCategory(cat.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   category === cat.value
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                    ? "border-sky-500 bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300"
                 }`}
               >
@@ -110,10 +114,20 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
             id="goal-date"
             type="date"
             value={targetDate}
+            min={todayIso}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-lg"
+          >
+            {error}
+          </p>
+        )}
 
         <div className="flex gap-2 pt-2">
           <button
@@ -126,12 +140,12 @@ export default function CreateGoalModal({ onClose, onCreate }: CreateGoalModalPr
           <button
             type="submit"
             disabled={!title.trim() || isCreating}
-            className="flex-1 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+            className="flex-1 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {isCreating ? "생성 중..." : "만들기"}
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 }

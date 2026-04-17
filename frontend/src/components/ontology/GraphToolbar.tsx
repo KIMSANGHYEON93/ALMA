@@ -63,7 +63,7 @@ export default function GraphToolbar({
           step={0.1}
           value={confidenceMin}
           onChange={(e) => onConfidenceChange(parseFloat(e.target.value))}
-          className="w-24 accent-blue-500"
+          className="w-24 accent-sky-500"
         />
         <span className="w-8 text-right">{confidenceMin.toFixed(1)}</span>
       </div>
@@ -74,7 +74,7 @@ export default function GraphToolbar({
         placeholder="Search nodes..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="px-3 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 w-48"
+        className="px-3 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-sky-500 w-48"
       />
 
       {/* Reset */}

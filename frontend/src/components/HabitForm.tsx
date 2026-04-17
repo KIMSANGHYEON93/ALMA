@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Modal from "./common/Modal";
 import type { HabitCreate, FrequencyType } from "@/lib/types";
 
 interface Props {
@@ -28,6 +29,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
   const [targetValue, setTargetValue] = useState(initial?.target_value?.toString() || "");
   const [targetUnit, setTargetUnit] = useState(initial?.target_unit || "");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleDay = (d: number) => {
     setDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()));
@@ -35,6 +37,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
 
   const handleSubmit = async () => {
     if (!title.trim() || submitting) return;
+    setError(null);
     setSubmitting(true);
     try {
       let frequency_value: Record<string, unknown> = {};
@@ -51,14 +54,16 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
         target_unit: targetUnit.trim() || undefined,
       });
       onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "습관 저장에 실패했습니다");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 space-y-4">
+    <Modal open onClose={onClose} ariaLabel={initial ? "습관 수정" : "새 습관"} maxWidth="max-w-md">
+      <div className="p-6 space-y-4">
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
           {initial ? "습관 수정" : "새 습관"}
         </h2>
@@ -90,7 +95,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
                 onClick={() => setFreqType(opt.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   freqType === opt.value
-                    ? "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400"
+                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-400"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -109,7 +114,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
                 onClick={() => toggleDay(i)}
                 className={`w-9 h-9 rounded-full text-sm font-medium transition ${
                   days.includes(i)
-                    ? "bg-blue-500 text-white"
+                    ? "bg-sky-500 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                 }`}
               >
@@ -166,23 +171,34 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
           </div>
         </div>
 
+        {error && (
+          <p
+            role="alert"
+            className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-lg"
+          >
+            {error}
+          </p>
+        )}
+
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-2">
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
           >
             취소
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={!title.trim() || submitting}
-            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "저장 중..." : initial ? "수정" : "추가"}
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

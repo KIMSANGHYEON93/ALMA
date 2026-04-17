@@ -1,30 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
   content: string;
+  isStreaming?: boolean;
   onAddGoal?: (content: string) => void;
 }
 
 export default React.memo(function MessageBubble({
   role,
   content,
+  isStreaming = false,
   onAddGoal,
 }: MessageBubbleProps) {
   const isUser = role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API 실패 시 무시
+    }
+  };
 
   return (
     <div
-      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+      className={`group flex ${isUser ? "justify-end" : "justify-start"}`}
       aria-label={isUser ? "사용자 메시지" : "AI 응답"}
     >
-      <div className="max-w-[70%]">
+      <div className="max-w-[85%] md:max-w-[70%] relative">
         <div
           className={`px-4 py-2 rounded-2xl ${
             isUser
-              ? "bg-blue-600 text-white rounded-br-md whitespace-pre-wrap"
+              ? "bg-sky-600 text-white rounded-br-md whitespace-pre-wrap"
               : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md"
           }`}
         >
@@ -35,9 +48,27 @@ export default React.memo(function MessageBubble({
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>
+              {isStreaming && (
+                <span
+                  className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-gray-600 dark:bg-gray-300 animate-pulse"
+                  aria-label="입력 중"
+                />
+              )}
             </div>
           )}
         </div>
+
+        {/* hover 시 나타나는 개별 메시지 복사 버튼 */}
+        <button
+          onClick={handleCopy}
+          aria-label="메시지 복사"
+          title={copied ? "복사됨" : "복사"}
+          className={`absolute -top-2 ${
+            isUser ? "-left-8" : "-right-8"
+          } opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-7 h-7 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 shadow-sm border border-gray-200 dark:border-gray-600 text-sm`}
+        >
+          {copied ? "✓" : "⎘"}
+        </button>
 
         {/* AI 응답에만 "목표로 추가" 버튼 표시 */}
         {!isUser && onAddGoal && (
@@ -46,7 +77,7 @@ export default React.memo(function MessageBubble({
               onClick={() => onAddGoal(content)}
               className="text-xs text-gray-400 hover:text-emerald-500 transition flex items-center gap-1 px-1 py-0.5"
             >
-              <span>🎯</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" strokeWidth={1.5} /><circle cx="12" cy="12" r="6" strokeWidth={1.5} /><circle cx="12" cy="12" r="2" strokeWidth={1.5} /></svg>
               <span>목표로 추가</span>
             </button>
           </div>
