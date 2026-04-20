@@ -30,9 +30,9 @@ export default function HabitHeatmap({ data }: Props) {
     <div className="p-4">
       <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">연간 습관 히트맵</h3>
       <div className="overflow-x-auto">
-        <div className="flex gap-[2px]" style={{ minWidth: "700px" }}>
+        <div className="flex gap-[3px]" style={{ minWidth: "700px" }}>
           {Array.from({ length: 53 }, (_, weekIdx) => (
-            <div key={weekIdx} className="flex flex-col gap-[2px]">
+            <div key={weekIdx} className="flex flex-col gap-[3px]">
               {Array.from({ length: 7 }, (_, dayIdx) => {
                 const idx = weekIdx * 7 + dayIdx;
                 const day = days[idx];
