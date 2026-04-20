@@ -19,11 +19,11 @@ export default function HabitHeatmap({ data }: Props) {
     days.push({ date: key, count: data.dates[key] || 0 });
   }
 
-  const getColor = (count: number) => {
+  const getCellStyle = (count: number) => {
     if (count === 0) return "bg-gray-100 dark:bg-gray-800";
-    if (count === 1) return "bg-emerald-200 dark:bg-emerald-900";
-    if (count === 2) return "bg-emerald-400 dark:bg-emerald-700";
-    return "bg-emerald-600 dark:bg-emerald-500";
+    if (count === 1) return "bg-emerald-200 dark:bg-emerald-900 ring-1 ring-emerald-400/70";
+    if (count === 2) return "bg-emerald-400 dark:bg-emerald-700 ring-2 ring-emerald-600/80";
+    return "bg-emerald-600 dark:bg-emerald-500 ring-2 ring-emerald-700 dark:ring-emerald-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900";
   };
 
   return (
@@ -40,7 +40,7 @@ export default function HabitHeatmap({ data }: Props) {
                 return (
                   <div
                     key={dayIdx}
-                    className={`w-3 h-3 rounded-sm ${getColor(day.count)}`}
+                    className={`w-3 h-3 rounded-sm ${getCellStyle(day.count)}`}
                     title={`${day.date}: ${day.count}개 완료`}
                   />
                 );
@@ -49,12 +49,11 @@ export default function HabitHeatmap({ data }: Props) {
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
+      <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-600 dark:text-gray-400">
         <span>적음</span>
-        <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800" />
-        <div className="w-3 h-3 rounded-sm bg-emerald-200 dark:bg-emerald-900" />
-        <div className="w-3 h-3 rounded-sm bg-emerald-400 dark:bg-emerald-700" />
-        <div className="w-3 h-3 rounded-sm bg-emerald-600 dark:bg-emerald-500" />
+        {[0, 1, 2, 3].map((n) => (
+          <div key={n} className={`w-3 h-3 rounded-sm ${getCellStyle(n)}`} aria-hidden="true" />
+        ))}
         <span>많음</span>
       </div>
     </div>
