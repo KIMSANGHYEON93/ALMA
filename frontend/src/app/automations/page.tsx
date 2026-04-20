@@ -33,7 +33,7 @@ export default function AutomationsPage() {
         <div className="max-w-2xl mx-auto py-4 px-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">자동화 규칙</h1>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{activeRules.length}개 활성</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">{activeRules.length}개 활성</span>
           </div>
 
           {error && (
@@ -57,7 +57,7 @@ export default function AutomationsPage() {
                 <p className="text-lg mb-2 text-gray-700 dark:text-gray-300">
                   아직 자동화 규칙이 없습니다
                 </p>
-                <p className="text-sm mb-4 text-gray-500 dark:text-gray-400">
+                <p className="text-sm mb-4 text-gray-700 dark:text-gray-300">
                   반복되는 작업을 이벤트에 따라 자동 실행할 수 있습니다
                 </p>
                 <button
@@ -79,7 +79,7 @@ export default function AutomationsPage() {
                 ))}
                 {inactiveRules.length > 0 && (
                   <>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 pt-2">비활성</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 pt-2">비활성</p>
                     {inactiveRules.map((rule) => (
                       <AutomationCard
                         key={rule.id}

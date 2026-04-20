@@ -37,7 +37,7 @@ export default function AutomationCard({ rule, onToggle, onDelete }: Props) {
         <div className="flex-1">
           <h3 className="font-medium text-gray-900 dark:text-gray-100">{rule.name}</h3>
           {rule.description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{rule.description}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{rule.description}</p>
           )}
           <div className="flex flex-wrap gap-2 mt-2">
             <span className="text-xs px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400">
@@ -47,7 +47,7 @@ export default function AutomationCard({ rule, onToggle, onDelete }: Props) {
               액션: {ACTION_LABELS[rule.action_type] || rule.action_type}
             </span>
             {rule.execution_count > 0 && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-600 dark:text-gray-400">
                 {rule.execution_count}회 실행
               </span>
             )}

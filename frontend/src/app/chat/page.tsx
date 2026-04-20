@@ -31,7 +31,7 @@ export default function ChatPage() {
           {conversationId ? (
             <ChatWindow token={token} conversationId={conversationId} />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-gray-700 dark:text-gray-300">
               대화를 선택하거나 새로 시작하세요
             </div>
           )}

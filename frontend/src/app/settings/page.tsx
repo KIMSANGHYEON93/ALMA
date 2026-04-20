@@ -130,7 +130,7 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 {modelGroups.map((group) => (
                   <div key={group.provider}>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{group.label}</p>
+                    <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">{group.label}</p>
                     <div className="space-y-1.5">
                       {group.models.map((m) => (
                         <button
@@ -149,7 +149,7 @@ export default function SettingsPage() {
                           }`}>
                             {m.label}
                           </span>
-                          <span className="text-xs text-gray-400 ml-2">{m.desc}</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400 ml-2">{m.desc}</span>
                           <span className="text-xs text-gray-300 dark:text-gray-600 ml-1 font-mono">{m.value}</span>
                         </button>
                       ))}
@@ -166,7 +166,7 @@ export default function SettingsPage() {
               </label>
               <div className="space-y-2">
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Anthropic (Claude)</label>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Anthropic (Claude)</label>
                   <input
                     type="password"
                     value={anthropicKey}
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">OpenAI (GPT)</label>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">OpenAI (GPT)</label>
                   <input
                     type="password"
                     value={openaiKey}
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Google (Gemini)</label>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Google (Gemini)</label>
                   <input
                     type="password"
                     value={geminiKey}
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                   >
                     API 키 저장
                   </button>
-                  <p className="text-xs text-gray-400">암호화되어 저장됩니다</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">암호화되어 저장됩니다</p>
                 </div>
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
                     <div>
                       <p className="text-sm text-gray-700 dark:text-gray-300">브라우저 알림</p>
-                      <p className="text-xs text-gray-400">습관 리마인더를 브라우저 알림으로 받습니다</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">습관 리마인더를 브라우저 알림으로 받습니다</p>
                     </div>
                     <button
                       onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
@@ -335,7 +335,7 @@ export default function SettingsPage() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">이 브라우저는 푸시 알림을 지원하지 않습니다</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">이 브라우저는 푸시 알림을 지원하지 않습니다</p>
               )}
             </div>
 
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                     <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
                       Google Calendar
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       {googleCalendar?.status === "active"
                         ? "연결됨"
                         : googleCalendar?.status === "expired"
@@ -393,7 +393,7 @@ export default function SettingsPage() {
               {/* OAuth credentials input — show when not connected */}
               {(!googleCalendar || googleCalendar.status !== "active") && (
                 <div className="space-y-2 pt-2 border-t dark:border-gray-800">
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Google Cloud Console에서 OAuth 2.0 인증 정보를 발급받아 입력하세요
                   </p>
                   <input
@@ -425,9 +425,9 @@ export default function SettingsPage() {
                     >
                       OAuth 키 저장
                     </button>
-                    <p className="text-xs text-gray-400">암호화 저장</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">암호화 저장</p>
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     리다이렉트 URI:{" "}
                     <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">
                       http://localhost:8000/api/integrations/google/callback

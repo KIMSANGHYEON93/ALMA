@@ -174,7 +174,7 @@ const features = [
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
           <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">토익 900점 달성</span><span className="text-xs text-sky-500">65%</span></div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div className="h-full bg-sky-500 rounded-full" style={{width: "65%"}} /></div>
-          <div className="flex gap-2 mt-2 text-xs text-gray-500"><span className="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded text-sky-600 dark:text-sky-400">커리어</span><span>D-45</span></div>
+          <div className="flex gap-2 mt-2 text-xs text-gray-600 dark:text-gray-400"><span className="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded text-sky-600 dark:text-sky-400">커리어</span><span>D-45</span></div>
         </div>
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
           <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">10km 마라톤 완주</span><span className="text-xs text-emerald-500">80%</span></div>
@@ -200,7 +200,7 @@ const features = [
             <span className="text-xs px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded-full text-sky-600 dark:text-sky-400">주제 트렌드</span>
           </div>
           <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">운동과 수면 품질의 강한 양의 상관관계 발견</p>
-          <p className="text-xs text-gray-500 mt-1">러닝을 한 날 수면 점수가 평균 23% 높았습니다.</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">러닝을 한 날 수면 점수가 평균 23% 높았습니다.</p>
         </div>
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
           <div className="flex items-center gap-2 mb-1">
@@ -315,7 +315,7 @@ export default function LandingPage() {
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-3 font-body">
             삶에 의미를 부여하다
           </p>
-          <p className="text-base text-gray-500 dark:text-gray-400 mb-10 max-w-xl mx-auto leading-relaxed">
+          <p className="text-base text-gray-700 dark:text-gray-300 mb-10 max-w-xl mx-auto leading-relaxed">
             대화, 목표, 습관, 지식 — 흩어진 삶의 조각들을
             <br className="hidden md:block" />
             온톨로지로 연결하고, AI가 의미를 발견합니다
@@ -341,7 +341,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             흩어진 삶의 조각들
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
             노트앱, 캘린더, 습관 트래커, 챗봇 — 데이터는 많지만 서로 연결되지 않습니다.
             어제 나눈 대화가 오늘의 목표와 어떤 관련이 있는지 아무도 알려주지 않습니다.
           </p>
@@ -354,7 +354,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.label} className="p-6 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 opacity-60">
                 <p className="text-lg font-semibold mb-1">{item.label}</p>
-                <p className="text-xs text-gray-400">{item.sublabel}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{item.sublabel}</p>
               </div>
             ))}
           </div>
@@ -367,7 +367,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             연결하면 <span className="text-sky-500">의미</span>가 보입니다
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
             VIVARA는 모든 데이터를 온톨로지 그래프로 연결합니다.
             LLM이 의미를 추출하고, 정제 파이프라인이 품질을 보장하며,
             그래프 분석이 숨겨진 패턴을 발견합니다.
@@ -382,7 +382,7 @@ export default function LandingPage() {
               <div key={item.step} className={`transition-all duration-700 delay-${i * 150} ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                 <div className={`text-4xl font-bold ${item.color} mb-3`}>{item.step}</div>
                 <h4 className="font-semibold mb-2">{item.title}</h4>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{item.desc}</p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -395,7 +395,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-center mb-4">
             하나의 플랫폼, 모든 것이 연결됩니다
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-gray-700 dark:text-gray-300 text-center mb-12 max-w-2xl mx-auto">
             대화에서 시작해 목표, 습관, 인사이트, 지식 그래프까지 — 모든 기능이 유기적으로 작동합니다
           </p>
 
@@ -423,7 +423,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <h3 className="text-2xl font-heading font-bold mb-4">{activeFeature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">{activeFeature.desc}</p>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">{activeFeature.desc}</p>
               <a href="/login" className="text-sky-500 hover:text-sky-600 text-sm font-medium transition">
                 직접 체험하기 &rarr;
               </a>
@@ -441,7 +441,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             목소리로 대화하세요
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-10 max-w-xl mx-auto">
+          <p className="text-gray-700 dark:text-gray-300 mb-10 max-w-xl mx-auto">
             음성 인식으로 더 자연스럽게 소통합니다.
             말한 내용이 텍스트로 변환되어 온톨로지에 자동 통합됩니다.
           </p>
@@ -454,7 +454,7 @@ export default function LandingPage() {
                   <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
                 </svg>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">음성 인식 중...</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">음성 인식 중...</p>
             </div>
           </div>
         </div>
@@ -483,7 +483,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{story.name}</p>
-                    <p className="text-xs text-gray-400">{story.role}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{story.role}</p>
                   </div>
                 </div>
               </div>
@@ -494,19 +494,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
               <p className="text-3xl md:text-4xl font-bold text-sky-500"><Counter target={12000} suffix="+" /></p>
-              <p className="text-sm text-gray-500 mt-1">온톨로지 노드 생성</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">온톨로지 노드 생성</p>
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-cyan-500"><Counter target={95} suffix="%" /></p>
-              <p className="text-sm text-gray-500 mt-1">맥락 정확도</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">맥락 정확도</p>
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-emerald-500"><Counter target={3} suffix="x" /></p>
-              <p className="text-sm text-gray-500 mt-1">목표 완료율 향상</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">목표 완료율 향상</p>
             </div>
             <div>
               <p className="text-3xl md:text-4xl font-bold text-sky-400"><Counter target={500} suffix="+" /></p>
-              <p className="text-sm text-gray-500 mt-1">자동 인사이트 생성</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">자동 인사이트 생성</p>
             </div>
           </div>
         </div>
@@ -518,7 +518,7 @@ export default function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
             삶의 의미를 발견할 준비가 되셨나요?
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">
+          <p className="text-gray-700 dark:text-gray-300 mb-8">
             VIVARA 얼리 액세스에 등록하고 가장 먼저 만나보세요
           </p>
 
@@ -551,7 +551,7 @@ export default function LandingPage() {
             </form>
           )}
 
-          <p className="text-xs text-gray-400 mt-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-4">
             스팸 없음 — 출시 알림만 보내드립니다
           </p>
         </div>

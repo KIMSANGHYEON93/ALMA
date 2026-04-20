@@ -141,12 +141,12 @@ export default function AddKnowledgeModal({ onAddText, onAddUrl, onAddFile, onCl
               {file ? (
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{file.name}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">PDF, DOCX, TXT, MD 파일을 선택하세요</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">최대 10MB</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">PDF, DOCX, TXT, MD 파일을 선택하세요</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">최대 10MB</p>
                 </div>
               )}
             </button>

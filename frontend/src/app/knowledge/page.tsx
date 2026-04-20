@@ -31,7 +31,7 @@ export default function KnowledgePage() {
         <div className="max-w-2xl mx-auto py-4 px-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">지식 베이스</h1>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{documents.length}개 문서</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">{documents.length}개 문서</span>
           </div>
 
           {error && (
@@ -55,7 +55,7 @@ export default function KnowledgePage() {
                 <p className="text-lg mb-2 text-gray-700 dark:text-gray-300">
                   아직 등록된 지식이 없습니다
                 </p>
-                <p className="text-sm mb-4 text-gray-500 dark:text-gray-400">
+                <p className="text-sm mb-4 text-gray-700 dark:text-gray-300">
                   텍스트, URL, 파일을 추가하면 채팅에서 자동으로 활용됩니다
                 </p>
                 <button
