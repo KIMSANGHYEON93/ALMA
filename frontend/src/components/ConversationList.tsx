@@ -225,7 +225,7 @@ export default function ConversationList({
 
             {/* 호버 시 편집/삭제 아이콘 */}
             {editingId !== conv.id && deleteConfirmId !== conv.id && (
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-0.5">
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-3">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
