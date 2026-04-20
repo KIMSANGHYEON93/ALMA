@@ -528,6 +528,43 @@ git commit -m "perf: narrow transition-all to specific properties (opacity, tran
 
 ### Files: `frontend/src/components/HabitHeatmap.tsx`
 
+**Bundle 2 carryover**: Bundle 2 최종 리뷰에서 `summarizeHeatmap` 365일 루프 + `days` 배열 생성이 매 렌더 반복되는 것을 useMemo로 방지하도록 권고됨. Task 3.4에 통합.
+
+- [ ] **Step 0: useMemo 적용 (Bundle 2 carryover)**
+
+파일 상단 import에 `useMemo` 추가:
+```tsx
+import { useMemo } from "react";
+```
+
+`days` 배열과 `summary`/`summaryText` 계산을 `useMemo`로 감싸기:
+
+```tsx
+const year = new Date().getFullYear();
+
+const { days, summaryText } = useMemo(() => {
+  if (!data) return { days: [] as { date: string; count: number }[], summaryText: "" };
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31);
+  const daysArr: { date: string; count: number }[] = [];
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    daysArr.push({ date: key, count: data.dates[key] || 0 });
+  }
+  const summary = summarizeHeatmap(data.dates, year);
+  return { days: daysArr, summaryText: formatHeatmapSummary(summary, year) };
+}, [data, year]);
+```
+
+이렇게 하면 `data.dates`가 동일한 참조일 때 루프 스킵. `data`가 null 처리도 useMemo 내부에서.
+
+상단 early return은 그대로 유지:
+```tsx
+if (!data) return null;
+```
+
+(`if (!data) return null` 상단 유지하면서 useMemo 내부의 null 처리는 방어 — useMemo는 조건부 훅 호출 방지용)
+
 - [ ] **Step 1: minWidth 주석 추가**
 
 L32-33 기존:
