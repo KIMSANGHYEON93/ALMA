@@ -544,7 +544,7 @@ export default function LandingPage() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-sky-500/25 transition-[box-shadow] duration-200 text-sm whitespace-nowrap"
+                className="px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-sky-500/25 transition-[box-shadow] duration-300 text-sm whitespace-nowrap"
               >
                 등록하기
               </button>
