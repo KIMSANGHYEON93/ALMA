@@ -381,7 +381,7 @@ export default function LandingPage() {
             ].map((item, i) => (
               <div key={item.step} className={`transition-all duration-700 delay-${i * 150} ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                 <div className={`text-4xl font-bold ${item.color} mb-3`}>{item.step}</div>
-                <h4 className="font-semibold mb-2">{item.title}</h4>
+                <h3 className="font-semibold mb-2">{item.title}</h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">{item.desc}</p>
               </div>
             ))}
