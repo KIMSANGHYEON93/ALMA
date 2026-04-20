@@ -3,6 +3,7 @@
 import { useCallback, useRef, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { GraphNodeData, GraphLinkData } from "@/lib/types";
+import { formatGraphSummary } from "@/lib/a11y";
 
 // Dynamic import with SSR disabled - react-force-graph uses Canvas/WebGL
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -170,24 +171,28 @@ export default function GraphView({
     [nodes, links]
   );
 
+  const summary = useMemo(() => formatGraphSummary(nodes, links), [nodes, links]);
+
   return (
-    <ForceGraph2D
-      ref={fgRef}
-      graphData={graphData}
-      width={width}
-      height={height}
-      backgroundColor="#030712"
-      nodeCanvasObject={nodeCanvasObject}
-      nodePointerAreaPaint={nodePointerAreaPaint}
-      linkColor={linkColor}
-      linkDirectionalArrowLength={4}
-      linkDirectionalArrowRelPos={0.9}
-      onNodeClick={(node) => onNodeClick(node as unknown as GraphNodeData)}
-      onBackgroundClick={onBackgroundClick}
-      warmupTicks={50}
-      cooldownTicks={100}
-      nodeId="id"
-      nodeVal="val"
-    />
+    <div role="img" aria-label={summary} className="relative">
+      <ForceGraph2D
+        ref={fgRef}
+        graphData={graphData}
+        width={width}
+        height={height}
+        backgroundColor="#030712"
+        nodeCanvasObject={nodeCanvasObject}
+        nodePointerAreaPaint={nodePointerAreaPaint}
+        linkColor={linkColor}
+        linkDirectionalArrowLength={4}
+        linkDirectionalArrowRelPos={0.9}
+        onNodeClick={(node) => onNodeClick(node as unknown as GraphNodeData)}
+        onBackgroundClick={onBackgroundClick}
+        warmupTicks={50}
+        cooldownTicks={100}
+        nodeId="id"
+        nodeVal="val"
+      />
+    </div>
   );
 }

@@ -82,3 +82,37 @@ export function formatCorrelationSummary(pairs: CorrelationPair[]): string {
   const negatives = strong.filter((p) => p.correlation < 0).length;
   return `습관 쌍 ${pairs.length}개 상관관계 분석. 강한 양의 상관 ${positives}쌍, 강한 음의 상관 ${negatives}쌍, 중간 상관 ${moderate.length}쌍.`;
 }
+
+// ─── Ontology Graph ───
+
+import type { GraphNodeData, GraphLinkData } from "./types";
+
+export interface GraphCategorySummary {
+  category: string;
+  count: number;
+}
+
+export function summarizeGraph(
+  nodes: GraphNodeData[],
+  links: GraphLinkData[]
+): { total: string; categories: GraphCategorySummary[] } {
+  const byCat: Record<string, number> = {};
+  nodes.forEach((n) => {
+    const c = n.parentCategory || "기타";
+    byCat[c] = (byCat[c] || 0) + 1;
+  });
+  const categories = Object.entries(byCat)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count);
+  return {
+    total: `온톨로지 그래프: 노드 ${nodes.length}개, 링크 ${links.length}개.`,
+    categories,
+  };
+}
+
+export function formatGraphSummary(nodes: GraphNodeData[], links: GraphLinkData[]): string {
+  const s = summarizeGraph(nodes, links);
+  if (s.categories.length === 0) return s.total;
+  const catText = s.categories.slice(0, 5).map((c) => `${c.category} ${c.count}개`).join(", ");
+  return `${s.total} 주요 카테고리: ${catText}.`;
+}
