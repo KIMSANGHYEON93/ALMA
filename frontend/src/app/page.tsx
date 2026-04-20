@@ -558,7 +558,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="py-8 px-6 border-t border-gray-200 dark:border-gray-800 text-center text-gray-500 text-sm">
+      <footer className="py-8 px-6 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400 text-sm">
         <span className="font-heading font-bold bg-gradient-to-r from-sky-500 to-cyan-400 bg-clip-text text-transparent">VIVARA</span>
         <span className="mx-2">—</span>
         The Origin of Your Life, Visualized

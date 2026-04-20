@@ -177,7 +177,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
               className="w-20 px-2 py-1 text-sm border rounded dark:bg-gray-800 dark:border-gray-700"
               placeholder="0"
             />
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               / {item.target_value} {item.target_unit}
             </span>
           </div>

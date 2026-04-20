@@ -140,7 +140,7 @@ export default function ConversationList({
       </div>
       <div className="flex-1 overflow-y-auto">
         {loading && (
-          <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
+          <div className="p-4 text-center text-xs text-gray-600 dark:text-gray-400">
             대화 목록 로드 중...
           </div>
         )}
@@ -160,7 +160,7 @@ export default function ConversationList({
             <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
               아직 대화가 없습니다
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               위의 &quot;+ 새 대화&quot; 버튼으로 시작해보세요
             </p>
           </div>

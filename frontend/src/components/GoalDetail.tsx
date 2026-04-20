@@ -61,7 +61,7 @@ export default function GoalDetailView({
           {detail.title}
         </h2>
         {detail.description && (
-          <div className="text-sm text-gray-500 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none">
+          <div className="text-sm text-gray-700 dark:text-gray-300 prose prose-sm dark:prose-invert max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {detail.description}
             </ReactMarkdown>
