@@ -40,7 +40,7 @@ export default function TrendLineChart({ daily }: { daily: TrendDay[] }) {
   };
 
   return (
-    <div style={{ height: "200px" }}>
+    <div style={{ height: "200px" }} aria-hidden="true">
       <Line data={chartData} options={options} />
     </div>
   );

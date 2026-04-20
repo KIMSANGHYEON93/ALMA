@@ -38,7 +38,7 @@ export default function CompletionBarChart({ habits }: { habits: CompletionHabit
   };
 
   return (
-    <div style={{ height: `${Math.max(150, habits.length * 40)}px` }}>
+    <div style={{ height: `${Math.max(150, habits.length * 40)}px` }} aria-hidden="true">
       <Bar data={chartData} options={options} />
     </div>
   );

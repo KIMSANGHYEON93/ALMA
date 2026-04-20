@@ -1,6 +1,7 @@
 "use client";
 
 import type { HeatmapData } from "@/lib/types";
+import { summarizeHeatmap, formatHeatmapSummary } from "@/lib/a11y";
 
 interface Props {
   data: HeatmapData | null;
@@ -26,11 +27,14 @@ export default function HabitHeatmap({ data }: Props) {
     return "bg-emerald-600 dark:bg-emerald-500 ring-2 ring-emerald-700 dark:ring-emerald-400 ring-offset-1 ring-offset-white dark:ring-offset-gray-900";
   };
 
+  const summary = summarizeHeatmap(data.dates, year);
+  const summaryText = formatHeatmapSummary(summary, year);
+
   return (
     <div className="p-4">
       <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">연간 습관 히트맵</h3>
-      <div className="overflow-x-auto">
-        <div className="flex gap-[3px]" style={{ minWidth: "700px" }}>
+      <div className="overflow-x-auto" role="img" aria-label={summaryText}>
+        <div className="flex gap-[3px]" style={{ minWidth: "700px" }} aria-hidden="true">
           {Array.from({ length: 53 }, (_, weekIdx) => (
             <div key={weekIdx} className="flex flex-col gap-[3px]">
               {Array.from({ length: 7 }, (_, dayIdx) => {
@@ -56,6 +60,7 @@ export default function HabitHeatmap({ data }: Props) {
         ))}
         <span>많음</span>
       </div>
+      <span className="sr-only">{summaryText}</span>
     </div>
   );
 }
