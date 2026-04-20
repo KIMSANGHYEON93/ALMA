@@ -60,7 +60,6 @@ export default function HabitHeatmap({ data }: Props) {
         ))}
         <span>많음</span>
       </div>
-      <span className="sr-only">{summaryText}</span>
     </div>
   );
 }

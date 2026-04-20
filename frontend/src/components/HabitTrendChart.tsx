@@ -22,7 +22,6 @@ export default function HabitTrendChart({ data }: Props) {
       <div role="img" aria-label={summary}>
         <ChartComponent daily={data.daily} />
       </div>
-      <span className="sr-only">{summary}</span>
     </div>
   );
 }

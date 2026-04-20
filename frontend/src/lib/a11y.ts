@@ -22,7 +22,7 @@ export function summarizeHeatmap(dates: Record<string, number>, year: number): H
   let curStreak = 0;
   let mostActiveCount = 0;
 
-  for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     totalDays += 1;
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     const count = dates[key] || 0;
@@ -61,6 +61,10 @@ export function formatTrendSummary(daily: TrendDay[]): string {
 // CompletionHabit.rate는 0~100 사이의 퍼센트 값
 export function formatCompletionSummary(habits: CompletionHabit[]): string {
   if (habits.length === 0) return "완료율 데이터 없음.";
+  if (habits.length === 1) {
+    const h = habits[0];
+    return `습관 1개 완료율. ${h.title} ${Math.round(h.rate)}%.`;
+  }
   const sorted = [...habits].sort((a, b) => b.rate - a.rate);
   const top = sorted[0];
   const bottom = sorted[sorted.length - 1];

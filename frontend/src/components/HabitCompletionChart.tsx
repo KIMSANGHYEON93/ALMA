@@ -22,7 +22,6 @@ export default function HabitCompletionChart({ data }: Props) {
       <div role="img" aria-label={summary}>
         <ChartComponent habits={data.habits} />
       </div>
-      <span className="sr-only">{summary}</span>
     </div>
   );
 }
