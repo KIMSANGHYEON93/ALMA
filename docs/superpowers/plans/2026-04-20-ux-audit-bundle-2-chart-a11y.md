@@ -38,6 +38,50 @@ Bundle 1과 병렬 진행 가능 — 겹치는 파일 없음.
 
 ---
 
+## Task 2.0: Bundle 1 Carryover — 추가 본문 대비 수정
+
+**배경:** Bundle 1 최종 리뷰에서 Task 1.1 대상 파일 목록에 포함되지 않았던 컴포넌트 본문 텍스트 5곳이 미처리로 남았음. Bundle 2 차트 작업 전에 정리.
+
+### 변경 대상 (5곳)
+
+| 파일 | 라인 | 현재 | 목표 |
+|---|---|---|---|
+| `frontend/src/components/HabitCard.tsx` | L180 | `text-sm text-gray-500` | `text-sm text-gray-600 dark:text-gray-400` |
+| `frontend/src/components/GoalDetail.tsx` | L64 | `text-sm text-gray-500 dark:text-gray-400` | `text-sm text-gray-700 dark:text-gray-300` (description prose, 본문 성격) |
+| `frontend/src/components/ConversationList.tsx` | L143 | `text-xs text-gray-500 dark:text-gray-400` | `text-xs text-gray-600 dark:text-gray-400` |
+| `frontend/src/components/ConversationList.tsx` | L163 | `text-xs text-gray-500 dark:text-gray-400` | `text-xs text-gray-600 dark:text-gray-400` |
+| `frontend/src/app/page.tsx` | L561 | `... text-center text-gray-500 text-sm` | `... text-center text-gray-600 dark:text-gray-400 text-sm` (footer, dark 짝 추가) |
+
+### 건드리지 말 것 (의도적 약화)
+
+- `GoalDetail.tsx` L146 — `text-gray-400 dark:text-gray-500 line-through` (완료된 마일스톤 strikethrough, 의도적 약화)
+- `MessageBubble.tsx` L68 — `text-gray-500 dark:text-gray-300` (hover-interactive 복사 버튼 내부, `hover:text-sky-600` 전환 있음, 보존 규칙 적용)
+
+### Acceptance Criteria
+
+- [ ] 위 5곳 모두 변경됨
+- [ ] 의도적 약화 2곳은 보존됨
+- [ ] Lint/Type 오류 없음
+
+### 실행
+
+```bash
+cd C:/Users/sha2.kim/alma
+# Edit 도구로 각 라인 변경
+
+cd frontend
+npm run lint && npx tsc --noEmit
+
+cd ..
+git add frontend/src/components/HabitCard.tsx \
+        frontend/src/components/GoalDetail.tsx \
+        frontend/src/components/ConversationList.tsx \
+        frontend/src/app/page.tsx
+git commit -m "fix(a11y): carryover contrast fixes from Bundle 1 review"
+```
+
+---
+
 ## Task 2.1: HabitHeatmap 색맹 대응
 
 **문제:** 현재 intensity 4단계가 순수 색상(emerald-200~600)만으로 구분 — 적록색맹 사용자는 단계를 구분 못함.
