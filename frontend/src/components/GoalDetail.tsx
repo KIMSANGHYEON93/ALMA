@@ -152,7 +152,7 @@ export default function GoalDetailView({
               <button
                 onClick={() => onDeleteMilestone(ms.id)}
                 aria-label={`${ms.title} 마일스톤 삭제`}
-                className="relative p-2 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition before:absolute before:inset-[-6px] before:content-['']"
+                className="relative p-2 text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition before:absolute before:inset-[-6px] before:content-['']"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
