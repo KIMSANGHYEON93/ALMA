@@ -93,7 +93,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
               disabled={loading}
               aria-label={`${item.title} 완료 토글`}
               aria-pressed={item.completed}
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition ${
+              className={`relative w-6 h-6 rounded-full border-2 flex items-center justify-center transition before:absolute before:inset-[-10px] before:content-[''] ${
                 item.completed
                   ? "bg-emerald-500 border-emerald-500 text-white"
                   : "border-gray-300 dark:border-gray-600 hover:border-emerald-400"
@@ -125,7 +125,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
             aria-label={`${item.title} 옵션 메뉴`}
             aria-haspopup="menu"
             aria-expanded={showMenu}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-3.5 -m-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="5" r="1.5" />
@@ -193,7 +193,7 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
       {/* Note toggle */}
       <button
         onClick={() => setShowNote(!showNote)}
-        className="mt-2 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        className="mt-2 py-2 px-3 -ml-3 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
       >
         {showNote ? "메모 접기" : "메모"}
       </button>

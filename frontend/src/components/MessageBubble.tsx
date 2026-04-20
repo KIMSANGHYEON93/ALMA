@@ -63,9 +63,9 @@ export default React.memo(function MessageBubble({
           onClick={handleCopy}
           aria-label="메시지 복사"
           title={copied ? "복사됨" : "복사"}
-          className={`absolute -top-2 ${
-            isUser ? "-left-8" : "-right-8"
-          } opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-7 h-7 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 shadow-sm border border-gray-200 dark:border-gray-600 text-sm`}
+          className={`absolute -top-3 ${
+            isUser ? "-left-12" : "-right-12"
+          } opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity w-11 h-11 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 shadow-sm border border-gray-200 dark:border-gray-600 text-sm`}
         >
           {copied ? "✓" : "⎘"}
         </button>
