@@ -20,44 +20,54 @@ export function useHabitAnalytics(days: number = 30) {
   const [insight, setInsight] = useState<InsightResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [insightLoading, setInsightLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [insightError, setInsightError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const year = new Date().getFullYear();
-      const [h, t, c, cor] = await Promise.all([
-        apiClient<HeatmapData>(`/api/habits/analytics/heatmap?year=${year}`, { token }),
-        apiClient<TrendData>(`/api/habits/analytics/trends?days=${days}`, { token }),
-        apiClient<CompletionData>(`/api/habits/analytics/completion?days=${days}`, { token }),
-        apiClient<CorrelationData>(`/api/habits/analytics/correlations?days=${days}`, { token }),
-      ]);
-      setHeatmap(h);
-      setTrends(t);
-      setCompletion(c);
-      setCorrelations(cor);
-    } catch {
-      // handled
-    } finally {
-      setLoading(false);
-    }
-  }, [token, days]);
+  const fetchData = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const year = new Date().getFullYear();
+        const [h, t, c, cor] = await Promise.all([
+          apiClient<HeatmapData>(`/api/habits/analytics/heatmap?year=${year}`, { token, signal }),
+          apiClient<TrendData>(`/api/habits/analytics/trends?days=${days}`, { token, signal }),
+          apiClient<CompletionData>(`/api/habits/analytics/completion?days=${days}`, { token, signal }),
+          apiClient<CorrelationData>(`/api/habits/analytics/correlations?days=${days}`, { token, signal }),
+        ]);
+        setHeatmap(h);
+        setTrends(t);
+        setCompletion(c);
+        setCorrelations(cor);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "분석 데이터 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, days]
+  );
 
   useEffect(() => {
-    fetchData();
+    const ctrl = new AbortController();
+    fetchData(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchData]);
 
   const generateInsight = useCallback(async () => {
     if (!token) return;
     setInsightLoading(true);
+    setInsightError(null);
     try {
       const result = await apiClient<InsightResult>("/api/habits/analytics/insight", {
         method: "POST",
         token,
       });
       setInsight(result);
-    } catch {
-      // handled
+    } catch (err) {
+      setInsightError(err instanceof Error ? err.message : "인사이트 생성 실패");
     } finally {
       setInsightLoading(false);
     }
@@ -71,7 +81,9 @@ export function useHabitAnalytics(days: number = 30) {
     insight,
     loading,
     insightLoading,
+    error,
+    insightError,
     generateInsight,
-    refresh: fetchData,
+    refresh: () => fetchData(),
   };
 }

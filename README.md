@@ -1,8 +1,8 @@
-# VIVARA — Adaptive Life Management Agent
+# VIVARA — The Origin of Your Life, Visualized
 
-> Self-learning AI personal assistant that grows with you.
+> 삶의 모든 데이터에 의미를 부여하고, 관계를 발견하고, 성장의 방향을 제시하는 인지 엔진
 
-VIVARA (formerly ALMA)는 사용자의 목표, 습관, 지식을 관리하고 성장을 돕는 AI 비서입니다. 대화를 기억하고, 패턴을 학습하며, 반복 작업을 자동화합니다.
+VIVARA는 사용자의 목표, 습관, 지식을 관리하고 성장을 돕는 AI 인지 엔진입니다. 대화를 기억하고, 패턴을 학습하며, 관계를 시각화하고, 반복 작업을 자동화합니다.
 
 ## Features
 

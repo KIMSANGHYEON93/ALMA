@@ -5,54 +5,82 @@ import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
 import type { OntologyAutomation, OntologyAutomationLog } from "@/lib/types";
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && (err.name === "AbortError" || /aborted/i.test(err.message));
+}
+
 export function useOntologyAutomations() {
   const { token } = useAuth();
   const [automations, setAutomations] = useState<OntologyAutomation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchAutomations = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const data = await apiClient<OntologyAutomation[]>(
-        "/api/ontology/automations",
-        { token }
-      );
-      setAutomations(data);
-    } catch {
-      // 401 handled by apiClient
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchAutomations = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        setLoading(true);
+        const data = await apiClient<OntologyAutomation[]>(
+          "/api/ontology/automations",
+          { token, signal }
+        );
+        setAutomations(data);
+      } catch (err) {
+        if (!isAbortError(err)) {
+          setError(err instanceof Error ? err.message : "자동화 조회 실패");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
-  useEffect(() => { fetchAutomations(); }, [fetchAutomations]);
-  return { automations, loading, refresh: fetchAutomations };
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetchAutomations(ctrl.signal);
+    return () => ctrl.abort();
+  }, [fetchAutomations]);
+
+  return { automations, loading, error, refresh: () => fetchAutomations() };
 }
 
 export function useAutomationLogs() {
   const { token } = useAuth();
   const [logs, setLogs] = useState<OntologyAutomationLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchLogs = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const data = await apiClient<OntologyAutomationLog[]>(
-        "/api/ontology/automations/logs",
-        { token }
-      );
-      setLogs(data);
-    } catch {
-      // 401 handled by apiClient
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchLogs = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        setLoading(true);
+        const data = await apiClient<OntologyAutomationLog[]>(
+          "/api/ontology/automations/logs",
+          { token, signal }
+        );
+        setLogs(data);
+      } catch (err) {
+        if (!isAbortError(err)) {
+          setError(err instanceof Error ? err.message : "로그 조회 실패");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
-  return { logs, loading, refresh: fetchLogs };
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetchLogs(ctrl.signal);
+    return () => ctrl.abort();
+  }, [fetchLogs]);
+
+  return { logs, loading, error, refresh: () => fetchLogs() };
 }
 
 export async function createAutomation(

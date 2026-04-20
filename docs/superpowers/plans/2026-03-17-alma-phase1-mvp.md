@@ -1,4 +1,4 @@
-# ALMA Phase 1 MVP Implementation Plan
+# VIVARA Phase 1 MVP Implementation Plan (formerly ALMA)
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 

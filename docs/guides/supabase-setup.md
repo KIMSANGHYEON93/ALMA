@@ -1,4 +1,4 @@
-# Supabase 설정 가이드 (ALMA 개발환경)
+# Supabase 설정 가이드 (VIVARA 개발환경)
 
 ## 1. 프로젝트 생성
 

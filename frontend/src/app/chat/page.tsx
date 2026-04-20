@@ -4,6 +4,7 @@ import { useState } from "react";
 import ChatWindow from "@/components/ChatWindow";
 import ConversationList from "@/components/ConversationList";
 import NavBar from "@/components/common/NavBar";
+import Spinner from "@/components/common/Spinner";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ChatPage() {
@@ -13,7 +14,7 @@ export default function ChatPage() {
   if (isLoading || !token) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <span className="text-gray-400">로딩 중...</span>
+        <Spinner size="md" label="로딩 중" />
       </div>
     );
   }

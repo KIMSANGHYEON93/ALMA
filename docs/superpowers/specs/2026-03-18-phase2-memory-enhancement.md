@@ -1,6 +1,6 @@
 # Phase 2: Memory Enhancement — Spec Document
 
-> **Goal:** ALMA가 대화를 기억하고, 과거 맥락을 활용하며, 사용자를 점진적으로 학습하는 메모리 시스템 구축
+> **Goal:** VIVARA가 대화를 기억하고, 과거 맥락을 활용하며, 사용자를 점진적으로 학습하는 메모리 시스템 구축
 
 ## 1. 스코프
 

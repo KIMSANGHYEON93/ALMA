@@ -46,6 +46,10 @@ function transformGraphData(graph: OntologyGraph): {
   return { nodes, links };
 }
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && (err.name === "AbortError" || err.message.includes("aborted"));
+}
+
 export function useOntologyGraph() {
   const { token } = useAuth();
   const [graphData, setGraphData] = useState<{
@@ -53,25 +57,35 @@ export function useOntologyGraph() {
     links: GraphLinkData[];
   }>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchGraph = useCallback(async () => {
-    if (!token) return;
-    try {
-      setLoading(true);
-      const data = await apiClient<OntologyGraph>("/api/ontology/graph", {
-        token,
-      });
-      setGraphData(transformGraphData(data));
-    } catch {
-      // 401 handled by apiClient
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchGraph = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        setLoading(true);
+        const data = await apiClient<OntologyGraph>("/api/ontology/graph", {
+          token,
+          signal,
+        });
+        setGraphData(transformGraphData(data));
+      } catch (err) {
+        if (!isAbortError(err)) {
+          setError(err instanceof Error ? err.message : "그래프 조회 실패");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchGraph();
+    const ctrl = new AbortController();
+    fetchGraph(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchGraph]);
 
-  return { graphData, loading, refresh: fetchGraph };
+  return { graphData, loading, error, refresh: () => fetchGraph() };
 }

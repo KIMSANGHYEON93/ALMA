@@ -94,11 +94,11 @@ TELEGRAM_ALLOWED_USERS=123456,789012  # 허용된 Telegram user_id
 ### 4.3 동작
 
 1. Telegram → webhook POST `/api/telegram/webhook`
-2. user_id → ALMA user 매핑 (DB에 telegram_id 저장)
+2. user_id → VIVARA user 매핑 (DB에 telegram_id 저장)
 3. ChannelService.process_message() 호출
 4. 응답을 Telegram sendMessage API로 전송
 
-### 4.4 Telegram user ↔ ALMA user 매핑
+### 4.4 Telegram user ↔ VIVARA user 매핑
 
 첫 메시지 시 `/start {email}` 명령으로 기존 계정 연결. `telegram_id` → user_id 매핑 테이블 or preferences에 저장.
 

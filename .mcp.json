@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vexp": {
+      "command": "vexp",
+      "args": ["mcp", "--workspace", "C:\\Users\\sha2.kim\\alma", "--proxy"]
+    }
+  }
+}

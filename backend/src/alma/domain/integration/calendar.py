@@ -44,11 +44,18 @@ class GoogleCalendarProvider:
     async def _refresh_token_if_needed(self) -> None:
         from datetime import datetime, timezone
 
+        # token_expiry가 None이면 만료 여부 불명 → 재발급 시도 (첫 호출 케이스)
         if (
             self.integration.token_expiry
             and datetime.now(timezone.utc) < self.integration.token_expiry
         ):
             return
+
+        if not self.integration.refresh_token:
+            if self.integration_repo:
+                await self.integration_repo.update_status(self.integration, "expired")
+            raise RuntimeError("No refresh_token available — user must reconnect Google account")
+
         try:
             creds = self._get_credentials()
 
@@ -59,10 +66,20 @@ class GoogleCalendarProvider:
                 return creds
 
             creds = await asyncio.to_thread(_refresh)
-            self.integration.access_token = encrypt_token(creds.token)
-            self.integration.token_expiry = creds.expiry
+            new_access = encrypt_token(creds.token)
+
+            # DB에 새 토큰 명시적으로 영속화 (다음 요청에서 재사용 가능)
             if self.integration_repo:
-                await self.integration_repo.update_status(self.integration, "active")
+                await self.integration_repo.update_tokens(
+                    self.integration,
+                    access_token=new_access,
+                    token_expiry=creds.expiry,
+                    status="active",
+                )
+            else:
+                # 레포 없으면 메모리만 업데이트
+                self.integration.access_token = new_access
+                self.integration.token_expiry = creds.expiry
         except Exception:
             if self.integration_repo:
                 await self.integration_repo.update_status(self.integration, "expired")

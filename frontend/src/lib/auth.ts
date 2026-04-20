@@ -29,6 +29,11 @@ export async function register(
   });
 }
 
+function notifyTokenChanged(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("vivara:token-changed"));
+}
+
 export function saveToken(access: string, refresh: string): void {
   if (!access || !refresh) return;
   localStorage.setItem("alma_access_token", access);
@@ -36,6 +41,8 @@ export function saveToken(access: string, refresh: string): void {
 
   // middleware(서버 사이드)에서 인증 확인할 수 있도록 cookie에도 저장
   document.cookie = `alma_access_token=${access}; path=/; SameSite=Lax; max-age=86400`;
+
+  notifyTokenChanged();
 }
 
 export function getToken(): string | null {
@@ -49,6 +56,37 @@ export function getRefreshToken(): string | null {
   return localStorage.getItem("alma_refresh_token");
 }
 
+export async function findAccount(
+  email: string
+): Promise<{ found: boolean; email?: string }> {
+  return apiClient("/api/auth/find-account", {
+    method: "POST",
+    body: { email },
+    skipAuthRedirect: true,
+  });
+}
+
+export async function resetPassword(
+  email: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  return apiClient("/api/auth/reset-password", {
+    method: "POST",
+    body: { email, new_password: newPassword },
+    skipAuthRedirect: true,
+  });
+}
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  return apiClient("/api/auth/change-password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  });
+}
+
 export function clearTokens(): void {
   localStorage.removeItem("alma_access_token");
   localStorage.removeItem("alma_refresh_token");
@@ -56,4 +94,6 @@ export function clearTokens(): void {
   // cookie도 함께 삭제
   document.cookie =
     "alma_access_token=; path=/; SameSite=Lax; max-age=0";
+
+  notifyTokenChanged();
 }

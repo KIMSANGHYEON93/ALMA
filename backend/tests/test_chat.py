@@ -1,9 +1,21 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from alma.infrastructure.llm.base import LLMResponse
+from alma.infrastructure.llm.base import LLMStreamChunk
 from alma.models.models import Conversation, User
 from alma.domain.chat.service import ChatService
+
+
+async def _mock_stream(*_args, **_kwargs):
+    """Async iterator mock yielding a single-chunk response."""
+    yield LLMStreamChunk(delta="I'll help you with that!", is_final=False)
+    yield LLMStreamChunk(
+        delta="",
+        is_final=True,
+        input_tokens=10,
+        output_tokens=5,
+        model="test",
+    )
 
 
 @pytest.mark.asyncio
@@ -15,13 +27,9 @@ async def test_process_message(db_session):
     db_session.add(conv)
     await db_session.flush()
 
-    mock_llm = AsyncMock()
-    mock_llm.complete.return_value = LLMResponse(
-        content="I'll help you with that!",
-        model="test",
-        input_tokens=10,
-        output_tokens=5,
-    )
+    # Mock LLM with stream() returning async generator
+    mock_llm = MagicMock()
+    mock_llm.stream = MagicMock(side_effect=lambda *a, **kw: _mock_stream())
 
     service = ChatService(session=db_session, llm=mock_llm)
 
@@ -44,4 +52,4 @@ async def test_process_message(db_session):
                 )
 
     assert "I'll help you with that!" in response
-    mock_llm.complete.assert_called_once()
+    mock_llm.stream.assert_called_once()

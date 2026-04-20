@@ -103,6 +103,22 @@ class IntegrationRepository:
         await self.session.refresh(integration)
         return integration
 
+    async def update_tokens(
+        self,
+        integration: Integration,
+        access_token: str,
+        token_expiry: datetime | None = None,
+        status: str = "active",
+    ) -> Integration:
+        """OAuth 토큰 갱신 후 DB에 명시적으로 영속화."""
+        integration.access_token = access_token
+        if token_expiry is not None:
+            integration.token_expiry = token_expiry
+        integration.status = status
+        await self.session.commit()
+        await self.session.refresh(integration)
+        return integration
+
     async def delete(self, integration_id: uuid.UUID) -> None:
         integration = await self.get(integration_id)
         if integration:

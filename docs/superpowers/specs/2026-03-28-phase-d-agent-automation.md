@@ -2,7 +2,7 @@
 
 ## 1. 개요
 
-Phase C의 인사이트를 기반으로 자동화 규칙을 설정하고, 에이전트가 자율적으로 행동을 실행한다. 기존 ALMA 인프라(Google Calendar, 이벤트 버스, 알림)를 활용하여 최소한의 새 코드로 자율화를 구현한다.
+Phase C의 인사이트를 기반으로 자동화 규칙을 설정하고, 에이전트가 자율적으로 행동을 실행한다. 기존 VIVARA 인프라(Google Calendar, 이벤트 버스, 알림)를 활용하여 최소한의 새 코드로 자율화를 구현한다.
 
 **핵심:** Insight → ActionPlanner (LLM) → ActionExecutor → 기존 시스템
 

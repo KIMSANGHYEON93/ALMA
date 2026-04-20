@@ -36,7 +36,7 @@ def extract_text(filename: str, file_bytes: bytes) -> str:
         return extract_pdf_text(file_bytes)
     elif lower.endswith(".docx"):
         return extract_docx_text(file_bytes)
-    elif lower.endswith(".txt"):
+    elif lower.endswith(".txt") or lower.endswith(".md") or lower.endswith(".markdown"):
         return file_bytes.decode("utf-8", errors="replace")
     else:
         raise ValueError(f"Unsupported file type: {filename}")

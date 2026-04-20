@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** ALMA가 대화를 기억하고, 과거 맥락을 벡터 검색으로 활용하며, 사용자를 점진적으로 학습하는 메모리 시스템을 구축한다.
+**Goal:** VIVARA가 대화를 기억하고, 과거 맥락을 벡터 검색으로 활용하며, 사용자를 점진적으로 학습하는 메모리 시스템을 구축한다.
 
 **Architecture:** Claude Memory Tool 패턴 참고 — 구조화된 메모리(user_memories 테이블) + 벡터 검색 + just-in-time context retrieval. EmbeddingProvider Protocol로 Gemini/OpenAI 교체 가능. 사용자 프로필은 명시적 설정(preferences) + 대화 기반 암묵적 학습(BackgroundTasks).
 

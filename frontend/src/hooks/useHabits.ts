@@ -10,25 +10,33 @@ export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [todaySummary, setTodaySummary] = useState<TodaySummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    if (!token) return;
-    try {
-      const [habitsData, summary] = await Promise.all([
-        apiClient<Habit[]>("/api/habits?status=active", { token }),
-        apiClient<TodaySummary>("/api/habits/today", { token }),
-      ]);
-      setHabits(habitsData);
-      setTodaySummary(summary);
-    } catch {
-      // handled
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchData = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        const [habitsData, summary] = await Promise.all([
+          apiClient<Habit[]>("/api/habits?status=active", { token, signal }),
+          apiClient<TodaySummary>("/api/habits/today", { token, signal }),
+        ]);
+        setHabits(habitsData);
+        setTodaySummary(summary);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "습관 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchData();
+    const ctrl = new AbortController();
+    fetchData(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchData]);
 
   const createHabit = async (data: HabitCreate) => {
@@ -77,10 +85,11 @@ export function useHabits() {
     habits,
     todaySummary,
     loading,
+    error,
     createHabit,
     updateHabit,
     deleteHabit,
     checkin,
-    refresh: fetchData,
+    refresh: () => fetchData(),
   };
 }

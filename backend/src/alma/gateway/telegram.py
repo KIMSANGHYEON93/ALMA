@@ -78,7 +78,7 @@ async def telegram_webhook(request: Request):
         await _send_telegram(
             chat_id,
             (
-                "ALMA입니다!\n\n"
+                "VIVARA입니다!\n\n"
                 "계정을 연결하려면 웹 설정에서 Telegram ID를 등록해주세요.\n"
                 f"당신의 Telegram ID: `{telegram_user_id}`"
             ),

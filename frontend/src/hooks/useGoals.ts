@@ -13,30 +13,38 @@ export function useGoals() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [summary, setSummary] = useState<GoalSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchGoals = useCallback(async () => {
-    if (!token) return;
-    try {
-      const [goalsData, summaryData] = await Promise.all([
-        apiClient<Goal[]>("/api/goals", { token }),
-        apiClient<GoalSummary>("/api/goals/summary", { token }),
-      ]);
-      setGoals(goalsData);
-      setSummary(summaryData);
-    } catch {
-      // 401 handled by apiClient
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchGoals = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        const [goalsData, summaryData] = await Promise.all([
+          apiClient<Goal[]>("/api/goals", { token, signal }),
+          apiClient<GoalSummary>("/api/goals/summary", { token, signal }),
+        ]);
+        setGoals(goalsData);
+        setSummary(summaryData);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "목표 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchGoals();
+    const ctrl = new AbortController();
+    fetchGoals(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchGoals]);
 
   // 다른 페이지에서 목표 변경 시 자동 갱신
   useEffect(() => {
-    return onGoalsChanged(fetchGoals);
+    return onGoalsChanged(() => fetchGoals());
   }, [fetchGoals]);
 
   const createGoal = async (data: {
@@ -73,7 +81,16 @@ export function useGoals() {
     await fetchGoals();
   };
 
-  return { goals, summary, loading, createGoal, deleteGoal, updateGoalStatus, refresh: fetchGoals };
+  return {
+    goals,
+    summary,
+    loading,
+    error,
+    createGoal,
+    deleteGoal,
+    updateGoalStatus,
+    refresh: () => fetchGoals(),
+  };
 }
 
 export function useGoalDetail(goalId: string | null) {

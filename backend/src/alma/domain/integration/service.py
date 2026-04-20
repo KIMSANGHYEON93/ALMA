@@ -57,12 +57,37 @@ class IntegrationService:
             "Message: " + user_message
         )
 
+        # 인텐트 감지는 단순 분류 작업 — 빠르고 저렴한 모델로 고정
+        # LLMRouter인 경우 provider별 가장 가벼운 모델을 명시적으로 지정
+        fast_models = {
+            "claude": "claude-haiku-4-5-20251001",
+            "openai": "gpt-4o-mini",
+            "gemini": "gemini-2.0-flash",
+        }
+        provider_name = None
+        request_model: str | None = None
+        if hasattr(self.llm, "providers") and isinstance(getattr(self.llm, "providers", None), dict):
+            # Router available — prefer claude haiku, fallback to any available provider
+            for p in ("claude", "openai", "gemini"):
+                if p in self.llm.providers:
+                    provider_name = p
+                    request_model = fast_models[p]
+                    break
+
         request = LLMRequest(
             messages=[ChatMessage(role="user", content=prompt)],
             max_tokens=500,
             temperature=0.0,
+            model=request_model,
         )
-        response = await self.llm.complete(request)
+        if provider_name and hasattr(self.llm, "complete"):
+            # LLMRouter는 provider_name 파라미터 지원
+            try:
+                response = await self.llm.complete(request, provider_name=provider_name)  # type: ignore
+            except TypeError:
+                response = await self.llm.complete(request)
+        else:
+            response = await self.llm.complete(request)
 
         try:
             data = json.loads(response.content)
@@ -118,7 +143,19 @@ class IntegrationService:
         return result
 
     async def _execute_calendar_action(self, user_id: str, intent: ActionIntent) -> dict:
+        # 먼저 active로 시도, 없으면 expired(재발급 가능한 상태) 시도
         integration = await self.integration_repo.get_active(uuid.UUID(user_id), "google_calendar")
+        if not integration:
+            # expired 상태여도 refresh_token이 있으면 복구 시도
+            all_integrations = await self.integration_repo.list_by_user(uuid.UUID(user_id))
+            integration = next(
+                (
+                    i
+                    for i in all_integrations
+                    if i.provider == "google_calendar" and i.refresh_token
+                ),
+                None,
+            )
         if not integration:
             return {
                 "error": "Google Calendar not connected",

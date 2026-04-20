@@ -2,7 +2,7 @@
 
 ## 사전 준비
 
-- ALMA 앱 ID: `1488065902048968704`
+- VIVARA 앱 ID: `1488065902048968704`
 - Public Key: `d5e2d68012cdb547239fa5d5fba08976210916fe1e4575d0ff2b799292d222ca`
 
 ---
@@ -69,7 +69,7 @@ uvicorn alma.main:app --reload --port 8000
 Discord 서버에서:
 - `!help` — 사용 가능한 명령어
 - `!id` — Discord ID 확인
-- 일반 메시지 → ALMA가 AI 응답
+- 일반 메시지 → VIVARA가 AI 응답
 
 ## Telegram 설정
 

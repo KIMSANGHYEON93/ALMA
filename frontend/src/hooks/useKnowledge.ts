@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { apiClient } from "@/lib/api";
+import { apiClient, uploadFormData } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import type { KnowledgeDocument } from "@/lib/types";
 
@@ -9,22 +9,29 @@ export function useKnowledge() {
   const { token } = useAuth();
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchDocs = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const data = await apiClient<KnowledgeDocument[]>("/api/knowledge", { token });
-      setDocuments(data);
-    } catch {
-      // handled
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchDocs = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        const data = await apiClient<KnowledgeDocument[]>("/api/knowledge", { token, signal });
+        setDocuments(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "문서 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchDocs();
+    const ctrl = new AbortController();
+    fetchDocs(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchDocs]);
 
   const addDocument = async (title: string, content: string) => {
@@ -49,18 +56,12 @@ export function useKnowledge() {
 
   const addFile = async (title: string, file: File) => {
     if (!token) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    const res = await fetch("/api/knowledge/upload", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
+    await uploadFormData<KnowledgeDocument>("/api/knowledge/upload", () => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("title", title);
+      return fd;
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: "Upload failed" }));
-      throw new Error(err.detail || "Upload failed");
-    }
     await fetchDocs();
   };
 
@@ -70,5 +71,14 @@ export function useKnowledge() {
     await fetchDocs();
   };
 
-  return { documents, loading, addDocument, addFromUrl, addFile, deleteDocument, refresh: fetchDocs };
+  return {
+    documents,
+    loading,
+    error,
+    addDocument,
+    addFromUrl,
+    addFile,
+    deleteDocument,
+    refresh: () => fetchDocs(),
+  };
 }

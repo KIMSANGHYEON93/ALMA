@@ -9,22 +9,32 @@ export function useAutomations() {
   const { token } = useAuth();
   const [rules, setRules] = useState<AutomationRule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchRules = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const data = await apiClient<AutomationRule[]>("/api/automations?active_only=false", { token });
-      setRules(data);
-    } catch {
-      // handled
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const fetchRules = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!token) return;
+      setError(null);
+      try {
+        const data = await apiClient<AutomationRule[]>("/api/automations?active_only=false", {
+          token,
+          signal,
+        });
+        setRules(data);
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "자동화 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
-    fetchRules();
+    const ctrl = new AbortController();
+    fetchRules(ctrl.signal);
+    return () => ctrl.abort();
   }, [fetchRules]);
 
   const createRule = async (data: AutomationRuleCreate) => {
@@ -52,5 +62,5 @@ export function useAutomations() {
     await fetchRules();
   };
 
-  return { rules, loading, createRule, deleteRule, toggleRule, refresh: fetchRules };
+  return { rules, loading, error, createRule, deleteRule, toggleRule, refresh: () => fetchRules() };
 }

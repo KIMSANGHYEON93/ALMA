@@ -1,7 +1,7 @@
-# ALMA Phase 1 MVP — Spec Document
+# VIVARA Phase 1 MVP — Spec Document (formerly ALMA)
 
-> **ALMA** — Adaptive Life Management Agent
-> "인간이 원하는 삶의 성장을 목표로 하는 미래를 만들어가는 AI 비서"
+> **VIVARA** — The Origin of Your Life, Visualized
+> "삶의 모든 데이터에 의미를 부여하고, 관계를 발견하고, 성장의 방향을 제시하는 인지 엔진"
 >
 > 비전 문서: `2026-03-17-alma-vision.md`
 
@@ -337,7 +337,7 @@ ChatService.process_message()
 
 ```yaml
 # .github/workflows/ci.yml
-name: ALMA CI
+name: VIVARA CI
 on: [push, pull_request]
 
 jobs:

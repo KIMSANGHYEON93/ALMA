@@ -104,7 +104,7 @@ async def test_completion_rate(db_session: AsyncSession, test_user):
 @pytest.mark.asyncio
 async def test_correlation_positive(db_session: AsyncSession, test_user):
     service = HabitService(db_session)
-    start = date(2026, 3, 1)
+    start = date.today() - timedelta(days=13)
     h1 = await service.create_habit(
         test_user.id, "운동", frequency_type="daily", frequency_value={}, start_date=start
     )
@@ -129,7 +129,7 @@ async def test_correlation_positive(db_session: AsyncSession, test_user):
 @pytest.mark.asyncio
 async def test_correlation_no_overlap(db_session: AsyncSession, test_user):
     service = HabitService(db_session)
-    start = date(2026, 3, 1)
+    start = date.today() - timedelta(days=13)
     h1 = await service.create_habit(
         test_user.id, "A", frequency_type="daily", frequency_value={}, start_date=start
     )

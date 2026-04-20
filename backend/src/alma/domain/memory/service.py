@@ -21,7 +21,9 @@ class MemoryService:
         self.message_repo = MessageRepository(session)
         self.conversation_repo = ConversationRepository(session)
 
-    async def store_message(self, conversation_id: str, role: str, content: str) -> None:
+    async def store_message(
+        self, conversation_id: str, role: str, content: str, user_id: str | None = None
+    ) -> None:
         embedding = await self._get_embedding(content)
         msg = await self.message_repo.create(
             conversation_id=uuid.UUID(conversation_id),
@@ -33,8 +35,13 @@ class MemoryService:
             from alma.core.events.helpers import emit
             await emit(
                 "memory.created", "memory",
-                {"memory_id": str(msg.id), "content": content, "category": role},
-                user_id=str(conversation_id), aggregate_id=str(msg.id),
+                {
+                    "memory_id": str(msg.id),
+                    "conversation_id": str(conversation_id),
+                    "content": content,
+                    "role": role,
+                },
+                user_id=user_id, aggregate_id=str(msg.id),
             )
         except Exception:
             pass

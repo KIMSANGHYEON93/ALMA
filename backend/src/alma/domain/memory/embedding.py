@@ -23,6 +23,8 @@ class GeminiEmbedding:
         self._client = genai.Client(api_key=api_key)
 
     async def embed(self, text: str) -> list[float] | None:
+        if not text or not text.strip():
+            return None
         try:
             result = await asyncio.to_thread(
                 self._client.models.embed_content,
@@ -45,6 +47,8 @@ class OpenAIEmbedding:
         self._client = openai.AsyncOpenAI(api_key=api_key)
 
     async def embed(self, text: str) -> list[float] | None:
+        if not text or not text.strip():
+            return None
         try:
             response = await self._client.embeddings.create(
                 model="text-embedding-3-small",

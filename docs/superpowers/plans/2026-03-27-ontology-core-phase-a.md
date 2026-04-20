@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** ALMA에 팔란티어 스타일 온톨로지 코어를 추가하여 모든 데이터에 의미를 부여하고 관계를 연결하는 인지 엔진 기반을 구축한다.
+**Goal:** VIVARA에 팔란티어 스타일 온톨로지 코어를 추가하여 모든 데이터에 의미를 부여하고 관계를 연결하는 인지 엔진 기반을 구축한다.
 
 **Architecture:** 기존 PostgreSQL에 6개 온톨로지 테이블(ontology_object_types, ontology_objects, ontology_link_types, ontology_links, ontology_action_types, ontology_action_logs)을 추가. LLM 기반 SemanticExtractor가 텍스트에서 노드/엣지를 추출하고, 4단계 PurificationPipeline(중복제거→스키마검증→정규화→신뢰도게이트)을 거쳐 검증된 데이터만 저장. 5개 DomainAdapter(Goal, Habit, Chat, Memory, Knowledge)가 기존 바운디드 컨텍스트와 양방향 싱크.
 
