@@ -21,7 +21,7 @@ export default function HabitTodaySummary({ summary }: Props) {
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
-          className="bg-emerald-500 h-2 rounded-full transition-all"
+          className="bg-emerald-500 h-2 rounded-full transition-[width] duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>

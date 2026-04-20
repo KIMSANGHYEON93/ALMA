@@ -511,7 +511,7 @@ export default function OntologyImportPage() {
       {toast && (
         <div
           role="alert"
-          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium transition-all ${
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium transition-colors duration-300 ${
             toast.type === "success"
               ? "bg-green-800 text-green-100 border border-green-600"
               : "bg-red-900 text-red-100 border border-red-700"

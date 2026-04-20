@@ -25,7 +25,7 @@ export default function Toast({ message, type = "success", onClose, duration = 3
     <div
       role={type === "error" ? "alert" : "status"}
       aria-live={type === "error" ? "assertive" : "polite"}
-      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm text-white transition-all duration-300 flex items-center gap-3 max-w-sm ${
+      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm text-white transition-[opacity,transform] duration-300 flex items-center gap-3 max-w-sm ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
       } ${type === "success" ? "bg-emerald-600" : "bg-red-600"}`}
     >

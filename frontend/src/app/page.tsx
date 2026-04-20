@@ -305,7 +305,7 @@ export default function LandingPage() {
         <OntologyGraphBg />
         <div className="absolute inset-0 bg-gradient-to-b from-vivara-surface/30 via-transparent to-vivara-surface dark:from-vivara-surface-dark/30 dark:to-vivara-surface-dark z-[1]" />
 
-        <div className={`relative z-10 text-center px-6 max-w-3xl mx-auto transition-all duration-1000 ${hero.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div className={`relative z-10 text-center px-6 max-w-3xl mx-auto transition-[opacity,transform] duration-1000 ${hero.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <p className="text-sm font-body tracking-widest text-sky-500 uppercase mb-4">Personal AI Cognitive Engine</p>
           <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight mb-6">
             <span className="bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
@@ -322,7 +322,7 @@ export default function LandingPage() {
           </p>
           <a
             href="/login"
-            className="inline-block px-8 py-4 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-full text-lg hover:shadow-lg hover:shadow-sky-500/25 transition-all duration-300 hover:-translate-y-0.5"
+            className="inline-block px-8 py-4 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-full text-lg hover:shadow-lg hover:shadow-sky-500/25 transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5"
           >
             시작하기
           </a>
@@ -337,7 +337,7 @@ export default function LandingPage() {
 
       {/* ─── Problem ─── */}
       <section ref={problem.ref} className="py-24 md:py-32 px-6">
-        <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${problem.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-4xl mx-auto text-center transition-[opacity,transform] duration-1000 ${problem.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             흩어진 삶의 조각들
           </h2>
@@ -363,7 +363,7 @@ export default function LandingPage() {
 
       {/* ─── Solution ─── */}
       <section ref={solution.ref} className="py-24 md:py-32 px-6 bg-gray-50 dark:bg-gray-900/30">
-        <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-4xl mx-auto text-center transition-[opacity,transform] duration-1000 ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             연결하면 <span className="text-sky-500">의미</span>가 보입니다
           </h2>
@@ -379,7 +379,7 @@ export default function LandingPage() {
               { step: "3", title: "정제 & 연결", desc: "중복 제거, 검증, 품질 보장", color: "text-emerald-400" },
               { step: "4", title: "인사이트", desc: "패턴 발견 → 행동 제안", color: "text-sky-400" },
             ].map((item, i) => (
-              <div key={item.step} className={`transition-all duration-700 delay-${i * 150} ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+              <div key={item.step} className={`transition-[opacity,transform] duration-700 delay-${i * 150} ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                 <div className={`text-4xl font-bold ${item.color} mb-3`}>{item.step}</div>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">{item.desc}</p>
@@ -391,7 +391,7 @@ export default function LandingPage() {
 
       {/* ─── Interactive Feature Demo ─── */}
       <section ref={featureSection.ref} className="py-24 md:py-32 px-6">
-        <div className={`max-w-5xl mx-auto transition-all duration-1000 ${featureSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-5xl mx-auto transition-[opacity,transform] duration-1000 ${featureSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-center mb-4">
             하나의 플랫폼, 모든 것이 연결됩니다
           </h2>
@@ -407,7 +407,7 @@ export default function LandingPage() {
                 role="tab"
                 aria-selected={activeTab === f.id}
                 onClick={() => setActiveTab(f.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-[background-color,color,transform] duration-200 ${
                   activeTab === f.id
                     ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
                     : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
@@ -437,7 +437,7 @@ export default function LandingPage() {
 
       {/* ─── Voice Section ─── */}
       <section ref={voice.ref} className="py-24 md:py-32 px-6 bg-gray-50 dark:bg-gray-900/30">
-        <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${voice.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-4xl mx-auto text-center transition-[opacity,transform] duration-1000 ${voice.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
             목소리로 대화하세요
           </h2>
@@ -462,7 +462,7 @@ export default function LandingPage() {
 
       {/* ─── Social Proof / Stats ─── */}
       <section ref={social.ref} className="py-24 md:py-32 px-6">
-        <div className={`max-w-5xl mx-auto transition-all duration-1000 ${social.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-5xl mx-auto transition-[opacity,transform] duration-1000 ${social.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-center mb-16">
             성장하는 사용자들의 이야기
           </h2>
@@ -514,7 +514,7 @@ export default function LandingPage() {
 
       {/* ─── CTA: Waitlist ─── */}
       <section ref={cta.ref} className="py-24 md:py-32 px-6 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900/30 dark:to-vivara-surface-dark">
-        <div className={`max-w-lg mx-auto text-center transition-all duration-1000 ${cta.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+        <div className={`max-w-lg mx-auto text-center transition-[opacity,transform] duration-1000 ${cta.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
             삶의 의미를 발견할 준비가 되셨나요?
           </h2>
@@ -544,7 +544,7 @@ export default function LandingPage() {
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-sky-500/25 transition-all text-sm whitespace-nowrap"
+                className="px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-400 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-sky-500/25 transition-[box-shadow] duration-200 text-sm whitespace-nowrap"
               >
                 등록하기
               </button>

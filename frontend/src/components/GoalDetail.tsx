@@ -72,7 +72,7 @@ export default function GoalDetailView({
         <div className="mt-4 flex items-center gap-3">
           <div className="flex-1 h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${
+              className={`h-full rounded-full transition-[width] duration-500 ease-out ${
                 detail.progress === 100 ? "bg-emerald-500" : "bg-sky-500"
               }`}
               style={{ width: `${detail.progress}%` }}

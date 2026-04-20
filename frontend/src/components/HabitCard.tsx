@@ -183,7 +183,7 @@ function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
           </div>
           <div className="mt-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
-              className="bg-emerald-500 h-1.5 rounded-full transition-all"
+              className="bg-emerald-500 h-1.5 rounded-full transition-[width] duration-500 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>

@@ -64,7 +64,7 @@ function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
       <div className="flex items-center gap-2">
         <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${
+            className={`h-full rounded-full transition-[width] duration-500 ease-out ${
               goal.progress === 100
                 ? "bg-emerald-500"
                 : "bg-sky-500"
