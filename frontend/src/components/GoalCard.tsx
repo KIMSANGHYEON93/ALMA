@@ -1,3 +1,4 @@
+import React from "react";
 import type { Goal } from "@/hooks/useGoals";
 
 const categoryLabels: Record<string, string> = {
@@ -31,7 +32,7 @@ interface GoalCardProps {
   onClick: () => void;
 }
 
-export default function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
+function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
   return (
     <button
       onClick={onClick}
@@ -91,3 +92,5 @@ export default function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
     </button>
   );
 }
+
+export default React.memo(GoalCard);

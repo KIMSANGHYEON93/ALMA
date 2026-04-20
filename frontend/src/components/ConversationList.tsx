@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -14,6 +14,121 @@ interface ConversationListProps {
   activeId: string | null;
   onSelect: (id: string | null) => void;
 }
+
+interface ConversationItemProps {
+  conv: Conversation;
+  isActive: boolean;
+  isEditing: boolean;
+  isConfirmDelete: boolean;
+  editTitle: string;
+  editInputRef: React.RefObject<HTMLInputElement>;
+  onSelect: () => void;
+  onStartEdit: () => void;
+  onRename: (title: string) => void;
+  onCancelEdit: () => void;
+  onConfirmDelete: () => void;
+  onCancelDelete: () => void;
+  onRequestDelete: () => void;
+  onEditTitleChange: (v: string) => void;
+}
+
+const ConversationItem = React.memo(function ConversationItem({
+  conv,
+  isActive,
+  isEditing,
+  isConfirmDelete,
+  editTitle,
+  editInputRef,
+  onSelect,
+  onStartEdit,
+  onRename,
+  onCancelEdit,
+  onConfirmDelete,
+  onCancelDelete,
+  onRequestDelete,
+  onEditTitleChange,
+}: ConversationItemProps) {
+  return (
+    <div
+      className={`group relative border-b dark:border-gray-800 ${
+        isActive
+          ? "bg-sky-50 dark:bg-gray-800"
+          : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+      }`}
+    >
+      {isEditing ? (
+        <div className="px-3 py-2">
+          <input
+            ref={editInputRef}
+            type="text"
+            value={editTitle}
+            onChange={(e) => onEditTitleChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onRename(editTitle);
+              if (e.key === "Escape") onCancelEdit();
+            }}
+            onBlur={() => onRename(editTitle)}
+            className="w-full px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          />
+        </div>
+      ) : isConfirmDelete ? (
+        <div className="px-3 py-2 space-y-2">
+          <p className="text-xs text-red-500">이 대화를 삭제하시겠습니까?</p>
+          <div className="flex gap-2">
+            <button
+              onClick={onConfirmDelete}
+              className="flex-1 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition"
+            >
+              삭제
+            </button>
+            <button
+              onClick={onCancelDelete}
+              className="flex-1 py-1 text-xs border dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={onSelect}
+          onDoubleClick={onStartEdit}
+          aria-current={isActive ? "true" : undefined}
+          className="w-full text-left px-4 py-3 transition text-sm pr-16"
+        >
+          <span className={isActive ? "font-medium" : ""}>
+            {conv.title || "새 대화"}
+          </span>
+        </button>
+      )}
+
+      {!isEditing && !isConfirmDelete && (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex group-focus-within:flex gap-3">
+          <button
+            onClick={(e) => { e.stopPropagation(); onStartEdit(); }}
+            aria-label={`${conv.title || "새 대화"} 이름 변경`}
+            className="relative p-2 text-gray-400 hover:text-sky-500 transition before:absolute before:inset-[-6px] before:content-['']"
+            title="이름 변경"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onRequestDelete(); }}
+            aria-label={`${conv.title || "새 대화"} 삭제`}
+            className="relative p-2 text-gray-400 hover:text-red-500 transition before:absolute before:inset-[-6px] before:content-['']"
+            title="삭제"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export default function ConversationList({
   activeId,
@@ -166,95 +281,23 @@ export default function ConversationList({
           </div>
         )}
         {conversations.map((conv) => (
-          <div
+          <ConversationItem
             key={conv.id}
-            className={`group relative border-b dark:border-gray-800 ${
-              activeId === conv.id
-                ? "bg-sky-50 dark:bg-gray-800"
-                : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
-            }`}
-          >
-            {editingId === conv.id ? (
-              /* 인라인 편집 모드 */
-              <div className="px-3 py-2">
-                <input
-                  ref={editInputRef}
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") renameConversation(conv.id, editTitle);
-                    if (e.key === "Escape") setEditingId(null);
-                  }}
-                  onBlur={() => renameConversation(conv.id, editTitle)}
-                  className="w-full px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-            ) : deleteConfirmId === conv.id ? (
-              /* 삭제 확인 모드 */
-              <div className="px-3 py-2 space-y-2">
-                <p className="text-xs text-red-500">이 대화를 삭제하시겠습니까?</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => deleteConversation(conv.id)}
-                    className="flex-1 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  >
-                    삭제
-                  </button>
-                  <button
-                    onClick={() => setDeleteConfirmId(null)}
-                    className="flex-1 py-1 text-xs border dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* 기본 표시 모드 */
-              <button
-                onClick={() => onSelect(conv.id)}
-                onDoubleClick={() => startEdit(conv)}
-                aria-current={activeId === conv.id ? "true" : undefined}
-                className="w-full text-left px-4 py-3 transition text-sm pr-16"
-              >
-                <span className={activeId === conv.id ? "font-medium" : ""}>
-                  {conv.title || "새 대화"}
-                </span>
-              </button>
-            )}
-
-            {/* 호버 시 편집/삭제 아이콘 */}
-            {editingId !== conv.id && deleteConfirmId !== conv.id && (
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startEdit(conv);
-                  }}
-                  aria-label={`${conv.title || "새 대화"} 이름 변경`}
-                  className="relative p-2 text-gray-400 hover:text-sky-500 transition before:absolute before:inset-[-6px] before:content-['']"
-                  title="이름 변경"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmId(conv.id);
-                  }}
-                  aria-label={`${conv.title || "새 대화"} 삭제`}
-                  className="relative p-2 text-gray-400 hover:text-red-500 transition before:absolute before:inset-[-6px] before:content-['']"
-                  title="삭제"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </div>
+            conv={conv}
+            isActive={activeId === conv.id}
+            isEditing={editingId === conv.id}
+            isConfirmDelete={deleteConfirmId === conv.id}
+            editTitle={editTitle}
+            editInputRef={editInputRef}
+            onSelect={() => onSelect(conv.id)}
+            onStartEdit={() => startEdit(conv)}
+            onRename={(title) => renameConversation(conv.id, title)}
+            onCancelEdit={() => setEditingId(null)}
+            onConfirmDelete={() => deleteConversation(conv.id)}
+            onCancelDelete={() => setDeleteConfirmId(null)}
+            onRequestDelete={() => setDeleteConfirmId(conv.id)}
+            onEditTitleChange={setEditTitle}
+          />
         ))}
       </div>
     </aside>

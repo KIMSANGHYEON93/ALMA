@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { TodayHabitItem } from "@/lib/types";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   onDelete: () => void;
 }
 
-export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
+function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
   const [showMenu, setShowMenu] = useState(false);
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState(item.note || "");
@@ -214,3 +214,5 @@ export default function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }
     </div>
   );
 }
+
+export default React.memo(HabitCard);
