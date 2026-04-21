@@ -141,7 +141,7 @@ export default function GoalsPage() {
                   key={goal.id}
                   goal={goal}
                   isActive={selectedGoalId === goal.id}
-                  onClick={() => setSelectedGoalId(goal.id)}
+                  onSelect={setSelectedGoalId}
                 />
               ))
             )}

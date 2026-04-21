@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
 import Spinner from "@/components/common/Spinner";
@@ -19,6 +19,24 @@ export default function HabitsPage() {
   const [editingHabit, setEditingHabit] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
+  // 로컬 timezone 기준 날짜 (UTC의 toISOString은 한국시간 00:00~09:00에 전날이 됨)
+  // useMemo로 마운트 시 1회만 계산하여 handleCheckin deps 안정화 (자정 경계 엣지 허용 — 페이지 새로고침 시 갱신)
+  const today = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  }, []);
+
+  const handleCheckin = useCallback(
+    async (habitId: string, completed: boolean, value?: number, note?: string) => {
+      await checkin(habitId, today, completed, value, note);
+    },
+    [checkin, today]
+  );
+
+  const handleEdit = useCallback((habitId: string) => setEditingHabit(habitId), []);
+  const handlePause = useCallback((habitId: string) => updateHabit(habitId, { status: "paused" }), [updateHabit]);
+  const handleDelete = useCallback((habitId: string) => setConfirmDeleteId(habitId), []);
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -26,10 +44,6 @@ export default function HabitsPage() {
       </div>
     );
   }
-
-  // 로컬 timezone 기준 날짜 (UTC의 toISOString은 한국시간 00:00~09:00에 전날이 됨)
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const todayMap = new Map(todaySummary?.habits.map((h) => [h.id, h]));
 
   // Sort: scheduled today first, then by sort_order
@@ -101,12 +115,10 @@ export default function HabitsPage() {
                   <HabitCard
                     key={habit.id}
                     item={item}
-                    onCheckin={async (completed, value, note) => {
-                      await checkin(habit.id, today, completed, value, note);
-                    }}
-                    onEdit={() => setEditingHabit(habit.id)}
-                    onPause={() => updateHabit(habit.id, { status: "paused" })}
-                    onDelete={() => setConfirmDeleteId(habit.id)}
+                    onCheckin={handleCheckin}
+                    onEdit={handleEdit}
+                    onPause={handlePause}
+                    onDelete={handleDelete}
                   />
                 );
               })

@@ -5,10 +5,10 @@ import type { TodayHabitItem } from "@/lib/types";
 
 interface Props {
   item: TodayHabitItem;
-  onCheckin: (completed: boolean, value?: number, note?: string) => Promise<void>;
-  onEdit: () => void;
-  onPause: () => void;
-  onDelete: () => void;
+  onCheckin: (habitId: string, completed: boolean, value?: number, note?: string) => Promise<void>;
+  onEdit: (habitId: string) => void;
+  onPause: (habitId: string) => void;
+  onDelete: (habitId: string) => void;
 }
 
 function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
@@ -50,9 +50,9 @@ function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
     try {
       if (hasTarget) {
         const val = parseFloat(valueInput) || 0;
-        await onCheckin(val >= (item.target_value || 0), val, noteText || undefined);
+        await onCheckin(item.id, val >= (item.target_value || 0), val, noteText || undefined);
       } else {
-        await onCheckin(!item.completed, undefined, noteText || undefined);
+        await onCheckin(item.id, !item.completed, undefined, noteText || undefined);
       }
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
     setLoading(true);
     try {
       const val = parseFloat(valueInput) || 0;
-      await onCheckin(val >= (item.target_value || 0), val, noteText || undefined);
+      await onCheckin(item.id, val >= (item.target_value || 0), val, noteText || undefined);
     } finally {
       setLoading(false);
     }
@@ -140,21 +140,21 @@ function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
             >
               <button
                 role="menuitem"
-                onClick={() => { onEdit(); setShowMenu(false); }}
+                onClick={() => { onEdit(item.id); setShowMenu(false); }}
                 className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 수정
               </button>
               <button
                 role="menuitem"
-                onClick={() => { onPause(); setShowMenu(false); }}
+                onClick={() => { onPause(item.id); setShowMenu(false); }}
                 className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 일시정지
               </button>
               <button
                 role="menuitem"
-                onClick={() => { onDelete(); setShowMenu(false); }}
+                onClick={() => { onDelete(item.id); setShowMenu(false); }}
                 className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 삭제
@@ -204,7 +204,7 @@ function HabitCard({ item, onCheckin, onEdit, onPause, onDelete }: Props) {
           onChange={(e) => setNoteText(e.target.value)}
           onBlur={() => {
             if (item.checked_in && noteText !== (item.note || "")) {
-              onCheckin(item.completed, item.value ?? undefined, noteText || undefined);
+              onCheckin(item.id, item.completed, item.value ?? undefined, noteText || undefined);
             }
           }}
           placeholder="짧은 메모..."

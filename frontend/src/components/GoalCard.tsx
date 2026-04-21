@@ -29,13 +29,13 @@ const statusLabels: Record<string, string> = {
 interface GoalCardProps {
   goal: Goal;
   isActive: boolean;
-  onClick: () => void;
+  onSelect: (goalId: string) => void;
 }
 
-function GoalCard({ goal, isActive, onClick }: GoalCardProps) {
+function GoalCard({ goal, isActive, onSelect }: GoalCardProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => onSelect(goal.id)}
       className={`w-full text-left p-4 rounded-xl border transition hover:shadow-sm ${
         isActive
           ? "border-sky-500 bg-sky-50 dark:bg-gray-800 dark:border-sky-400"
