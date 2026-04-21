@@ -39,47 +39,59 @@ export function useHabits() {
     return () => ctrl.abort();
   }, [fetchData]);
 
-  const createHabit = async (data: HabitCreate) => {
-    if (!token) return;
-    await apiClient<Habit>("/api/habits", {
-      method: "POST",
-      token,
-      body: data,
-    });
-    await fetchData();
-  };
+  const createHabit = useCallback(
+    async (data: HabitCreate) => {
+      if (!token) return;
+      await apiClient<Habit>("/api/habits", {
+        method: "POST",
+        token,
+        body: data,
+      });
+      await fetchData();
+    },
+    [token, fetchData]
+  );
 
-  const updateHabit = async (id: string, data: Record<string, unknown>) => {
-    if (!token) return;
-    await apiClient<Habit>(`/api/habits/${id}`, {
-      method: "PUT",
-      token,
-      body: data,
-    });
-    await fetchData();
-  };
+  const updateHabit = useCallback(
+    async (id: string, data: Record<string, unknown>) => {
+      if (!token) return;
+      await apiClient<Habit>(`/api/habits/${id}`, {
+        method: "PUT",
+        token,
+        body: data,
+      });
+      await fetchData();
+    },
+    [token, fetchData]
+  );
 
-  const deleteHabit = async (id: string) => {
-    if (!token) return;
-    await apiClient(`/api/habits/${id}`, { method: "DELETE", token });
-    await fetchData();
-  };
+  const deleteHabit = useCallback(
+    async (id: string) => {
+      if (!token) return;
+      await apiClient(`/api/habits/${id}`, { method: "DELETE", token });
+      await fetchData();
+    },
+    [token, fetchData]
+  );
 
-  const checkin = async (
-    habitId: string,
-    logDate: string,
-    completed: boolean,
-    value?: number,
-    note?: string
-  ) => {
-    if (!token) return;
-    await apiClient<HabitLog>(`/api/habits/${habitId}/checkin`, {
-      method: "POST",
-      token,
-      body: { log_date: logDate, completed, value, note },
-    });
-    await fetchData();
-  };
+  const checkin = useCallback(
+    async (
+      habitId: string,
+      logDate: string,
+      completed: boolean,
+      value?: number,
+      note?: string
+    ) => {
+      if (!token) return;
+      await apiClient<HabitLog>(`/api/habits/${habitId}/checkin`, {
+        method: "POST",
+        token,
+        body: { log_date: logDate, completed, value, note },
+      });
+      await fetchData();
+    },
+    [token, fetchData]
+  );
 
   return {
     habits,
