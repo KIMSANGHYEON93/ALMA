@@ -54,18 +54,23 @@ export default function GraphToolbar({
       </div>
 
       {/* Confidence slider */}
-      <div className="flex items-center gap-2 text-xs text-gray-400">
-        <span>Confidence</span>
+      <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+        <label htmlFor="graph-confidence-slider">Confidence</label>
         <input
+          id="graph-confidence-slider"
           type="range"
           min={0}
           max={1}
           step={0.1}
           value={confidenceMin}
           onChange={(e) => onConfidenceChange(parseFloat(e.target.value))}
+          aria-label="Minimum confidence threshold"
+          aria-valuemin={0}
+          aria-valuemax={1}
+          aria-valuenow={confidenceMin}
           className="w-24 accent-sky-500"
         />
-        <span className="w-8 text-right">{confidenceMin.toFixed(1)}</span>
+        <span className="w-8 text-right" aria-hidden="true">{confidenceMin.toFixed(1)}</span>
       </div>
 
       {/* Search */}

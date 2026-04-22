@@ -150,7 +150,7 @@ export default function SettingsPage() {
                             {m.label}
                           </span>
                           <span className="text-xs text-gray-600 dark:text-gray-400 ml-2">{m.desc}</span>
-                          <span className="text-xs text-gray-300 dark:text-gray-600 ml-1 font-mono">{m.value}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1 font-mono">{m.value}</span>
                         </button>
                       ))}
                     </div>

@@ -15,8 +15,8 @@ const OUT_DIR = "/tmp/vivara-audit/phase1/playwright-smoke";
 const SHOTS_DIR = path.join(OUT_DIR, "screenshots");
 const BASE_URL = "http://localhost:3000";
 const API_URL = "http://localhost:8000";
-const EMAIL = "test1@alma.com";
-const PASSWORD = "testpass123";
+const EMAIL = process.env.AUDIT_EMAIL || "test1@alma.com";
+const PASSWORD = process.env.AUDIT_PASSWORD || "testpass123";
 
 const ROUTES = [
   { name: "home", url: "/", requiresAuth: false },

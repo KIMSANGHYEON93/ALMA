@@ -1,0 +1,371 @@
+{
+  "startedAt": "2026-04-22T04:41:50.984Z",
+  "routes": [
+    {
+      "name": "home",
+      "url": "/",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/chat\">대화</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-full"
+              ],
+              "html": "<button class=\"w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm\">+ 새 대화</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #0284c7, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    },
+    {
+      "name": "login",
+      "url": "/login",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/chat\">대화</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-full"
+              ],
+              "html": "<button class=\"w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm\">+ 새 대화</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #0284c7, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    },
+    {
+      "name": "chat",
+      "url": "/chat",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/chat\">대화</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-full"
+              ],
+              "html": "<button class=\"w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm\">+ 새 대화</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #0284c7, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "url": "/settings",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".dark\\:bg-sky-500\\/10"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/settings\">설정</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > .space-y-1\\.5 > .text-left.py-2\\.5.w-full:nth-child(1) > .text-gray-300.dark\\:text-gray-600.ml-1"
+              ],
+              "html": "<span class=\"text-xs text-gray-300 dark:text-gray-600 ml-1 font-mono\">claude-sonnet-4-20250514</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.47 (foreground color: #d1d5db, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > .space-y-1\\.5 > .text-left.py-2\\.5.w-full:nth-child(2) > .text-gray-300.dark\\:text-gray-600.ml-1"
+              ],
+              "html": "<span class=\"text-xs text-gray-300 dark:text-gray-600 ml-1 font-mono\">claude-3-5-haiku-20241022</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.47 (foreground color: #d1d5db, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 14
+        }
+      ]
+    },
+    {
+      "name": "goals",
+      "url": "/goals",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/goals\">목표</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".font-bold.text-sky-600.text-lg"
+              ],
+              "html": "<p class=\"text-lg font-bold text-sky-600\">0%</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #0284c7, background color: #ffffff, font size: 13.5pt (18px), font weight: bold). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-full"
+              ],
+              "html": "<button class=\"w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition text-sm\">+ 새 목표</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #0284c7, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 7
+        }
+      ]
+    },
+    {
+      "name": "habits",
+      "url": "/habits",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/habits\">습관</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-sky-500"
+              ],
+              "html": "<a class=\"text-sm text-sky-500 hover:text-sky-600\" href=\"/habits/analytics\">통계 보기 →</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #0ea5e9, background color: #f9fafb, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-2"
+              ],
+              "html": "<button class=\"px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium\">+ 첫 습관 만들기</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #ffffff, background color: #10b981, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 3
+        }
+      ]
+    },
+    {
+      "name": "habits-analytics",
+      "url": "/habits/analytics",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/habits\">습관</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-sky-100"
+              ],
+              "html": "<button class=\"px-3 py-1 text-xs rounded-lg transition bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400\">30일</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.56 (foreground color: #0284c7, background color: #e0f2fe, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-sky-600"
+              ],
+              "html": "<button class=\"px-3 py-1.5 text-xs bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition\">AI 분석</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #ffffff, background color: #0284c7, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 4
+        }
+      ]
+    },
+    {
+      "name": "insights",
+      "url": "/insights",
+      "violations": []
+    },
+    {
+      "name": "knowledge",
+      "url": "/knowledge",
+      "violations": []
+    },
+    {
+      "name": "automations",
+      "url": "/automations",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/automations\">자동화</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-2"
+              ],
+              "html": "<button class=\"px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium\">+ 첫 규칙 만들기</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #ffffff, background color: #10b981, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    },
+    {
+      "name": "ontology",
+      "url": "/ontology",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/ontology\">온톨로지</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-orange-600"
+              ],
+              "html": "<a class=\"px-4 py-2 rounded bg-orange-600 text-sm font-medium hover:bg-orange-500 transition\" href=\"/ontology/import\">Import</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.55 (foreground color: #ffffff, background color: #ea580c, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-green-600"
+              ],
+              "html": "<a class=\"px-4 py-2 rounded bg-green-600 text-sm font-medium hover:bg-green-500 transition\" href=\"/ontology/automations\">Automations</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.29 (foreground color: #ffffff, background color: #16a34a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 5
+        }
+      ]
+    },
+    {
+      "name": "ontology-graph",
+      "url": "/ontology/graph",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-sky-50"
+              ],
+              "html": "<a class=\"px-3 py-1.5 rounded-lg text-sm transition bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium\" href=\"/ontology\">온톨로지</a>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.84 (foreground color: #0284c7, background color: #f0f9ff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-2\\.5.transition-opacity.font-medium:nth-child(1)"
+              ],
+              "html": "<button class=\"px-2.5 py-1 rounded text-xs font-medium transition-opacity\" style=\"background-color: rgb(59, 130, 246); color: rgb(255, 255, 255); border: 1px solid rgb(59, 130, 246); opacity: 1;\">Enti",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #ffffff, background color: #3b82f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-2\\.5.transition-opacity.font-medium:nth-child(2)"
+              ],
+              "html": "<button class=\"px-2.5 py-1 rounded text-xs font-medium transition-opacity\" style=\"background-color: rgb(34, 197, 94); color: rgb(255, 255, 255); border: 1px solid rgb(34, 197, 94); opacity: 1;\">Action",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.27 (foreground color: #ffffff, background color: #22c55e, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 6
+        },
+        {
+          "id": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/label?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".w-24"
+              ],
+              "html": "<input min=\"0\" max=\"1\" step=\"0.1\" class=\"w-24 accent-sky-500\" type=\"range\" value=\"0\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ],
+          "nodeCount": 1
+        }
+      ]
+    }
+  ],
+  "ruleFrequency": {
+    "color-contrast": 47,
+    "label": 1
+  },
+  "summary": {
+    "totalViolations": 11,
+    "totalNodes": 48
+  }
+}
