@@ -276,7 +276,7 @@ function FolderBrowserModal({
                 onSelect(currentPath || "");
                 onClose();
               }}
-              className="px-4 py-2 rounded-lg bg-sky-700 text-sm font-medium text-white hover:bg-sky-600 transition"
+              className="px-4 py-2 rounded-lg bg-sky-700 text-sm font-medium text-white hover:bg-sky-800 transition"
             >
               이 폴더 선택
             </button>
@@ -626,7 +626,7 @@ export default function OntologyImportPage() {
                   <button
                     onClick={handleScan}
                     disabled={scanning}
-                    className="px-5 py-2 rounded-lg bg-sky-700 text-sm font-medium hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2 rounded-lg bg-sky-700 text-sm font-medium hover:bg-sky-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {scanning ? (
                       <span className="flex items-center gap-2">
@@ -832,7 +832,7 @@ export default function OntologyImportPage() {
                 <button
                   onClick={() => handleImportDB(src.key)}
                   disabled={!!dbImporting[src.key]}
-                  className="mt-auto px-4 py-2 rounded-lg bg-sky-700 text-sm font-medium hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-auto px-4 py-2 rounded-lg bg-sky-700 text-sm font-medium hover:bg-sky-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {dbImporting[src.key] ? "가져오는 중..." : "DB에서 가져오기"}
                 </button>

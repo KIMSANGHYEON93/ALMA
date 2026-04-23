@@ -54,7 +54,7 @@ export default function OntologyPage() {
             </Link>
             <Link
               href="/ontology/graph"
-              className="px-4 py-2 rounded bg-sky-700 text-sm font-medium hover:bg-sky-600 transition"
+              className="px-4 py-2 rounded bg-sky-700 text-sm font-medium hover:bg-sky-800 transition"
             >
               Graph View
             </Link>

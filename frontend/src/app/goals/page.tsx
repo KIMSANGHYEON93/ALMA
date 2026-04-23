@@ -59,7 +59,7 @@ export default function GoalsPage() {
                   <p className="text-xs text-gray-500">진행 중</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-emerald-600">
+                  <p className="text-lg font-bold text-emerald-700">
                     {summary.total_goals - summary.active_goals}
                   </p>
                   <p className="text-xs text-gray-500">완료</p>

@@ -23,7 +23,7 @@ export default function RetrospectiveCard({ retro }: RetrospectiveCardProps) {
 
       {retro.highlights.length > 0 && (
         <div className="mb-3">
-          <h4 className="text-xs font-medium text-emerald-600 mb-1">성과</h4>
+          <h4 className="text-xs font-medium text-emerald-700 mb-1">성과</h4>
           <ul className="space-y-1">
             {retro.highlights.map((h, i) => (
               <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex gap-2">

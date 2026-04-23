@@ -85,7 +85,7 @@ export default function InsightsPage() {
           {stats && hasAnyData && (
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-white dark:bg-gray-900 rounded-xl border dark:border-gray-800 p-4 text-center">
-                <p className="text-2xl font-bold text-emerald-600">
+                <p className="text-2xl font-bold text-emerald-700">
                   {stats.active_goals}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">진행 중 목표</p>
