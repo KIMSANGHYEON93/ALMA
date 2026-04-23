@@ -243,7 +243,7 @@ export default function ConversationList({
         <button
           onClick={createConversation}
           disabled={isCreating}
-          className="w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+          className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
         >
           {isCreating ? "생성 중..." : "+ 새 대화"}
         </button>

@@ -61,7 +61,7 @@ export default function HabitsPage() {
         <div className="max-w-2xl mx-auto">
           <HabitTodaySummary summary={todaySummary} />
           <div className="px-4 pt-2">
-            <Link href="/habits/analytics" className="text-sm text-sky-500 hover:text-sky-600">
+            <Link href="/habits/analytics" className="text-sm text-sky-700 hover:text-sky-800">
               통계 보기 →
             </Link>
           </div>
@@ -90,7 +90,7 @@ export default function HabitsPage() {
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium"
+                  className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-sm font-medium"
                 >
                   + 첫 습관 만들기
                 </button>
@@ -130,7 +130,7 @@ export default function HabitsPage() {
         <button
           onClick={() => setShowCreate(true)}
           aria-label="습관 추가"
-          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center justify-center text-2xl"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-700 text-white rounded-full shadow-lg hover:bg-emerald-800 transition flex items-center justify-center text-2xl"
         >
           +
         </button>

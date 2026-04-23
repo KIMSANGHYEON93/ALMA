@@ -49,7 +49,7 @@ export default function InsightsPage() {
             <button
               onClick={generateRetrospective}
               disabled={generating}
-              className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-4 py-2 text-sm bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {generating ? "분석 중..." : "주간 회고 생성"}
             </button>
@@ -91,7 +91,7 @@ export default function InsightsPage() {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">진행 중 목표</p>
               </div>
               <div className="bg-white dark:bg-gray-900 rounded-xl border dark:border-gray-800 p-4 text-center">
-                <p className="text-2xl font-bold text-sky-600">
+                <p className="text-2xl font-bold text-sky-700">
                   {stats.completed_goals}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">완료 목표</p>
@@ -116,7 +116,7 @@ export default function InsightsPage() {
               <div className="flex items-center justify-center gap-2">
                 <Link
                   href="/goals"
-                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/50"
+                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/50"
                 >
                   목표 만들기
                 </Link>

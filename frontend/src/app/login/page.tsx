@@ -186,7 +186,7 @@ function RegisterModal({ open, onClose }: { open: boolean; onClose: () => void }
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {isSubmitting ? "처리 중..." : "회원가입"}
         </button>
@@ -301,7 +301,7 @@ function FindAccountModal({ open, onClose }: { open: boolean; onClose: () => voi
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {isSubmitting ? "조회 중..." : "계정 찾기"}
           </button>
@@ -341,7 +341,7 @@ function FindAccountModal({ open, onClose }: { open: boolean; onClose: () => voi
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {isSubmitting ? "처리 중..." : "비밀번호 재설정"}
           </button>
@@ -426,7 +426,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {isSubmitting ? "처리 중..." : "로그인"}
         </button>
@@ -435,7 +435,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowRegister(true)}
-            className="text-sm text-sky-500 hover:text-sky-600 hover:underline"
+            className="text-sm text-sky-700 hover:text-sky-800 hover:underline"
           >
             계정이 없으신가요? 회원가입
           </button>

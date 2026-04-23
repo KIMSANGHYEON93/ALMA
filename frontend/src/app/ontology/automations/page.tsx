@@ -122,7 +122,7 @@ export default function OntologyAutomationsPage() {
           </div>
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="px-4 py-2 rounded bg-green-600 hover:bg-green-500 text-sm font-medium transition"
+            className="px-4 py-2 rounded bg-green-700 hover:bg-green-600 text-sm font-medium transition"
           >
             {showForm ? "취소" : "규칙 추가"}
           </button>
@@ -203,7 +203,7 @@ export default function OntologyAutomationsPage() {
               <button
                 type="submit"
                 disabled={submitting || !formName.trim()}
-                className="px-5 py-2 rounded bg-green-600 hover:bg-green-500 disabled:bg-green-900 disabled:cursor-not-allowed text-sm font-medium transition"
+                className="px-5 py-2 rounded bg-green-700 hover:bg-green-600 disabled:bg-green-900 disabled:cursor-not-allowed text-sm font-medium transition"
               >
                 {submitting ? "생성 중..." : "규칙 생성"}
               </button>

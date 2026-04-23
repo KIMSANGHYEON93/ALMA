@@ -353,7 +353,7 @@ export default function ChatWindow({
               onClick={sendMessage}
               disabled={!isConnected || !input.trim() || input.length > MAX_LENGTH}
               aria-label="메시지 전송"
-              className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-4 py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               전송
             </button>

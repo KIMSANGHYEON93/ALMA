@@ -18,7 +18,7 @@ export default function HabitInsightCard({ insight, loading, onGenerate }: Props
         <button
           onClick={onGenerate}
           disabled={loading}
-          className="px-3 py-1.5 text-xs bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
+          className="px-3 py-1.5 text-xs bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 transition"
         >
           {loading ? "분석 중..." : "AI 분석"}
         </button>
@@ -29,7 +29,7 @@ export default function HabitInsightCard({ insight, loading, onGenerate }: Props
           <p className="text-xs text-gray-400 mt-2">{insight.generated_at}</p>
         </div>
       ) : (
-        <p className="text-sm text-gray-400">AI 분석 버튼을 눌러 습관 패턴을 분석해보세요</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">AI 분석 버튼을 눌러 습관 패턴을 분석해보세요</p>
       )}
     </div>
   );

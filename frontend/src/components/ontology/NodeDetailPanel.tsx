@@ -118,7 +118,7 @@ export default function NodeDetailPanel({
         <div className="p-4 border-t border-gray-700">
           <button
             onClick={() => onVerify(node.id)}
-            className="w-full px-4 py-2 rounded bg-sky-600 text-white text-sm font-medium hover:bg-sky-500 transition"
+            className="w-full px-4 py-2 rounded bg-sky-700 text-white text-sm font-medium hover:bg-sky-600 transition"
           >
             Verify
           </button>

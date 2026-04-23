@@ -141,7 +141,7 @@ export default function OntologyInsightsPage() {
           <button
             onClick={() => setFilterType(undefined)}
             className={`px-3 py-1.5 rounded text-xs font-medium transition ${
-              filterType === undefined ? "bg-sky-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              filterType === undefined ? "bg-sky-700 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
             전체
@@ -151,7 +151,7 @@ export default function OntologyInsightsPage() {
               key={type}
               onClick={() => setFilterType(filterType === type ? undefined : type)}
               className={`px-3 py-1.5 rounded text-xs font-medium transition ${
-                filterType === type ? "bg-sky-600 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                filterType === type ? "bg-sky-700 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"
               }`}
             >
               {label}

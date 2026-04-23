@@ -62,7 +62,7 @@ export default function AutomationsPage() {
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium"
+                  className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-sm font-medium"
                 >
                   + 첫 규칙 만들기
                 </button>
@@ -98,7 +98,7 @@ export default function AutomationsPage() {
         <button
           onClick={() => setShowCreate(true)}
           aria-label="자동화 규칙 추가"
-          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center justify-center text-2xl"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-700 text-white rounded-full shadow-lg hover:bg-emerald-800 transition flex items-center justify-center text-2xl"
         >
           +
         </button>

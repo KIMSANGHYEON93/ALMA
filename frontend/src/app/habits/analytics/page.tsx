@@ -47,7 +47,7 @@ export default function HabitAnalyticsPage() {
                   onClick={() => setDays(d)}
                   className={`px-3 py-1 text-xs rounded-lg transition ${
                     days === d
-                      ? "bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
+                      ? "bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400"
                       : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >

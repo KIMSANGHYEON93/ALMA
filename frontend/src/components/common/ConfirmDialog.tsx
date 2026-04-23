@@ -29,7 +29,7 @@ export default function ConfirmDialog({
   const confirmBtnClass =
     variant === "danger"
       ? "bg-red-600 text-white hover:bg-red-700"
-      : "bg-sky-600 text-white hover:bg-sky-700";
+      : "bg-sky-700 text-white hover:bg-sky-800";
 
   return (
     <Modal open={open} onClose={onCancel} ariaLabel={title} maxWidth="max-w-sm">

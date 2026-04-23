@@ -60,7 +60,7 @@ export default function KnowledgePage() {
                 </p>
                 <button
                   onClick={() => setShowAdd(true)}
-                  className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm font-medium"
+                  className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 text-sm font-medium"
                 >
                   + 첫 문서 추가하기
                 </button>
@@ -80,7 +80,7 @@ export default function KnowledgePage() {
         <button
           onClick={() => setShowAdd(true)}
           aria-label="지식 추가"
-          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg hover:bg-emerald-600 transition flex items-center justify-center text-2xl"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-emerald-700 text-white rounded-full shadow-lg hover:bg-emerald-800 transition flex items-center justify-center text-2xl"
         >
           +
         </button>

@@ -95,7 +95,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
                 onClick={() => setFreqType(opt.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   freqType === opt.value
-                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 dark:border-sky-700 text-sky-600 dark:text-sky-400"
+                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 dark:border-sky-700 text-sky-700 dark:text-sky-400"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -114,7 +114,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
                 onClick={() => toggleDay(i)}
                 className={`w-9 h-9 rounded-full text-sm font-medium transition ${
                   days.includes(i)
-                    ? "bg-sky-500 text-white"
+                    ? "bg-sky-700 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                 }`}
               >
@@ -193,7 +193,7 @@ export default function HabitForm({ onSubmit, onClose, initial }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={!title.trim() || submitting}
-            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "저장 중..." : initial ? "수정" : "추가"}
           </button>

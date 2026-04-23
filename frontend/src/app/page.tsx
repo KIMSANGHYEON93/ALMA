@@ -172,12 +172,12 @@ const features = [
     mockup: (
       <div className="space-y-3">
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
-          <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">토익 900점 달성</span><span className="text-xs text-sky-500">65%</span></div>
+          <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">토익 900점 달성</span><span className="text-xs text-sky-700">65%</span></div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div className="h-full bg-sky-500 rounded-full" style={{width: "65%"}} /></div>
-          <div className="flex gap-2 mt-2 text-xs text-gray-600 dark:text-gray-400"><span className="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded text-sky-600 dark:text-sky-400">커리어</span><span>D-45</span></div>
+          <div className="flex gap-2 mt-2 text-xs text-gray-600 dark:text-gray-400"><span className="px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded text-sky-700 dark:text-sky-400">커리어</span><span>D-45</span></div>
         </div>
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
-          <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">10km 마라톤 완주</span><span className="text-xs text-emerald-500">80%</span></div>
+          <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium">10km 마라톤 완주</span><span className="text-xs text-emerald-700">80%</span></div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{width: "80%"}} /></div>
         </div>
       </div>
@@ -197,7 +197,7 @@ const features = [
       <div className="space-y-3">
         <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded-full text-sky-600 dark:text-sky-400">주제 트렌드</span>
+            <span className="text-xs px-2 py-0.5 bg-sky-50 dark:bg-sky-900/20 rounded-full text-sky-700 dark:text-sky-400">주제 트렌드</span>
           </div>
           <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">운동과 수면 품질의 강한 양의 상관관계 발견</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">러닝을 한 날 수면 점수가 평균 23% 높았습니다.</p>
@@ -306,7 +306,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-vivara-surface/30 via-transparent to-vivara-surface dark:from-vivara-surface-dark/30 dark:to-vivara-surface-dark z-[1]" />
 
         <div className={`relative z-10 text-center px-6 max-w-3xl mx-auto transition-[opacity,transform] duration-1000 ${hero.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <p className="text-sm font-body tracking-widest text-sky-500 uppercase mb-4">Personal AI Cognitive Engine</p>
+          <p className="text-sm font-body tracking-widest text-sky-700 uppercase mb-4">Personal AI Cognitive Engine</p>
           <h1 className="text-5xl md:text-7xl font-heading font-bold tracking-tight mb-6">
             <span className="bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
               VIVARA
@@ -365,7 +365,7 @@ export default function LandingPage() {
       <section ref={solution.ref} className="py-24 md:py-32 px-6 bg-gray-50 dark:bg-gray-900/30">
         <div className={`max-w-4xl mx-auto text-center transition-[opacity,transform] duration-1000 ${solution.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
-            연결하면 <span className="text-sky-500">의미</span>가 보입니다
+            연결하면 <span className="text-sky-700">의미</span>가 보입니다
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
             VIVARA는 모든 데이터를 온톨로지 그래프로 연결합니다.
@@ -424,7 +424,7 @@ export default function LandingPage() {
             <div>
               <h3 className="text-2xl font-heading font-bold mb-4">{activeFeature.title}</h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">{activeFeature.desc}</p>
-              <a href="/login" className="text-sky-500 hover:text-sky-600 text-sm font-medium transition">
+              <a href="/login" className="text-sky-700 hover:text-sky-800 text-sm font-medium transition">
                 직접 체험하기 &rarr;
               </a>
             </div>
@@ -478,7 +478,7 @@ export default function LandingPage() {
                   <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">&ldquo;{story.after}&rdquo;</p>
                 </div>
                 <div className="flex items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <div className="w-8 h-8 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center text-sky-600 text-xs font-bold">
+                  <div className="w-8 h-8 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center text-sky-700 text-xs font-bold">
                     {story.name[0]}
                   </div>
                   <div>
@@ -493,7 +493,7 @@ export default function LandingPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <p className="text-3xl md:text-4xl font-bold text-sky-500"><Counter target={12000} suffix="+" /></p>
+              <p className="text-3xl md:text-4xl font-bold text-sky-700"><Counter target={12000} suffix="+" /></p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">온톨로지 노드 생성</p>
             </div>
             <div>
@@ -501,7 +501,7 @@ export default function LandingPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">맥락 정확도</p>
             </div>
             <div>
-              <p className="text-3xl md:text-4xl font-bold text-emerald-500"><Counter target={3} suffix="x" /></p>
+              <p className="text-3xl md:text-4xl font-bold text-emerald-700"><Counter target={3} suffix="x" /></p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">목표 완료율 향상</p>
             </div>
             <div>

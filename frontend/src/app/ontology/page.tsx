@@ -36,7 +36,7 @@ export default function OntologyPage() {
           <div className="flex gap-2">
             <Link
               href="/ontology/import"
-              className="px-4 py-2 rounded bg-orange-600 text-sm font-medium hover:bg-orange-500 transition"
+              className="px-4 py-2 rounded bg-orange-700 text-sm font-medium hover:bg-orange-600 transition"
             >
               Import
             </Link>
@@ -48,13 +48,13 @@ export default function OntologyPage() {
             </Link>
             <Link
               href="/ontology/automations"
-              className="px-4 py-2 rounded bg-green-600 text-sm font-medium hover:bg-green-500 transition"
+              className="px-4 py-2 rounded bg-green-700 text-sm font-medium hover:bg-green-600 transition"
             >
               Automations
             </Link>
             <Link
               href="/ontology/graph"
-              className="px-4 py-2 rounded bg-sky-600 text-sm font-medium hover:bg-sky-500 transition"
+              className="px-4 py-2 rounded bg-sky-700 text-sm font-medium hover:bg-sky-600 transition"
             >
               Graph View
             </Link>
@@ -81,7 +81,7 @@ export default function OntologyPage() {
         <div className="flex gap-2 mt-6 mb-4">
           <button
             onClick={() => setTab("all")}
-            className={`px-4 py-2 rounded ${tab === "all" ? "bg-sky-600" : "bg-gray-800"}`}
+            className={`px-4 py-2 rounded ${tab === "all" ? "bg-sky-700" : "bg-gray-800"}`}
           >
             All Nodes ({verified.length})
           </button>

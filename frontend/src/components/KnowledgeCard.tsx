@@ -33,7 +33,7 @@ export default function KnowledgeCard({ doc, onDelete }: Props) {
                 href={doc.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-sky-500 hover:underline truncate max-w-[200px]"
+                className="text-xs text-sky-700 hover:underline truncate max-w-[200px]"
               >
                 {doc.source_url}
               </a>

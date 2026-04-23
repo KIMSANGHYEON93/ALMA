@@ -1,10 +1,10 @@
 import type { OntologyNode } from "@/lib/types";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Entity: "bg-sky-600",
-  Action: "bg-green-600",
+  Entity: "bg-sky-700",
+  Action: "bg-green-700",
   Concept: "bg-purple-600",
-  Attribute: "bg-orange-600",
+  Attribute: "bg-orange-700",
   Temporal: "bg-cyan-600",
 };
 

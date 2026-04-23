@@ -37,7 +37,7 @@ export default React.memo(function MessageBubble({
         <div
           className={`px-4 py-2 rounded-2xl ${
             isUser
-              ? "bg-sky-600 text-white rounded-br-md whitespace-pre-wrap"
+              ? "bg-sky-700 text-white rounded-br-md whitespace-pre-wrap"
               : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md"
           }`}
         >
@@ -65,7 +65,7 @@ export default React.memo(function MessageBubble({
           title={copied ? "복사됨" : "복사"}
           className={`absolute -top-3 ${
             isUser ? "-left-12" : "-right-12"
-          } opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity w-11 h-11 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 shadow-sm border border-gray-200 dark:border-gray-600 text-sm`}
+          } opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity w-11 h-11 flex items-center justify-center rounded-md bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:text-sky-700 dark:hover:text-sky-400 shadow-sm border border-gray-200 dark:border-gray-600 text-sm`}
         >
           {copied ? "✓" : "⎘"}
         </button>

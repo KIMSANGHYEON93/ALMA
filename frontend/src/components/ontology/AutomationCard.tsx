@@ -3,17 +3,17 @@
 import type { OntologyAutomation } from "@/lib/types";
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  hub_node: { label: "허브", color: "bg-sky-600" },
+  hub_node: { label: "허브", color: "bg-sky-700" },
   isolated: { label: "고립", color: "bg-yellow-600" },
-  strong_path: { label: "경로", color: "bg-green-600" },
+  strong_path: { label: "경로", color: "bg-green-700" },
   conflict: { label: "상충", color: "bg-red-600" },
   opportunity: { label: "기회", color: "bg-purple-600" },
   trend: { label: "추세", color: "bg-cyan-600" },
 };
 
 const ACTION_CONFIG: Record<string, { label: string; color: string }> = {
-  create_link: { label: "링크 생성", color: "bg-sky-600" },
-  create_node: { label: "노드 생성", color: "bg-green-600" },
+  create_link: { label: "링크 생성", color: "bg-sky-700" },
+  create_node: { label: "노드 생성", color: "bg-green-700" },
   notification: { label: "알림", color: "bg-yellow-600" },
   suggest: { label: "제안", color: "bg-purple-600" },
 };

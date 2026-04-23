@@ -65,7 +65,7 @@ export default function GoalsPage() {
                   <p className="text-xs text-gray-500">완료</p>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-sky-600">
+                  <p className="text-lg font-bold text-sky-700">
                     {summary.average_progress}%
                   </p>
                   <p className="text-xs text-gray-500">평균</p>
@@ -78,7 +78,7 @@ export default function GoalsPage() {
           <div className="p-3 border-b dark:border-gray-800 space-y-2">
             <button
               onClick={() => setShowCreate(true)}
-              className="w-full py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition text-sm"
+              className="w-full py-2 bg-sky-700 text-white rounded-lg hover:bg-sky-800 transition text-sm"
             >
               + 새 목표
             </button>
@@ -93,7 +93,7 @@ export default function GoalsPage() {
                   onClick={() => setFilter(f.key)}
                   className={`flex-1 py-1 text-xs rounded-md transition ${
                     filter === f.key
-                      ? "bg-sky-100 dark:bg-sky-900/30 text-sky-600"
+                      ? "bg-sky-100 dark:bg-sky-900/30 text-sky-700"
                       : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -129,7 +129,7 @@ export default function GoalsPage() {
                 {filter === "all" && (
                   <button
                     onClick={() => setShowCreate(true)}
-                    className="text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline"
+                    className="text-xs font-medium text-sky-700 dark:text-sky-400 hover:underline"
                   >
                     + 첫 목표 만들기
                   </button>
@@ -160,7 +160,7 @@ export default function GoalsPage() {
               onDelete={handleDelete}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
               <div className="text-center">
                 <p className="text-lg mb-2">목표를 선택하거나 새로 만드세요</p>
                 <p className="text-sm">성장의 여정을 함께 시작합니다</p>

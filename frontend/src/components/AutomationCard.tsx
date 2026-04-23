@@ -40,7 +40,7 @@ export default function AutomationCard({ rule, onToggle, onDelete }: Props) {
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{rule.description}</p>
           )}
           <div className="flex flex-wrap gap-2 mt-2">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400">
               트리거: {EVENT_LABELS[rule.trigger_event] || rule.trigger_event}
             </span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">

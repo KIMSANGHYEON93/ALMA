@@ -55,7 +55,7 @@ export default function NavBar() {
               href={item.href}
               className={`px-3 py-1.5 rounded-lg text-sm transition ${
                 pathname.startsWith(item.href)
-                  ? "bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium"
+                  ? "bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 font-medium"
                   : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
@@ -126,7 +126,7 @@ export default function NavBar() {
                   href={item.href}
                   className={`px-4 py-3 rounded-lg text-sm transition ${
                     pathname.startsWith(item.href)
-                      ? "bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium"
+                      ? "bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 font-medium"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >

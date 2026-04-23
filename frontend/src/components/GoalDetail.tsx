@@ -16,11 +16,11 @@ interface GoalDetailProps {
 
 const statusActions: Record<string, { label: string; next: string; color: string }[]> = {
   active: [
-    { label: "완료", next: "completed", color: "bg-emerald-600 hover:bg-emerald-700" },
+    { label: "완료", next: "completed", color: "bg-emerald-700 hover:bg-emerald-800" },
     { label: "일시정지", next: "paused", color: "bg-yellow-600 hover:bg-yellow-700" },
   ],
   paused: [
-    { label: "재개", next: "active", color: "bg-sky-600 hover:bg-sky-700" },
+    { label: "재개", next: "active", color: "bg-sky-700 hover:bg-sky-800" },
     { label: "포기", next: "abandoned", color: "bg-red-600 hover:bg-red-700" },
   ],
   completed: [],
@@ -176,7 +176,7 @@ export default function GoalDetailView({
             <button
               onClick={handleAddMilestone}
               disabled={!newMilestone.trim() || isAdding}
-              className="px-4 py-2 text-sm bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition"
+              className="px-4 py-2 text-sm bg-sky-700 text-white rounded-lg hover:bg-sky-800 disabled:opacity-50 transition"
             >
               추가
             </button>

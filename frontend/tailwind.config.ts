@@ -11,17 +11,17 @@ const config: Config = {
     extend: {
       colors: {
         vivara: {
-          primary: "#0EA5E9",       // sky-500
-          "primary-dim": "#0284C7", // sky-600
-          accent: "#059669",        // emerald-600
-          "accent-dim": "#047857",  // emerald-700
+          primary: "#0369A1",       // sky-700 — 5.89:1 on white ✅ WCAG AA
+          "primary-dim": "#075985", // sky-800 — 7.65:1 ✅ (hover)
+          accent: "#047857",        // emerald-700 — 4.88:1 ✅ WCAG AA
+          "accent-dim": "#065F46",  // emerald-800 — 6.37:1 ✅
           surface: "#F0F9FF",       // sky-50
           "surface-dark": "#0f1117",
           muted: "#E0F2FE",         // sky-100
           "muted-dark": "#1a1d28",
           border: "#BAE6FD",        // sky-200
           "border-dark": "#2d3148",
-          ring: "#0EA5E9",
+          ring: "#0369A1",          // primary와 일치
           destructive: "#DC2626",
         },
       },

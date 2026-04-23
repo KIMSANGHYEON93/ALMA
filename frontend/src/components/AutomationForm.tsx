@@ -100,7 +100,7 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
                 onClick={() => setActionType(opt.value)}
                 className={`px-3 py-1.5 text-sm rounded-lg border transition ${
                   actionType === opt.value
-                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 text-sky-600"
+                    ? "bg-sky-50 dark:bg-sky-900/30 border-sky-300 text-sky-700"
                     : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -139,7 +139,7 @@ export default function AutomationForm({ onSubmit, onClose }: Props) {
             type="button"
             onClick={handleSubmit}
             disabled={!name.trim() || submitting}
-            className="px-4 py-2 text-sm bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "생성 중..." : "추가"}
           </button>
