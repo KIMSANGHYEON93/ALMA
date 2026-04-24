@@ -1,11 +1,12 @@
 import type { OntologyNode } from "@/lib/types";
 
+// WCAG AA compliant with white text (≥4.5:1)
 const CATEGORY_COLORS: Record<string, string> = {
   Entity: "bg-sky-700",
   Action: "bg-green-700",
-  Concept: "bg-purple-600",
+  Concept: "bg-purple-700",
   Attribute: "bg-orange-700",
-  Temporal: "bg-cyan-600",
+  Temporal: "bg-cyan-700",
 };
 
 export default function ObjectList({ objects, loading }: { objects: OntologyNode[]; loading: boolean }) {

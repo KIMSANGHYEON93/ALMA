@@ -1,0 +1,96 @@
+{
+  "startedAt": "2026-04-24T05:36:30.221Z",
+  "routes": [
+    {
+      "name": "home",
+      "url": "/",
+      "violations": []
+    },
+    {
+      "name": "login",
+      "url": "/login",
+      "violations": []
+    },
+    {
+      "name": "chat",
+      "url": "/chat",
+      "violations": []
+    },
+    {
+      "name": "settings",
+      "url": "/settings",
+      "violations": []
+    },
+    {
+      "name": "goals",
+      "url": "/goals",
+      "violations": []
+    },
+    {
+      "name": "habits",
+      "url": "/habits",
+      "violations": []
+    },
+    {
+      "name": "habits-analytics",
+      "url": "/habits/analytics",
+      "violations": []
+    },
+    {
+      "name": "insights",
+      "url": "/insights",
+      "violations": []
+    },
+    {
+      "name": "knowledge",
+      "url": "/knowledge",
+      "violations": []
+    },
+    {
+      "name": "automations",
+      "url": "/automations",
+      "violations": []
+    },
+    {
+      "name": "ontology",
+      "url": "/ontology",
+      "violations": []
+    },
+    {
+      "name": "ontology-graph",
+      "url": "/ontology/graph",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                "label"
+              ],
+              "html": "<label for=\"graph-confidence-slider\">Confidence</label>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.34 (foreground color: #4b5563, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-8"
+              ],
+              "html": "<span class=\"w-8 text-right\" aria-hidden=\"true\">0.0</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.34 (foreground color: #4b5563, background color: #111827, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    }
+  ],
+  "ruleFrequency": {
+    "color-contrast": 2
+  },
+  "summary": {
+    "totalViolations": 1,
+    "totalNodes": 2
+  }
+}

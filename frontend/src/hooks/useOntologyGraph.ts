@@ -4,14 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
 import type { OntologyGraph, GraphNodeData, GraphLinkData } from "@/lib/types";
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Entity: "#3B82F6",
-  Action: "#22C55E",
-  Concept: "#A855F7",
-  Attribute: "#F97316",
-  Temporal: "#06B6D4",
-};
+import { ONTOLOGY_CATEGORY_COLORS, ONTOLOGY_CATEGORY_FALLBACK } from "@/lib/ontology-palette";
 
 function transformGraphData(graph: OntologyGraph): {
   nodes: GraphNodeData[];
@@ -32,7 +25,7 @@ function transformGraphData(graph: OntologyGraph): {
     confidence: n.confidence,
     status: n.status,
     val: Math.max(4, Math.min(20, 4 + (edgeCounts.get(n.id) || 0) * 2)),
-    color: CATEGORY_COLORS[n.parent_category] || "#6B7280",
+    color: ONTOLOGY_CATEGORY_COLORS[n.parent_category] || ONTOLOGY_CATEGORY_FALLBACK,
   }));
 
   const links: GraphLinkData[] = graph.edges.map((e) => ({

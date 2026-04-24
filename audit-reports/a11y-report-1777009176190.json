@@ -1,0 +1,70 @@
+{
+  "startedAt": "2026-04-24T05:38:44.061Z",
+  "routes": [
+    {
+      "name": "home",
+      "url": "/",
+      "violations": []
+    },
+    {
+      "name": "login",
+      "url": "/login",
+      "violations": []
+    },
+    {
+      "name": "chat",
+      "url": "/chat",
+      "violations": []
+    },
+    {
+      "name": "settings",
+      "url": "/settings",
+      "violations": []
+    },
+    {
+      "name": "goals",
+      "url": "/goals",
+      "violations": []
+    },
+    {
+      "name": "habits",
+      "url": "/habits",
+      "violations": []
+    },
+    {
+      "name": "habits-analytics",
+      "url": "/habits/analytics",
+      "violations": []
+    },
+    {
+      "name": "insights",
+      "url": "/insights",
+      "violations": []
+    },
+    {
+      "name": "knowledge",
+      "url": "/knowledge",
+      "violations": []
+    },
+    {
+      "name": "automations",
+      "url": "/automations",
+      "violations": []
+    },
+    {
+      "name": "ontology",
+      "url": "/ontology",
+      "violations": []
+    },
+    {
+      "name": "ontology-graph",
+      "url": "/ontology/graph",
+      "violations": []
+    }
+  ],
+  "ruleFrequency": {},
+  "summary": {
+    "totalViolations": 0,
+    "totalNodes": 0
+  }
+}

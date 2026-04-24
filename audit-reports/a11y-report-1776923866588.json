@@ -1,0 +1,161 @@
+{
+  "startedAt": "2026-04-23T05:57:03.096Z",
+  "routes": [
+    {
+      "name": "home",
+      "url": "/",
+      "violations": []
+    },
+    {
+      "name": "login",
+      "url": "/login",
+      "violations": []
+    },
+    {
+      "name": "chat",
+      "url": "/chat",
+      "violations": []
+    },
+    {
+      "name": "settings",
+      "url": "/settings",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".bg-emerald-100"
+              ],
+              "html": "<button class=\"px-3 py-1.5 text-xs rounded-lg transition bg-emerald-100 text-emerald-600 hover:bg-emerald-200\">활성화</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #059669, background color: #d1fae5, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 1
+        }
+      ]
+    },
+    {
+      "name": "goals",
+      "url": "/goals",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-2"
+              ],
+              "html": "<p class=\"text-lg mb-2\">목표를 선택하거나 새로 만드세요</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.42 (foreground color: #9ca3af, background color: #f9fafb, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-center > p:nth-child(2)"
+              ],
+              "html": "<p class=\"text-sm\">성장의 여정을 함께 시작합니다</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.42 (foreground color: #9ca3af, background color: #f9fafb, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 2
+        }
+      ]
+    },
+    {
+      "name": "habits",
+      "url": "/habits",
+      "violations": []
+    },
+    {
+      "name": "habits-analytics",
+      "url": "/habits/analytics",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".text-gray-400"
+              ],
+              "html": "<p class=\"text-sm text-gray-400\">AI 분석 버튼을 눌러 습관 패턴을 분석해보세요</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #9ca3af, background color: #ffffff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 1
+        }
+      ]
+    },
+    {
+      "name": "insights",
+      "url": "/insights",
+      "violations": []
+    },
+    {
+      "name": "knowledge",
+      "url": "/knowledge",
+      "violations": []
+    },
+    {
+      "name": "automations",
+      "url": "/automations",
+      "violations": []
+    },
+    {
+      "name": "ontology",
+      "url": "/ontology",
+      "violations": []
+    },
+    {
+      "name": "ontology-graph",
+      "url": "/ontology/graph",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".px-2\\.5.transition-opacity.font-medium:nth-child(1)"
+              ],
+              "html": "<button class=\"px-2.5 py-1 rounded text-xs font-medium transition-opacity\" style=\"background-color: rgb(59, 130, 246); color: rgb(255, 255, 255); border: 1px solid rgb(59, 130, 246); opacity: 1;\">Enti",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #ffffff, background color: #3b82f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-2\\.5.transition-opacity.font-medium:nth-child(2)"
+              ],
+              "html": "<button class=\"px-2.5 py-1 rounded text-xs font-medium transition-opacity\" style=\"background-color: rgb(34, 197, 94); color: rgb(255, 255, 255); border: 1px solid rgb(34, 197, 94); opacity: 1;\">Action",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.27 (foreground color: #ffffff, background color: #22c55e, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-2\\.5.transition-opacity.font-medium:nth-child(3)"
+              ],
+              "html": "<button class=\"px-2.5 py-1 rounded text-xs font-medium transition-opacity\" style=\"background-color: rgb(168, 85, 247); color: rgb(255, 255, 255); border: 1px solid rgb(168, 85, 247); opacity: 1;\">Conc",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.95 (foreground color: #ffffff, background color: #a855f7, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ],
+          "nodeCount": 7
+        }
+      ]
+    }
+  ],
+  "ruleFrequency": {
+    "color-contrast": 11
+  },
+  "summary": {
+    "totalViolations": 4,
+    "totalNodes": 11
+  }
+}

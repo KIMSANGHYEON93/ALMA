@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { ONTOLOGY_CATEGORIES, ONTOLOGY_CATEGORY_COLORS } from "@/lib/ontology-palette";
 
-const CATEGORIES = [
-  { key: "Entity", color: "#3B82F6" },
-  { key: "Action", color: "#22C55E" },
-  { key: "Concept", color: "#A855F7" },
-  { key: "Attribute", color: "#F97316" },
-  { key: "Temporal", color: "#06B6D4" },
-] as const;
+const CATEGORIES = ONTOLOGY_CATEGORIES.map((key) => ({
+  key,
+  color: ONTOLOGY_CATEGORY_COLORS[key],
+}));
 
 interface GraphToolbarProps {
   activeCategories: Set<string>;
@@ -53,8 +51,8 @@ export default function GraphToolbar({
         })}
       </div>
 
-      {/* Confidence slider */}
-      <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+      {/* Confidence slider — toolbar is always bg-gray-900 so text is fixed light */}
+      <div className="flex items-center gap-2 text-xs text-gray-300">
         <label htmlFor="graph-confidence-slider">Confidence</label>
         <input
           id="graph-confidence-slider"
