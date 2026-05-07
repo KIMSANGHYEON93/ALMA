@@ -8,12 +8,19 @@ const TEST_NAME = "Playwright";
 
 async function register(page: Page) {
   await page.goto("/login");
-  await page.getByText("회원가입").click();
-  await page.fill('input[name="name"], input[placeholder*="이름"]', TEST_NAME);
-  await page.fill('input[name="email"], input[placeholder*="이메일"], input[type="email"]', TEST_EMAIL);
-  await page.fill('input[name="password"], input[placeholder*="비밀번호"], input[type="password"]', TEST_PASSWORD);
-  await page.getByRole("button", { name: /가입|회원가입|등록/ }).click();
-  await page.waitForURL(/\/(chat|login)/, { timeout: 10000 });
+  // 회원가입 트리거 버튼 (로그인 폼 하단 링크)
+  await page.getByRole("button", { name: /계정이 없으신가요/ }).click();
+  // 모달 등장 대기
+  const dialog = page.getByRole("dialog", { name: "회원가입" });
+  await dialog.waitFor({ state: "visible" });
+  await dialog.locator("#reg-name").fill(TEST_NAME);
+  await dialog.locator("#reg-email").fill(TEST_EMAIL);
+  await dialog.locator("#reg-password").fill(TEST_PASSWORD);
+  await dialog.locator("#reg-password-confirm").fill(TEST_PASSWORD);
+  // 모달 내 제출 버튼 (트리거 버튼과 구분)
+  await dialog.getByRole("button", { name: /^회원가입$/ }).click();
+  // 성공 시 모달이 1.5s 후 닫히고 URL은 /login 유지 → 모달 사라짐 대기
+  await dialog.waitFor({ state: "hidden", timeout: 10000 });
 }
 
 async function login(page: Page) {
@@ -28,12 +35,12 @@ async function login(page: Page) {
 }
 
 async function ensureLoggedIn(page: Page) {
-  // 먼저 회원가입 시도, 이미 있으면 로그인
+  // register는 모달이 닫힐 때까지만 기다림 (자동 로그인 안 함)
+  // 이미 가입된 경우 → 모달이 안 닫혀서 throw → catch 후 로그인 시도
   try {
     await register(page);
-    if (page.url().includes("/chat")) return;
   } catch {
-    // 회원가입 실패 → 로그인 시도
+    // 회원가입 실패 (이미 존재 등) → 무시하고 로그인 진행
   }
   await login(page);
 }
