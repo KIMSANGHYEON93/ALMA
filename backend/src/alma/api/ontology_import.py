@@ -133,7 +133,15 @@ def _source_response(source) -> SourceResponse:
 
 
 BROWSE_ALLOWED_EXTENSIONS = {
-    ".md", ".txt", ".pdf", ".docx", ".json", ".yaml", ".yml", ".csv", ".tsv",
+    ".md",
+    ".txt",
+    ".pdf",
+    ".docx",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".csv",
+    ".tsv",
 }
 
 
@@ -163,23 +171,32 @@ async def browse_directory(
         for item in sorted(target.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
             # Skip hidden files/dirs and common noise
             if item.name.startswith(".") or item.name in {
-                "node_modules", "__pycache__", ".git", ".next", ".venv", "venv",
+                "node_modules",
+                "__pycache__",
+                ".git",
+                ".next",
+                ".venv",
+                "venv",
             }:
                 continue
 
             if item.is_dir():
-                entries.append(BrowseEntry(
-                    name=item.name,
-                    path=str(item.relative_to(root)),
-                    is_dir=True,
-                ))
+                entries.append(
+                    BrowseEntry(
+                        name=item.name,
+                        path=str(item.relative_to(root)),
+                        is_dir=True,
+                    )
+                )
             elif item.suffix.lower() in BROWSE_ALLOWED_EXTENSIONS:
-                entries.append(BrowseEntry(
-                    name=item.name,
-                    path=str(item.relative_to(root)),
-                    is_dir=False,
-                    size=item.stat().st_size,
-                ))
+                entries.append(
+                    BrowseEntry(
+                        name=item.name,
+                        path=str(item.relative_to(root)),
+                        is_dir=False,
+                        size=item.stat().st_size,
+                    )
+                )
     except PermissionError:
         raise HTTPException(status_code=403, detail="디렉토리 접근 권한이 없습니다")
 

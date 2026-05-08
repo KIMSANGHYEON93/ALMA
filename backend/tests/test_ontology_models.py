@@ -18,25 +18,34 @@ def test_ontology_models_importable():
 
 def test_node_candidate_defaults():
     from alma.domain.ontology.models import NodeCandidate
-    nc = NodeCandidate(name="Test", parent_category="Action", sub_type="Goal", properties={}, confidence=0.9)
+
+    nc = NodeCandidate(
+        name="Test", parent_category="Action", sub_type="Goal", properties={}, confidence=0.9
+    )
     assert nc.action == "create"
     assert nc.status == "draft"
     assert nc.source_type == "llm_extracted"
 
+
 def test_raw_extraction_from_llm_response():
     from alma.domain.ontology.models import RawExtraction
+
     json_str = '{"nodes": [{"name": "Python", "parent_category": "Concept", "sub_type": "Skill", "properties": {"level": "intermediate"}, "confidence": 0.9}], "edges": []}'
     result = RawExtraction.from_llm_response(json_str)
     assert len(result.node_candidates) == 1
     assert result.node_candidates[0].name == "Python"
 
+
 def test_raw_extraction_from_invalid_json():
     from alma.domain.ontology.models import RawExtraction
+
     result = RawExtraction.from_llm_response("not json")
     assert len(result.node_candidates) == 0
 
+
 def test_purification_result_defaults():
     from alma.domain.ontology.models import PurificationResult
+
     result = PurificationResult()
     assert result.created_objects == []
     assert result.rejected_count == 0

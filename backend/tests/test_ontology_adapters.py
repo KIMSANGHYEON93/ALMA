@@ -19,7 +19,9 @@ async def ontology_setup(db_session: AsyncSession, test_user):
     await SystemSeed(db_session).seed_for_user(test_user.id)
     service = OntologyService(db_session, embedding_provider=None)
     pipeline = PurificationPipeline(
-        DeduplicationService(db_session), SchemaValidator(), service,
+        DeduplicationService(db_session),
+        SchemaValidator(),
+        service,
     )
     return service, pipeline
 

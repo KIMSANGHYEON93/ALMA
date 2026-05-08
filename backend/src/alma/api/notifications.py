@@ -54,7 +54,5 @@ async def test_notification(
 ):
     """테스트 알림 전송"""
     service = NotificationService(session)
-    sent = await service.send_notification(
-        user.id, "VIVARA 테스트", "Push 알림이 정상 동작합니다!"
-    )
+    sent = await service.send_notification(user.id, "VIVARA 테스트", "Push 알림이 정상 동작합니다!")
     return {"sent": sent}

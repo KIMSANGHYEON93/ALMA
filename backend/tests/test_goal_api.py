@@ -25,9 +25,7 @@ async def auth_client(db_session):
 
 @pytest.mark.asyncio
 async def test_create_goal_requires_auth(db_session):
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         resp = await client.post("/api/goals", json={"title": "Test"})
     assert resp.status_code in (401, 403)
 
@@ -40,9 +38,7 @@ async def test_create_goal_empty_title_rejected(auth_client):
 
 @pytest.mark.asyncio
 async def test_create_goal_invalid_category(auth_client):
-    resp = await auth_client.post(
-        "/api/goals", json={"title": "Test", "category": "invalid"}
-    )
+    resp = await auth_client.post("/api/goals", json={"title": "Test", "category": "invalid"})
     assert resp.status_code == 422
 
 
@@ -68,9 +64,7 @@ async def test_goal_crud_flow(auth_client):
     assert resp.json()["milestones"] == []
 
     # Update
-    resp = await auth_client.put(
-        f"/api/goals/{goal_id}", json={"title": "Learn Rust & Go"}
-    )
+    resp = await auth_client.put(f"/api/goals/{goal_id}", json={"title": "Learn Rust & Go"})
     assert resp.status_code == 200
     assert resp.json()["title"] == "Learn Rust & Go"
 
@@ -86,16 +80,12 @@ async def test_milestone_flow(auth_client):
     goal_id = resp.json()["id"]
 
     # Add milestone
-    resp = await auth_client.post(
-        f"/api/goals/{goal_id}/milestones", json={"title": "Step 1"}
-    )
+    resp = await auth_client.post(f"/api/goals/{goal_id}/milestones", json={"title": "Step 1"})
     assert resp.status_code == 201
     ms_id = resp.json()["id"]
 
     # Complete milestone
-    resp = await auth_client.patch(
-        f"/api/goals/{goal_id}/milestones/{ms_id}/complete"
-    )
+    resp = await auth_client.patch(f"/api/goals/{goal_id}/milestones/{ms_id}/complete")
     assert resp.status_code == 200
     data = resp.json()
     assert data["progress"] == 100
@@ -121,8 +111,6 @@ async def test_summary(auth_client):
 async def test_status_update(auth_client):
     resp = await auth_client.post("/api/goals", json={"title": "Pause Me"})
     goal_id = resp.json()["id"]
-    resp = await auth_client.patch(
-        f"/api/goals/{goal_id}/status", json={"status": "paused"}
-    )
+    resp = await auth_client.patch(f"/api/goals/{goal_id}/status", json={"status": "paused"})
     assert resp.status_code == 200
     assert resp.json()["status"] == "paused"

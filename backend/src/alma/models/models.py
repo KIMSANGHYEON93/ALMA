@@ -430,7 +430,8 @@ class DocumentChunk(Base):
         Index("idx_chunks_document", "document_id", "chunk_index"),
         Index("idx_chunks_user", "user_id"),
         Index(
-            "idx_chunks_embedding", "embedding",
+            "idx_chunks_embedding",
+            "embedding",
             postgresql_using="hnsw",
             postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
@@ -464,7 +465,9 @@ class ObjectType(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     parent_category: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    property_schema: Mapped[dict] = mapped_column("schema", JSONB, default=dict, server_default="{}")
+    property_schema: Mapped[dict] = mapped_column(
+        "schema", JSONB, default=dict, server_default="{}"
+    )
     embedding = mapped_column(Vector(768), nullable=True)
     is_system: Mapped[bool] = mapped_column(default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
@@ -682,7 +685,9 @@ class OntologyAutomation(Base):
     __tablename__ = "ontology_automations"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     name: Mapped[str] = mapped_column(nullable=False)
     insight_type: Mapped[str] = mapped_column(nullable=False)
     action_type: Mapped[str] = mapped_column(nullable=False)
@@ -708,9 +713,15 @@ class OntologyAutomationLog(Base):
     __tablename__ = "ontology_automation_logs"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    automation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ontology_automations.id", ondelete="CASCADE"), nullable=False)
-    insight_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("ontology_insights.id", ondelete="SET NULL"), nullable=True)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    automation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ontology_automations.id", ondelete="CASCADE"), nullable=False
+    )
+    insight_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("ontology_insights.id", ondelete="SET NULL"), nullable=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     action_taken: Mapped[str] = mapped_column(Text, nullable=False)
     result: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
     status: Mapped[str] = mapped_column(nullable=False, default="success")
@@ -718,7 +729,9 @@ class OntologyAutomationLog(Base):
 
     __table_args__ = (
         Index("idx_ont_auto_logs_user", "user_id", "created_at"),
-        CheckConstraint("status IN ('success','failed','pending_approval')", name="ck_ont_auto_logs_status"),
+        CheckConstraint(
+            "status IN ('success','failed','pending_approval')", name="ck_ont_auto_logs_status"
+        ),
     )
 
 
@@ -726,7 +739,9 @@ class ImportSource(Base):
     __tablename__ = "ontology_import_sources"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     source_type: Mapped[str] = mapped_column(nullable=False)
     source_path: Mapped[str] = mapped_column(nullable=False)
     file_hash: Mapped[str | None] = mapped_column(nullable=True)

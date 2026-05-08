@@ -77,9 +77,7 @@ async def test_dashboard_with_retro(db_session, test_user):
 async def test_json_parse_fallback(db_session, test_user):
     """LLM이 잘못된 JSON 반환 시 폴백"""
     mock_llm = MagicMock()
-    mock_llm.complete = AsyncMock(
-        return_value=MagicMock(content="This is not valid JSON at all")
-    )
+    mock_llm.complete = AsyncMock(return_value=MagicMock(content="This is not valid JSON at all"))
 
     # 메시지가 있어야 LLM 호출됨 — 직접 Retro repo에 메시지 생성
     from alma.models.models import Conversation, Message

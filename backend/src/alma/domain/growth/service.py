@@ -28,10 +28,13 @@ class GoalService:
         goal = await self.goal_repo.create(user_id, title, **kwargs)
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "goal.created", "growth",
+                "goal.created",
+                "growth",
                 {"goal_id": str(goal.id), "title": goal.title},
-                user_id=str(user_id), aggregate_id=str(goal.id),
+                user_id=str(user_id),
+                aggregate_id=str(goal.id),
             )
         except Exception:
             pass
@@ -58,10 +61,16 @@ class GoalService:
         updated = await self.goal_repo.update(goal)
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "goal.updated", "growth",
-                {"goal_id": str(goal.id), "changed": {k: v for k, v in kwargs.items() if v is not None}},
-                user_id=str(goal.user_id), aggregate_id=str(goal.id),
+                "goal.updated",
+                "growth",
+                {
+                    "goal_id": str(goal.id),
+                    "changed": {k: v for k, v in kwargs.items() if v is not None},
+                },
+                user_id=str(goal.user_id),
+                aggregate_id=str(goal.id),
             )
         except Exception:
             pass
@@ -71,8 +80,10 @@ class GoalService:
         await self.goal_repo.delete(goal_id)
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "goal.deleted", "growth",
+                "goal.deleted",
+                "growth",
                 {"goal_id": str(goal_id)},
             )
         except Exception:
@@ -107,9 +118,7 @@ class GoalService:
 
     async def get_active_goals_context(self, user_id, limit: int = 5) -> str:
         """ChatService용 활성 목표 컨텍스트 문자열"""
-        goals = await self.goal_repo.list_by_user(
-            uuid.UUID(str(user_id)), status="active"
-        )
+        goals = await self.goal_repo.list_by_user(uuid.UUID(str(user_id)), status="active")
         if not goals:
             return ""
         goals = goals[:limit]

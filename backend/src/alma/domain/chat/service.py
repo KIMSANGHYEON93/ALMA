@@ -73,7 +73,9 @@ class ChatService:
         if similar:
             ctx = "\n".join([f"[Past {m.role}]: {m.content}" for m in similar])
             messages.append(ChatMessage(role="user", content=f"[Relevant past context]\n{ctx}"))
-            messages.append(ChatMessage(role="assistant", content="I'll keep this context in mind."))
+            messages.append(
+                ChatMessage(role="assistant", content="I'll keep this context in mind.")
+            )
         for msg in history:
             messages.append(msg)
 
@@ -110,9 +112,11 @@ class ChatService:
 
         if intent:
             # 자연어 서술 — 모델이 구조화 코드로 echo하지 않도록 함
-            params_desc = ", ".join(
-                f"{k}={v}" for k, v in intent.params.items()
-            ) if intent.params else "(none)"
+            params_desc = (
+                ", ".join(f"{k}={v}" for k, v in intent.params.items())
+                if intent.params
+                else "(none)"
+            )
             personalized_prompt += (
                 f"\n\nImportant: The user's request will trigger action "
                 f"'{intent.service}.{intent.action}' ({params_desc}). "
@@ -145,9 +149,7 @@ class ChatService:
         )
         return request, provider_name, intent
 
-    async def process_message_stream(
-        self, user_id: str, conversation_id: str, content: str
-    ):
+    async def process_message_stream(self, user_id: str, conversation_id: str, content: str):
         """스트리밍 버전. 이벤트 dict를 yield:
         {"type": "chunk", "content": str} — 텍스트 델타
         {"type": "action_result", "content": str} — 액션 실행 결과 텍스트
@@ -298,7 +300,10 @@ class ChatService:
                 items = result.get("results") or []
                 if not items:
                     return "\n\n📚 관련 문서를 찾지 못했습니다."
-                lines = [f"- **{i.get('title', '')}**: {(i.get('snippet') or '')[:120]}" for i in items[:5]]
+                lines = [
+                    f"- **{i.get('title', '')}**: {(i.get('snippet') or '')[:120]}"
+                    for i in items[:5]
+                ]
                 return "\n\n📚 검색 결과:\n" + "\n".join(lines)
 
         # Automation

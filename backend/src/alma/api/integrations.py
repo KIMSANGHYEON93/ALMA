@@ -92,7 +92,9 @@ async def google_callback(
         return RedirectResponse(url="http://localhost:3000/settings?integration=denied")
 
     if not code or not state:
-        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=missing_params")
+        return RedirectResponse(
+            url="http://localhost:3000/settings?integration=error&reason=missing_params"
+        )
 
     # Verify state JWT
     from alma.domain.integration.oauth import GoogleOAuthService
@@ -101,7 +103,9 @@ async def google_callback(
         payload = GoogleOAuthService.verify_state(state)
         user_id = payload["user_id"]
     except Exception:
-        return RedirectResponse(url="http://localhost:3000/settings?integration=error&reason=invalid_state")
+        return RedirectResponse(
+            url="http://localhost:3000/settings?integration=error&reason=invalid_state"
+        )
 
     # Get user's Google OAuth credentials from preferences
     import uuid
@@ -124,9 +128,11 @@ async def google_callback(
         # Try pending status
         from sqlalchemy import select
         from alma.models.models import Integration
+
         result = await session.execute(
             select(Integration).where(
-                Integration.user_id == (uuid.UUID(user_id) if isinstance(user_id, str) else user_id),
+                Integration.user_id
+                == (uuid.UUID(user_id) if isinstance(user_id, str) else user_id),
                 Integration.provider == "google_calendar",
                 Integration.status == "pending",
             )
@@ -141,15 +147,21 @@ async def google_callback(
     # Exchange code for tokens
     try:
         tokens = GoogleOAuthService.exchange_code(
-            code, client_id=client_id, client_secret=client_secret,
+            code,
+            client_id=client_id,
+            client_secret=client_secret,
             code_verifier=code_verifier,
         )
     except Exception as e:
         import logging
+
         logging.getLogger(__name__).exception("Google token exchange failed")
         import urllib.parse
+
         error_msg = urllib.parse.quote(str(e)[:200])
-        return RedirectResponse(url=f"http://localhost:3000/settings?integration=error&reason=token_exchange&detail={error_msg}")
+        return RedirectResponse(
+            url=f"http://localhost:3000/settings?integration=error&reason=token_exchange&detail={error_msg}"
+        )
 
     # Store encrypted tokens
     repo = IntegrationRepository(session)
@@ -185,9 +197,7 @@ async def disconnect_integration(
 
         token = decrypt_token(integration.access_token)
         async with httpx.AsyncClient() as client:
-            await client.post(
-                "https://oauth2.googleapis.com/revoke", params={"token": token}
-            )
+            await client.post("https://oauth2.googleapis.com/revoke", params={"token": token})
     except Exception:
         pass
 

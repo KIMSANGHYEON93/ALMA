@@ -118,9 +118,7 @@ async def change_password(
         raise HTTPException(status_code=400, detail="Current password is incorrect")
 
     if len(req.new_password) < 8:
-        raise HTTPException(
-            status_code=422, detail="New password must be at least 8 characters"
-        )
+        raise HTTPException(status_code=422, detail="New password must be at least 8 characters")
 
     result = await session.execute(select(User).where(User.id == current_user.id))
     user = result.scalar_one()
@@ -165,9 +163,7 @@ async def reset_password(
         raise HTTPException(status_code=404, detail="User not found")
 
     if len(req.new_password) < 8:
-        raise HTTPException(
-            status_code=422, detail="New password must be at least 8 characters"
-        )
+        raise HTTPException(status_code=422, detail="New password must be at least 8 characters")
 
     user.password_hash = hash_password(req.new_password)
     await session.commit()

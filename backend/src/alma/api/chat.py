@@ -130,9 +130,7 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
                     f"오늘 아직 완료하지 않은 습관이 있어요:\n{names}\n"
                     f"완료: {summary['completed']}/{summary['total']}"
                 )
-                await _safe_send(
-                    websocket, {"type": "habit_reminder", "message": reminder_msg}
-                )
+                await _safe_send(websocket, {"type": "habit_reminder", "message": reminder_msg})
         except Exception:
             logger.warning("Failed to send habit reminder", exc_info=True)
 

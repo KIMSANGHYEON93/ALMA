@@ -35,6 +35,7 @@ class RawExtraction:
     @staticmethod
     def from_llm_response(content: str) -> "RawExtraction":
         import json
+
         try:
             data = json.loads(content)
         except json.JSONDecodeError:

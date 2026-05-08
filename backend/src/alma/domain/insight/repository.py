@@ -68,9 +68,7 @@ class RetrospectiveRepository:
         )
         return result.scalar_one_or_none()
 
-    async def list_by_user(
-        self, user_id: uuid.UUID, limit: int = 10
-    ) -> list[Retrospective]:
+    async def list_by_user(self, user_id: uuid.UUID, limit: int = 10) -> list[Retrospective]:
         result = await self.session.execute(
             select(Retrospective)
             .where(Retrospective.user_id == user_id)
@@ -79,9 +77,7 @@ class RetrospectiveRepository:
         )
         return list(result.scalars().all())
 
-    async def count_conversations(
-        self, user_id: uuid.UUID, start: date, end: date
-    ) -> int:
+    async def count_conversations(self, user_id: uuid.UUID, start: date, end: date) -> int:
         result = await self.session.execute(
             select(func.count(Conversation.id)).where(
                 Conversation.user_id == user_id,
@@ -91,9 +87,7 @@ class RetrospectiveRepository:
         )
         return result.scalar() or 0
 
-    async def count_messages(
-        self, user_id: uuid.UUID, start: date, end: date
-    ) -> int:
+    async def count_messages(self, user_id: uuid.UUID, start: date, end: date) -> int:
         result = await self.session.execute(
             select(func.count(Message.id)).where(
                 Message.conversation_id.in_(
@@ -178,9 +172,7 @@ class InsightRepository:
         await self.session.refresh(insight)
         return insight
 
-    async def list_recent(
-        self, user_id: uuid.UUID, limit: int = 5
-    ) -> list[Insight]:
+    async def list_recent(self, user_id: uuid.UUID, limit: int = 5) -> list[Insight]:
         result = await self.session.execute(
             select(Insight)
             .where(Insight.user_id == user_id)
@@ -189,9 +181,7 @@ class InsightRepository:
         )
         return list(result.scalars().all())
 
-    async def list_by_retrospective(
-        self, retrospective_id: uuid.UUID
-    ) -> list[Insight]:
+    async def list_by_retrospective(self, retrospective_id: uuid.UUID) -> list[Insight]:
         result = await self.session.execute(
             select(Insight)
             .where(Insight.retrospective_id == retrospective_id)

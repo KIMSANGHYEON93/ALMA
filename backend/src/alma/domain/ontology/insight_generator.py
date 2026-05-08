@@ -64,8 +64,6 @@ class InsightGenerator:
                 )
                 insights.append(insight)
             except Exception:
-                logger.warning(
-                    "Failed to save insight: %s", item.get("title"), exc_info=True
-                )
+                logger.warning("Failed to save insight: %s", item.get("title"), exc_info=True)
                 continue
         return insights
