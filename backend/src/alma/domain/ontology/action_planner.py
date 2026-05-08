@@ -19,6 +19,7 @@ def _parse_json_lenient(content: str) -> dict:
             text = text[start : end + 1]
     return json.loads(text)
 
+
 ACTION_PLAN_PROMPT = """
 당신은 온톨로지 자동화 에이전트입니다. 인사이트를 기반으로 구체적인 행동 계획을 생성합니다.
 
