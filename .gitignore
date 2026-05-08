@@ -28,3 +28,7 @@ frontend/tsconfig.tsbuildinfo
 
 # Docker
 *.log
+
+# Local AI tooling
+.github/copilot-instructions.md
+.vexp/
