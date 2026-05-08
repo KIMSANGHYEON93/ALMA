@@ -35,9 +35,18 @@ class RawExtraction:
     @staticmethod
     def from_llm_response(content: str) -> "RawExtraction":
         import json
+        import re
 
+        text = (content or "").strip()
+        fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, flags=re.DOTALL)
+        if fence:
+            text = fence.group(1)
+        else:
+            start, end = text.find("{"), text.rfind("}")
+            if start != -1 and end > start:
+                text = text[start : end + 1]
         try:
-            data = json.loads(content)
+            data = json.loads(text)
         except json.JSONDecodeError:
             return RawExtraction()
         nodes = [

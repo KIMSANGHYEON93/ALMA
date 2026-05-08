@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import uuid
 
 from alma.domain.ontology.repository import InsightRepository
@@ -7,6 +8,19 @@ from alma.infrastructure.llm.base import ChatMessage, LLMRequest
 from alma.infrastructure.llm.router import LLMRouter
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_json_lenient(content: str) -> dict:
+    text = (content or "").strip()
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, flags=re.DOTALL)
+    if fence:
+        text = fence.group(1)
+    else:
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            text = text[start : end + 1]
+    return json.loads(text)
+
 
 INSIGHT_PROMPT = """
 당신은 개인 성장 코치입니다. 사용자의 지식 그래프 분석 결과를 바탕으로 실행 가능한 인사이트를 제공합니다.
@@ -44,7 +58,7 @@ class InsightGenerator:
 
         try:
             response = await self.llm_router.complete(request)
-            parsed = json.loads(response.content)
+            parsed = _parse_json_lenient(response.content)
         except Exception:
             logger.warning("Failed to generate insights via LLM", exc_info=True)
             return []
