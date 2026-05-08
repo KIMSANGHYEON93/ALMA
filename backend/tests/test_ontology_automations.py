@@ -1,6 +1,5 @@
 import asyncio
 
-import pytest
 
 from alma.domain.ontology.action_planner import ActionPlanner
 
