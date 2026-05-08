@@ -1,7 +1,11 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from alma.domain.ontology.repository import ObjectTypeRepository, LinkTypeRepository, ActionTypeRepository
+from alma.domain.ontology.repository import (
+    ObjectTypeRepository,
+    LinkTypeRepository,
+    ActionTypeRepository,
+)
 from alma.domain.ontology.seed import SystemSeed
 from alma.domain.ontology.validator import SchemaValidator
 from alma.domain.ontology.models import NodeCandidate
@@ -72,8 +76,12 @@ async def test_ontology_service_create_object(db_session: AsyncSession, test_use
 
     service = OntologyService(db_session, embedding_provider=None)
     candidate = NodeCandidate(
-        name="Learn Python", parent_category="Action", sub_type="Goal",
-        properties={"category": "learning"}, confidence=1.0, source_type="goal",
+        name="Learn Python",
+        parent_category="Action",
+        sub_type="Goal",
+        properties={"category": "learning"},
+        confidence=1.0,
+        source_type="goal",
     )
     obj_id = await service.create_object(test_user.id, candidate)
     assert obj_id is not None
@@ -97,8 +105,12 @@ async def test_ontology_service_verify_object(db_session: AsyncSession, test_use
     await SystemSeed(db_session).seed_for_user(test_user.id)
     service = OntologyService(db_session, embedding_provider=None)
     candidate = NodeCandidate(
-        name="Test Node", parent_category="Concept", sub_type="Topic",
-        properties={}, confidence=0.7, source_type="manual",
+        name="Test Node",
+        parent_category="Concept",
+        sub_type="Topic",
+        properties={},
+        confidence=0.7,
+        source_type="manual",
     )
     obj_id = await service.create_object(test_user.id, candidate)
     await service.verify_object(obj_id)

@@ -1,4 +1,5 @@
 """Secure preferences — encrypt/decrypt sensitive fields"""
+
 import logging
 
 from alma.domain.integration.crypto import encrypt_token, decrypt_token

@@ -206,9 +206,7 @@ class LinkTypeRepository:
 
     async def list_by_user(self, user_id: uuid.UUID) -> list[LinkType]:
         result = await self.session.execute(
-            select(LinkType)
-            .where(LinkType.user_id == user_id)
-            .order_by(LinkType.name)
+            select(LinkType).where(LinkType.user_id == user_id).order_by(LinkType.name)
         )
         return list(result.scalars().all())
 
@@ -264,6 +262,7 @@ class LinkRepository:
             condition = OntologyLink.target_id == object_id
         else:
             from sqlalchemy import or_
+
             condition = or_(
                 OntologyLink.source_id == object_id,
                 OntologyLink.target_id == object_id,
@@ -403,9 +402,7 @@ class InsightRepository:
         )
         return result.scalar_one_or_none()
 
-    async def update_status(
-        self, insight_id: uuid.UUID, new_status: str
-    ) -> OntologyInsight | None:
+    async def update_status(self, insight_id: uuid.UUID, new_status: str) -> OntologyInsight | None:
         insight = await self.get(insight_id)
         if insight:
             insight.status = new_status
@@ -538,8 +535,11 @@ class ImportSourceRepository:
 
     async def create(self, user_id, source_type, source_path, file_hash=None, node_count=0):
         source = ImportSource(
-            user_id=user_id, source_type=source_type, source_path=source_path,
-            file_hash=file_hash, node_count=node_count,
+            user_id=user_id,
+            source_type=source_type,
+            source_path=source_path,
+            file_hash=file_hash,
+            node_count=node_count,
         )
         self.session.add(source)
         await self.session.flush()
@@ -555,7 +555,8 @@ class ImportSourceRepository:
 
     async def list_by_user(self, user_id):
         result = await self.session.execute(
-            select(ImportSource).where(ImportSource.user_id == user_id)
+            select(ImportSource)
+            .where(ImportSource.user_id == user_id)
             .order_by(desc(ImportSource.last_imported_at))
         )
         return list(result.scalars().all())

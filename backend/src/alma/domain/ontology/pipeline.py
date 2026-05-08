@@ -18,14 +18,17 @@ class PurificationPipeline:
         self.validator = schema_validator
         self.ontology = ontology_service
 
-    async def process(self, extraction: RawExtraction, user_id: uuid.UUID, force_draft: bool = False) -> PurificationResult:
+    async def process(
+        self, extraction: RawExtraction, user_id: uuid.UUID, force_draft: bool = False
+    ) -> PurificationResult:
         result = PurificationResult()
 
         # Stage 1: Deduplication
         for candidate in extraction.node_candidates:
             if candidate.embedding:
                 similar = await self.dedup.find_similar(
-                    user_id, candidate.embedding,
+                    user_id,
+                    candidate.embedding,
                     threshold=settings.ontology_dedup_review_threshold,
                 )
                 if similar and similar.similarity > settings.ontology_dedup_auto_merge_threshold:
@@ -42,7 +45,9 @@ class PurificationPipeline:
                 candidate.action = "reject"
                 continue
             await self.ontology.create_object_type(
-                user_id, candidate.sub_type, candidate.parent_category,
+                user_id,
+                candidate.sub_type,
+                candidate.parent_category,
                 property_schema=self.validator.infer_schema(candidate.properties),
             )
 
@@ -64,7 +69,10 @@ class PurificationPipeline:
                 candidate.action = "reject"
                 result.rejected_count += 1
                 continue
-            if candidate.confidence >= settings.ontology_confidence_auto_verify and candidate.action == "create":
+            if (
+                candidate.confidence >= settings.ontology_confidence_auto_verify
+                and candidate.action == "create"
+            ):
                 candidate.status = "verified"
             else:
                 candidate.status = "draft"
@@ -89,8 +97,13 @@ class PurificationPipeline:
             target_obj = await self.ontology.find_object_by_name(user_id, edge.target_name)
             if source_obj and target_obj:
                 link_id = await self.ontology.create_link(
-                    user_id, edge.relation, source_obj.id, target_obj.id,
-                    edge.properties, edge.confidence, edge.source_origin,
+                    user_id,
+                    edge.relation,
+                    source_obj.id,
+                    target_obj.id,
+                    edge.properties,
+                    edge.confidence,
+                    edge.source_origin,
                 )
                 result.created_links.append(link_id)
 

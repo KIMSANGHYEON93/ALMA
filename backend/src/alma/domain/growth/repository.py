@@ -100,16 +100,12 @@ class MilestoneRepository:
         return milestone
 
     async def get(self, milestone_id: uuid.UUID) -> Milestone | None:
-        result = await self.session.execute(
-            select(Milestone).where(Milestone.id == milestone_id)
-        )
+        result = await self.session.execute(select(Milestone).where(Milestone.id == milestone_id))
         return result.scalar_one_or_none()
 
     async def list_by_goal(self, goal_id: uuid.UUID) -> list[Milestone]:
         result = await self.session.execute(
-            select(Milestone)
-            .where(Milestone.goal_id == goal_id)
-            .order_by(Milestone.sort_order)
+            select(Milestone).where(Milestone.goal_id == goal_id).order_by(Milestone.sort_order)
         )
         return list(result.scalars().all())
 

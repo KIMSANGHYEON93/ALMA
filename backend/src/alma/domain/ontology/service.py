@@ -40,6 +40,7 @@ class OntologyService:
         has_system = any(getattr(t, "is_system", False) for t in existing)
         if not has_system:
             from alma.domain.ontology.seed import SystemSeed
+
             seed = SystemSeed(self.session)
             await seed.seed_for_user(user_id)
 
@@ -71,7 +72,9 @@ class OntologyService:
             confidence=candidate.confidence,
             status=candidate.status,
         )
-        await self._log_action("create_object", user_id, "system", {"name": candidate.name}, str(obj.id))
+        await self._log_action(
+            "create_object", user_id, "system", {"name": candidate.name}, str(obj.id)
+        )
         return obj.id
 
     async def get_object(self, object_id: uuid.UUID) -> OntologyObject | None:
@@ -87,8 +90,11 @@ class OntologyService:
         if candidate.confidence > target.confidence:
             target.confidence = candidate.confidence
         await self._log_action(
-            "merge_objects", target.user_id, "system",
-            {"merged_from": candidate.name}, str(target_id),
+            "merge_objects",
+            target.user_id,
+            "system",
+            {"merged_from": candidate.name},
+            str(target_id),
         )
 
     async def verify_object(self, object_id: uuid.UUID) -> None:
@@ -108,8 +114,11 @@ class OntologyService:
         if obj:
             obj.properties = {**obj.properties, **changes}
             await self._log_action(
-                "update_object", obj.user_id, "adapter",
-                {"changes": list(changes.keys())}, str(object_id),
+                "update_object",
+                obj.user_id,
+                "adapter",
+                {"changes": list(changes.keys())},
+                str(object_id),
             )
 
     async def find_by_source(self, source_type: str, source_id: uuid.UUID) -> OntologyObject | None:
@@ -141,13 +150,19 @@ class OntologyService:
             confidence=confidence,
             source_origin=source_origin,
         )
-        await self._log_action("create_link", user_id, "system", {"relation": relation}, str(link.id))
+        await self._log_action(
+            "create_link", user_id, "system", {"relation": relation}, str(link.id)
+        )
         return link.id
 
-    async def create_object_type(self, user_id: uuid.UUID, name: str, parent_category: str, **kwargs) -> None:
+    async def create_object_type(
+        self, user_id: uuid.UUID, name: str, parent_category: str, **kwargs
+    ) -> None:
         existing = await self.ot_repo.get_by_name(user_id, name)
         if not existing:
-            await self.ot_repo.create(user_id=user_id, name=name, parent_category=parent_category, **kwargs)
+            await self.ot_repo.create(
+                user_id=user_id, name=name, parent_category=parent_category, **kwargs
+            )
 
     async def get_neighbors(self, object_id: uuid.UUID, depth: int = 2) -> list[GraphNode]:
         query = text("""
@@ -178,14 +193,25 @@ class OntologyService:
         lt_name_map = {str(lt.id): lt.name for lt in link_types}
         return GraphData(
             nodes=[
-                {"id": str(o.id), "name": o.name, "type_id": str(o.type_id),
-                 "properties": o.properties, "confidence": o.confidence}
+                {
+                    "id": str(o.id),
+                    "name": o.name,
+                    "type_id": str(o.type_id),
+                    "properties": o.properties,
+                    "confidence": o.confidence,
+                }
                 for o in objects
             ],
             edges=[
-                {"id": str(link.id), "source": str(link.source_id), "target": str(link.target_id),
-                 "type_id": str(link.type_id), "relation": lt_name_map.get(str(link.type_id), ""),
-                 "properties": link.properties, "confidence": link.confidence}
+                {
+                    "id": str(link.id),
+                    "source": str(link.source_id),
+                    "target": str(link.target_id),
+                    "type_id": str(link.type_id),
+                    "relation": lt_name_map.get(str(link.type_id), ""),
+                    "properties": link.properties,
+                    "confidence": link.confidence,
+                }
                 for link in links
             ],
         )

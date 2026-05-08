@@ -1,4 +1,3 @@
-
 from alma.domain.ontology.analyzer import GraphAnalyzer
 from alma.domain.ontology.models import GraphData
 

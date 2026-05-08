@@ -272,7 +272,9 @@ async def list_objects(
 
     # Build type lookup (single query)
     all_types = await service.ot_repo.list_by_user(user.id)
-    type_map: dict[uuid.UUID, tuple[str, str]] = {t.id: (t.name, t.parent_category) for t in all_types}
+    type_map: dict[uuid.UUID, tuple[str, str]] = {
+        t.id: (t.name, t.parent_category) for t in all_types
+    }
 
     type_id = None
     if type_name:
@@ -293,14 +295,22 @@ async def list_objects(
             all_objects.extend(objs)
         # 정렬 + offset/limit 적용
         all_objects.sort(key=lambda o: o.updated_at or o.created_at, reverse=True)
-        paged = all_objects[offset:offset + limit]
-        return [_node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in paged]
+        paged = all_objects[offset : offset + limit]
+        return [
+            _node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in paged
+        ]
 
     objects = await service.obj_repo.list_by_user(
-        user.id, status=status, type_id=type_id, limit=limit, offset=offset,
+        user.id,
+        status=status,
+        type_id=type_id,
+        limit=limit,
+        offset=offset,
     )
 
-    return [_node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in objects]
+    return [
+        _node_response(obj, *type_map.get(obj.type_id, ("unknown", "unknown"))) for obj in objects
+    ]
 
 
 @router.get("/objects/{object_id}", response_model=NodeResponse)

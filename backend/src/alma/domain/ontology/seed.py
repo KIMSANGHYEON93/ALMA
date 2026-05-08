@@ -12,9 +12,17 @@ SYSTEM_OBJECT_TYPES = [
     {"name": "Person", "parent": "Entity", "schema": {"role": "str"}},
     {"name": "Project", "parent": "Entity", "schema": {"status": "str", "deadline": "date"}},
     {"name": "Organization", "parent": "Entity", "schema": {"domain": "str"}},
-    {"name": "Goal", "parent": "Action", "schema": {"category": "str", "progress": "int", "target_date": "date"}},
+    {
+        "name": "Goal",
+        "parent": "Action",
+        "schema": {"category": "str", "progress": "int", "target_date": "date"},
+    },
     {"name": "Habit", "parent": "Action", "schema": {"frequency": "str", "streak": "int"}},
-    {"name": "Task", "parent": "Action", "schema": {"priority": "str", "due_date": "date", "status": "str"}},
+    {
+        "name": "Task",
+        "parent": "Action",
+        "schema": {"priority": "str", "due_date": "date", "status": "str"},
+    },
     {"name": "Topic", "parent": "Concept", "schema": {"domain": "str"}},
     {"name": "Skill", "parent": "Concept", "schema": {"level": "str"}},
     {"name": "Value", "parent": "Concept", "schema": {"importance": "float"}},
@@ -60,7 +68,8 @@ class SystemSeed:
             existing = await self.ot_repo.get_by_name(user_id, ot["name"])
             if not existing:
                 await self.ot_repo.create(
-                    user_id=user_id, name=ot["name"],
+                    user_id=user_id,
+                    name=ot["name"],
                     parent_category=ot["parent"],
                     property_schema=ot.get("schema", {}),
                     is_system=True,
@@ -70,7 +79,8 @@ class SystemSeed:
             existing = await self.lt_repo.get_by_name(user_id, lt["name"])
             if not existing:
                 await self.lt_repo.create(
-                    user_id=user_id, name=lt["name"],
+                    user_id=user_id,
+                    name=lt["name"],
                     cardinality=lt["cardinality"],
                     description=lt["desc"],
                     is_system=True,

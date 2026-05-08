@@ -33,10 +33,17 @@ class HabitService:
         )
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "habit.created", "habit",
-                {"habit_id": str(habit.id), "title": habit.title, "frequency_type": habit.frequency_type},
-                user_id=str(user_id), aggregate_id=str(habit.id),
+                "habit.created",
+                "habit",
+                {
+                    "habit_id": str(habit.id),
+                    "title": habit.title,
+                    "frequency_type": habit.frequency_type,
+                },
+                user_id=str(user_id),
+                aggregate_id=str(habit.id),
             )
         except Exception:
             pass
@@ -66,6 +73,7 @@ class HabitService:
         await self.habit_repo.delete(habit_id)
         try:
             from alma.core.events.helpers import emit
+
             await emit("habit.deleted", "habit", {"habit_id": str(habit_id)})
         except Exception:
             pass
@@ -94,10 +102,13 @@ class HabitService:
         )
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "habit.checkin_completed", "habit",
+                "habit.checkin_completed",
+                "habit",
                 {"habit_id": str(habit_id), "completed": completed, "source": source},
-                user_id=str(user_id), aggregate_id=str(habit_id),
+                user_id=str(user_id),
+                aggregate_id=str(habit_id),
             )
         except Exception:
             pass

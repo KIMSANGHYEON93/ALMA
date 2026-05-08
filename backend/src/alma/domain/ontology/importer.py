@@ -49,7 +49,9 @@ class ImportScanner:
     def __init__(self, import_repo: ImportSourceRepository):
         self.import_repo = import_repo
 
-    async def scan_directory(self, user_id: uuid.UUID, directory: str, pattern: str = "**/*.md") -> ScanResult:
+    async def scan_directory(
+        self, user_id: uuid.UUID, directory: str, pattern: str = "**/*.md"
+    ) -> ScanResult:
         base_path = Path(directory)
         if not base_path.exists():
             return ScanResult(summary={"error": f"Directory not found: {directory}"})
@@ -82,7 +84,9 @@ class ImportScanner:
             summary={"new": new_count, "modified": modified_count, "unchanged": unchanged_count},
         )
 
-    async def scan_db_source(self, user_id: uuid.UUID, source_type: str, current_count: int) -> ScanFileItem:
+    async def scan_db_source(
+        self, user_id: uuid.UUID, source_type: str, current_count: int
+    ) -> ScanFileItem:
         source_path = f"db://{source_type.replace('db_', '')}"
         existing = await self.import_repo.get_by_path(user_id, source_path)
         if existing is None:
@@ -106,7 +110,9 @@ class ImportProcessor:
         self.import_repo = import_repo
         self.extractor = extractor
 
-    async def process_markdown(self, user_id: uuid.UUID, base_dir: str, rel_path: str) -> ImportResult:
+    async def process_markdown(
+        self, user_id: uuid.UUID, base_dir: str, rel_path: str
+    ) -> ImportResult:
         result = ImportResult()
         full_path = os.path.join(base_dir, rel_path)
 
@@ -137,7 +143,9 @@ class ImportProcessor:
         # Process through pipeline with force_draft
         pipeline_result = await self.pipeline.process(extraction, user_id, force_draft=True)
         result.processed = 1
-        result.draft_count = len(pipeline_result.created_objects) + len(pipeline_result.review_objects)
+        result.draft_count = len(pipeline_result.created_objects) + len(
+            pipeline_result.review_objects
+        )
 
         # Record import source
         existing = await self.import_repo.get_by_path(user_id, rel_path)
@@ -145,8 +153,11 @@ class ImportProcessor:
             await self.import_repo.update_hash(existing.id, file_hash, result.draft_count)
         else:
             await self.import_repo.create(
-                user_id=user_id, source_type="markdown", source_path=rel_path,
-                file_hash=file_hash, node_count=result.draft_count,
+                user_id=user_id,
+                source_type="markdown",
+                source_path=rel_path,
+                file_hash=file_hash,
+                node_count=result.draft_count,
             )
 
         return result
@@ -164,30 +175,42 @@ class ImportProcessor:
             if existing:
                 result.skipped += 1
                 continue
-            candidates.append(NodeCandidate(
-                name=goal.title,
-                parent_category="Action",
-                sub_type="Goal",
-                properties={"category": goal.category, "status": goal.status, "progress": goal.progress},
-                confidence=1.0,
-                source_type="goal",
-                source_id=goal.id,
-            ))
+            candidates.append(
+                NodeCandidate(
+                    name=goal.title,
+                    parent_category="Action",
+                    sub_type="Goal",
+                    properties={
+                        "category": goal.category,
+                        "status": goal.status,
+                        "progress": goal.progress,
+                    },
+                    confidence=1.0,
+                    source_type="goal",
+                    source_id=goal.id,
+                )
+            )
 
         if candidates:
             extraction = RawExtraction(node_candidates=candidates)
             pipeline_result = await self.pipeline.process(extraction, user_id, force_draft=True)
             result.processed = len(candidates)
-            result.draft_count = len(pipeline_result.created_objects) + len(pipeline_result.review_objects)
+            result.draft_count = len(pipeline_result.created_objects) + len(
+                pipeline_result.review_objects
+            )
 
             # Record source
             source_path = "db://goals"
             existing_src = await self.import_repo.get_by_path(user_id, source_path)
             if existing_src:
-                await self.import_repo.update_hash(existing_src.id, None, result.draft_count + result.skipped)
+                await self.import_repo.update_hash(
+                    existing_src.id, None, result.draft_count + result.skipped
+                )
             else:
                 await self.import_repo.create(
-                    user_id=user_id, source_type="db_goals", source_path=source_path,
+                    user_id=user_id,
+                    source_type="db_goals",
+                    source_path=source_path,
                     node_count=result.draft_count + result.skipped,
                 )
 
@@ -207,40 +230,50 @@ class ImportProcessor:
             if existing:
                 result.skipped += 1
                 continue
-            candidates.append(NodeCandidate(
-                name=habit.title,
-                parent_category="Action",
-                sub_type="Habit",
-                properties={"frequency": habit.frequency_type},
-                confidence=1.0,
-                source_type="habit",
-                source_id=habit.id,
-            ))
+            candidates.append(
+                NodeCandidate(
+                    name=habit.title,
+                    parent_category="Action",
+                    sub_type="Habit",
+                    properties={"frequency": habit.frequency_type},
+                    confidence=1.0,
+                    source_type="habit",
+                    source_id=habit.id,
+                )
+            )
             if habit.goal_id:
                 goal_obj = await self.ontology.find_by_source("goal", habit.goal_id)
                 if goal_obj:
-                    edge_candidates.append(EdgeCandidate(
-                        source_name=habit.title,
-                        target_name=goal_obj.name,
-                        relation="supports",
-                        properties={},
-                        confidence=1.0,
-                        source_origin="system",
-                    ))
+                    edge_candidates.append(
+                        EdgeCandidate(
+                            source_name=habit.title,
+                            target_name=goal_obj.name,
+                            relation="supports",
+                            properties={},
+                            confidence=1.0,
+                            source_origin="system",
+                        )
+                    )
 
         if candidates:
             extraction = RawExtraction(node_candidates=candidates, edge_candidates=edge_candidates)
             pipeline_result = await self.pipeline.process(extraction, user_id, force_draft=True)
             result.processed = len(candidates)
-            result.draft_count = len(pipeline_result.created_objects) + len(pipeline_result.review_objects)
+            result.draft_count = len(pipeline_result.created_objects) + len(
+                pipeline_result.review_objects
+            )
 
             source_path = "db://habits"
             existing_src = await self.import_repo.get_by_path(user_id, source_path)
             if existing_src:
-                await self.import_repo.update_hash(existing_src.id, None, result.draft_count + result.skipped)
+                await self.import_repo.update_hash(
+                    existing_src.id, None, result.draft_count + result.skipped
+                )
             else:
                 await self.import_repo.create(
-                    user_id=user_id, source_type="db_habits", source_path=source_path,
+                    user_id=user_id,
+                    source_type="db_habits",
+                    source_path=source_path,
                     node_count=result.draft_count + result.skipped,
                 )
 
@@ -249,18 +282,21 @@ class ImportProcessor:
     def _extract_headings(self, content: str, filename: str) -> RawExtraction:
         """Fallback: extract markdown headings as Topic nodes when LLM is unavailable."""
         import re
-        headings = re.findall(r'^#{1,3}\s+(.+)$', content, re.MULTILINE)
+
+        headings = re.findall(r"^#{1,3}\s+(.+)$", content, re.MULTILINE)
         candidates = []
         for heading in headings[:10]:  # max 10 per file
             heading = heading.strip()
             if len(heading) < 3 or heading.startswith("---"):
                 continue
-            candidates.append(NodeCandidate(
-                name=heading,
-                parent_category="Concept",
-                sub_type="Topic",
-                properties={"source_file": filename},
-                confidence=0.6,
-                source_type="knowledge",
-            ))
+            candidates.append(
+                NodeCandidate(
+                    name=heading,
+                    parent_category="Concept",
+                    sub_type="Topic",
+                    properties={"source_file": filename},
+                    confidence=0.6,
+                    source_type="knowledge",
+                )
+            )
         return RawExtraction(node_candidates=candidates)

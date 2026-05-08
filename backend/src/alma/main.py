@@ -163,8 +163,13 @@ async def _ontology_adapter_handler(event):
 
 
 for _evt in [
-    "goal.created", "goal.updated", "goal.deleted",
-    "habit.created", "habit.deleted", "memory.created",
-    "message.received", "knowledge.document_ready",
+    "goal.created",
+    "goal.updated",
+    "goal.deleted",
+    "habit.created",
+    "habit.deleted",
+    "memory.created",
+    "message.received",
+    "knowledge.document_ready",
 ]:
     event_bus.subscribe(_evt, _ontology_adapter_handler)

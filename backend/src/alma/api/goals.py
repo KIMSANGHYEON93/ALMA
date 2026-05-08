@@ -140,8 +140,11 @@ async def create_goal(
 ):
     service = GoalService(session)
     goal = await service.create_goal(
-        user.id, req.title, description=req.description,
-        category=req.category, target_date=req.target_date,
+        user.id,
+        req.title,
+        description=req.description,
+        category=req.category,
+        target_date=req.target_date,
     )
     return _goal_response(goal)
 
@@ -220,7 +223,10 @@ async def add_milestone(
     if not goal:
         raise HTTPException(status_code=404, detail="Goal not found")
     ms = await service.add_milestone(
-        goal.id, req.title, description=req.description, sort_order=req.sort_order,
+        goal.id,
+        req.title,
+        description=req.description,
+        sort_order=req.sort_order,
     )
     return _milestone_response(ms)
 

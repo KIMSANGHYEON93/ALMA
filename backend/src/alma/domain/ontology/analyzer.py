@@ -38,9 +38,7 @@ class GraphAnalyzer:
         if self.G.number_of_nodes() < 3:
             return []
         # Only check top nodes by degree to avoid O(n^2)
-        top_nodes = sorted(
-            self.G.nodes, key=lambda n: self.G.degree(n), reverse=True
-        )[:20]
+        top_nodes = sorted(self.G.nodes, key=lambda n: self.G.degree(n), reverse=True)[:20]
         paths = []
         for source in top_nodes:
             for target in top_nodes:
@@ -51,9 +49,7 @@ class GraphAnalyzer:
                     if len(path) >= 3:
                         paths.append(
                             {
-                                "path": [
-                                    self.G.nodes[n].get("name", "") for n in path
-                                ],
+                                "path": [self.G.nodes[n].get("name", "") for n in path],
                                 "node_ids": path,
                                 "length": len(path) - 1,
                             }
@@ -108,9 +104,7 @@ class GraphAnalyzer:
             "total_nodes": self.G.number_of_nodes(),
             "total_edges": self.G.number_of_edges(),
             "by_type": categories,
-            "density": round(nx.density(self.G), 4)
-            if self.G.number_of_nodes() > 1
-            else 0,
+            "density": round(nx.density(self.G), 4) if self.G.number_of_nodes() > 1 else 0,
         }
 
     def full_analysis(self) -> dict:

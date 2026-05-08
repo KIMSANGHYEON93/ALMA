@@ -66,7 +66,9 @@ class IntegrationService:
         }
         provider_name = None
         request_model: str | None = None
-        if hasattr(self.llm, "providers") and isinstance(getattr(self.llm, "providers", None), dict):
+        if hasattr(self.llm, "providers") and isinstance(
+            getattr(self.llm, "providers", None), dict
+        ):
             # Router available — prefer claude haiku, fallback to any available provider
             for p in ("claude", "openai", "gemini"):
                 if p in self.llm.providers:

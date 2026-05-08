@@ -33,15 +33,18 @@ class MemoryService:
         )
         try:
             from alma.core.events.helpers import emit
+
             await emit(
-                "memory.created", "memory",
+                "memory.created",
+                "memory",
                 {
                     "memory_id": str(msg.id),
                     "conversation_id": str(conversation_id),
                     "content": content,
                     "role": role,
                 },
-                user_id=user_id, aggregate_id=str(msg.id),
+                user_id=user_id,
+                aggregate_id=str(msg.id),
             )
         except Exception:
             pass

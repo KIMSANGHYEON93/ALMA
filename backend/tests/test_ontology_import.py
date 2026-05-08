@@ -31,7 +31,10 @@ def test_compute_file_hash_changes():
 
 def test_extract_headings_fallback():
     processor = ImportProcessor(
-        ontology_service=None, pipeline=None, import_repo=None, extractor=None,
+        ontology_service=None,
+        pipeline=None,
+        import_repo=None,
+        extractor=None,
     )
     content = "# Title\n## Section 1\nSome text\n## Section 2\nMore text\n### Sub"
     extraction = processor._extract_headings(content, "test.md")
@@ -43,7 +46,10 @@ def test_extract_headings_fallback():
 
 def test_extract_headings_empty():
     processor = ImportProcessor(
-        ontology_service=None, pipeline=None, import_repo=None, extractor=None,
+        ontology_service=None,
+        pipeline=None,
+        import_repo=None,
+        extractor=None,
     )
     extraction = processor._extract_headings("Just plain text", "test.md")
     assert len(extraction.node_candidates) == 0
@@ -51,4 +57,5 @@ def test_extract_headings_empty():
 
 def test_import_source_model_importable():
     from alma.models.models import ImportSource
+
     assert ImportSource.__tablename__ == "ontology_import_sources"

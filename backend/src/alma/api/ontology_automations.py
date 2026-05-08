@@ -9,7 +9,11 @@ from alma.auth.dependencies import get_current_user
 from alma.database import get_session
 from alma.domain.ontology.action_executor import ActionExecutor
 from alma.domain.ontology.action_planner import ActionPlanner
-from alma.domain.ontology.repository import AutomationLogRepository, AutomationRepository, InsightRepository
+from alma.domain.ontology.repository import (
+    AutomationLogRepository,
+    AutomationRepository,
+    InsightRepository,
+)
 from alma.domain.ontology.service import OntologyService
 from alma.models.models import User
 
@@ -136,7 +140,14 @@ async def create_automation(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    valid_insight_types = {"hub_node", "isolated", "strong_path", "conflict", "opportunity", "trend"}
+    valid_insight_types = {
+        "hub_node",
+        "isolated",
+        "strong_path",
+        "conflict",
+        "opportunity",
+        "trend",
+    }
     valid_action_types = {"create_link", "create_node", "notification", "suggest"}
 
     if req.insight_type not in valid_insight_types:

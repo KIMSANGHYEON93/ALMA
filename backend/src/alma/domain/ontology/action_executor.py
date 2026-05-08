@@ -32,8 +32,12 @@ class ActionExecutor:
 
         try:
             if action == "create_link":
-                source = await self.ontology.find_object_by_name(user_id, params.get("source_name", ""))
-                target = await self.ontology.find_object_by_name(user_id, params.get("target_name", ""))
+                source = await self.ontology.find_object_by_name(
+                    user_id, params.get("source_name", "")
+                )
+                target = await self.ontology.find_object_by_name(
+                    user_id, params.get("target_name", "")
+                )
                 if source and target:
                     link_id = await self.ontology.create_link(
                         user_id,
@@ -43,7 +47,9 @@ class ActionExecutor:
                         confidence=0.7,
                         source_origin="system",
                     )
-                    result["detail"] = f"Link created: {params.get('source_name')} → {params.get('target_name')}"
+                    result["detail"] = (
+                        f"Link created: {params.get('source_name')} → {params.get('target_name')}"
+                    )
                     result["link_id"] = str(link_id)
                 else:
                     result = {"status": "failed", "detail": "Source or target node not found"}
@@ -70,7 +76,9 @@ class ActionExecutor:
                 if insight_id:
                     insight = await self.insight_repo.get(insight_id)
                     if insight:
-                        insight.action_suggestion = params.get("suggestion", params.get("message", ""))
+                        insight.action_suggestion = params.get(
+                            "suggestion", params.get("message", "")
+                        )
                         insight.actionable = True
                 result["detail"] = params.get("suggestion", params.get("message", ""))
 

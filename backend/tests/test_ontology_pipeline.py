@@ -37,13 +37,19 @@ async def test_pipeline_creates_verified_object(db_session: AsyncSession, test_u
     await SystemSeed(db_session).seed_for_user(test_user.id)
     service = OntologyService(db_session, embedding_provider=None)
     pipeline = PurificationPipeline(
-        DeduplicationService(db_session), SchemaValidator(), service,
+        DeduplicationService(db_session),
+        SchemaValidator(),
+        service,
     )
     extraction = RawExtraction(
         node_candidates=[
             NodeCandidate(
-                name="Learn Rust", parent_category="Action", sub_type="Goal",
-                properties={"category": "learning"}, confidence=0.9, source_type="goal",
+                name="Learn Rust",
+                parent_category="Action",
+                sub_type="Goal",
+                properties={"category": "learning"},
+                confidence=0.9,
+                source_type="goal",
             )
         ],
     )
@@ -59,13 +65,19 @@ async def test_pipeline_rejects_low_confidence(db_session: AsyncSession, test_us
     await SystemSeed(db_session).seed_for_user(test_user.id)
     service = OntologyService(db_session, embedding_provider=None)
     pipeline = PurificationPipeline(
-        DeduplicationService(db_session), SchemaValidator(), service,
+        DeduplicationService(db_session),
+        SchemaValidator(),
+        service,
     )
     extraction = RawExtraction(
         node_candidates=[
             NodeCandidate(
-                name="Maybe Something", parent_category="Concept", sub_type="Topic",
-                properties={}, confidence=0.3, source_type="llm_extracted",
+                name="Maybe Something",
+                parent_category="Concept",
+                sub_type="Topic",
+                properties={},
+                confidence=0.3,
+                source_type="llm_extracted",
             )
         ],
     )
@@ -79,13 +91,19 @@ async def test_pipeline_draft_medium_confidence(db_session: AsyncSession, test_u
     await SystemSeed(db_session).seed_for_user(test_user.id)
     service = OntologyService(db_session, embedding_provider=None)
     pipeline = PurificationPipeline(
-        DeduplicationService(db_session), SchemaValidator(), service,
+        DeduplicationService(db_session),
+        SchemaValidator(),
+        service,
     )
     extraction = RawExtraction(
         node_candidates=[
             NodeCandidate(
-                name="Possible Skill", parent_category="Concept", sub_type="Skill",
-                properties={"level": "beginner"}, confidence=0.65, source_type="llm_extracted",
+                name="Possible Skill",
+                parent_category="Concept",
+                sub_type="Skill",
+                properties={"level": "beginner"},
+                confidence=0.65,
+                source_type="llm_extracted",
             )
         ],
     )

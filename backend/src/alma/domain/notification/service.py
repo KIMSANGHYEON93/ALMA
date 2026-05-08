@@ -1,4 +1,5 @@
 """Web Push notification service"""
+
 import json
 import logging
 import uuid
