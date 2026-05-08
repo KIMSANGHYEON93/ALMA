@@ -1,11 +1,8 @@
-import hashlib
 import os
 import tempfile
 
-import pytest
 
-from alma.domain.ontology.importer import ImportProcessor, ImportScanner, compute_file_hash, ScanResult
-from alma.domain.ontology.models import NodeCandidate, RawExtraction
+from alma.domain.ontology.importer import ImportProcessor, compute_file_hash
 
 
 def test_compute_file_hash():
