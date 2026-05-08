@@ -1,10 +1,23 @@
 import json
 import logging
+import re
 
 from alma.infrastructure.llm.base import ChatMessage, LLMRequest
 from alma.infrastructure.llm.router import LLMRouter
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_json_lenient(content: str) -> dict:
+    text = (content or "").strip()
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, flags=re.DOTALL)
+    if fence:
+        text = fence.group(1)
+    else:
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            text = text[start : end + 1]
+    return json.loads(text)
 
 ACTION_PLAN_PROMPT = """
 당신은 온톨로지 자동화 에이전트입니다. 인사이트를 기반으로 구체적인 행동 계획을 생성합니다.
@@ -58,7 +71,7 @@ class ActionPlanner:
                 temperature=0.3,
             )
             response = await self.llm_router.complete(request)
-            return json.loads(response.content)
+            return _parse_json_lenient(response.content)
         except Exception:
             logger.warning("ActionPlanner LLM failed", exc_info=True)
             return {
