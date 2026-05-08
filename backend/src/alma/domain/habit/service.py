@@ -70,13 +70,22 @@ class HabitService:
         return await self.habit_repo.update(habit)
 
     async def delete_habit(self, habit_id: uuid.UUID) -> None:
+        habit = await self.habit_repo.get(habit_id)
+        user_id = habit.user_id if habit else None
         await self.habit_repo.delete(habit_id)
-        try:
-            from alma.core.events.helpers import emit
+        if user_id is not None:
+            try:
+                from alma.core.events.helpers import emit
 
-            await emit("habit.deleted", "habit", {"habit_id": str(habit_id)})
-        except Exception:
-            pass
+                await emit(
+                    "habit.deleted",
+                    "habit",
+                    {"habit_id": str(habit_id)},
+                    user_id=str(user_id),
+                    aggregate_id=str(habit_id),
+                )
+            except Exception:
+                pass
 
     async def checkin(
         self,
