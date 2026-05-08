@@ -45,6 +45,8 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://alma:alma@localhost:5432/alma
       TEST_DATABASE_URL: postgresql+asyncpg://alma:alma@localhost:5432/alma
       JWT_SECRET: ci-test-secret
+      # Fernet test key — encrypts only ephemeral CI test data; not a real secret
+      ENCRYPTION_KEY: 75CM88xp7uxzd0tf2csdrVb9syrRfNBu4d-zzxLRkaU=
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
