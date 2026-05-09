@@ -99,7 +99,7 @@ domain/
 cd backend
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
 
 # .env 설정
 cp .env.example .env
