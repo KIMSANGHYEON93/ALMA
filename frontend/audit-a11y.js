@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * VIVARA A11y Audit (axe-core)
  * - Logs in via API

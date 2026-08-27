@@ -44,6 +44,8 @@ export function useOntologyStats() {
 
 export function useOntologyObjects(params?: { status?: string; type_id?: string }) {
   const { token } = useAuth();
+  const status = params?.status;
+  const typeId = params?.type_id;
   const [objects, setObjects] = useState<OntologyNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +56,8 @@ export function useOntologyObjects(params?: { status?: string; type_id?: string 
       setError(null);
       try {
         const searchParams = new URLSearchParams();
-        if (params?.status) searchParams.set("status", params.status);
-        if (params?.type_id) searchParams.set("type_id", params.type_id);
+        if (status) searchParams.set("status", status);
+        if (typeId) searchParams.set("type_id", typeId);
         const qs = searchParams.toString();
         const url = `/api/ontology/objects${qs ? "?" + qs : ""}`;
         const res = await apiClient<OntologyNode[]>(url, { token, signal });
@@ -68,7 +70,7 @@ export function useOntologyObjects(params?: { status?: string; type_id?: string 
         setLoading(false);
       }
     },
-    [token, params?.status, params?.type_id]
+    [token, status, typeId]
   );
 
   useEffect(() => {

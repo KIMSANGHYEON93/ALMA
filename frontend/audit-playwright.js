@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * VIVARA Phase 1 Playwright Smoke Audit
  * - Logs in as test1@alma.com

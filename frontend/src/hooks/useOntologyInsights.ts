@@ -11,6 +11,8 @@ function isAbortError(err: unknown): boolean {
 
 export function useOntologyInsights(params?: { type?: string; status?: string }) {
   const { token } = useAuth();
+  const type = params?.type;
+  const status = params?.status;
   const [insights, setInsights] = useState<OntologyInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +24,8 @@ export function useOntologyInsights(params?: { type?: string; status?: string })
       try {
         setLoading(true);
         const searchParams = new URLSearchParams();
-        if (params?.type) searchParams.set("insight_type", params.type);
-        if (params?.status) searchParams.set("status", params.status);
+        if (type) searchParams.set("insight_type", type);
+        if (status) searchParams.set("status", status);
         const qs = searchParams.toString();
         const url = `/api/ontology/insights${qs ? "?" + qs : ""}`;
         const data = await apiClient<OntologyInsight[]>(url, { token, signal });
@@ -36,7 +38,7 @@ export function useOntologyInsights(params?: { type?: string; status?: string })
         setLoading(false);
       }
     },
-    [token, params?.type, params?.status]
+    [token, type, status]
   );
 
   useEffect(() => {

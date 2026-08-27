@@ -30,6 +30,12 @@ const MAX_RECENT = 5;
 // Helpers
 // ---------------------------------------------------------------------------
 
+function SortIcon({ col, sortKey, sortAsc }: { col: SortKey; sortKey: SortKey; sortAsc: boolean }) {
+  return sortKey === col ? (
+    <span className="ml-1 text-sky-400">{sortAsc ? "↑" : "↓"}</span>
+  ) : null;
+}
+
 function StatusBadge({ status }: { status: ScanFileItem["status"] }) {
   const styles = {
     new: "bg-green-900 text-green-300 border border-green-700",
@@ -498,11 +504,6 @@ export default function OntologyImportPage() {
     unchanged: scanFiles.filter((f) => f.status === "unchanged").length,
   };
 
-  const SortIcon = ({ col }: { col: SortKey }) =>
-    sortKey === col ? (
-      <span className="ml-1 text-sky-400">{sortAsc ? "↑" : "↓"}</span>
-    ) : null;
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-white">
       <NavBar />
@@ -722,17 +723,17 @@ export default function OntologyImportPage() {
                         </th>
                         <th className="px-4 py-2 text-left">
                           <button onClick={() => handleSort("path")} className="hover:text-sky-400 transition">
-                            파일 경로<SortIcon col="path" />
+                            파일 경로<SortIcon col="path" sortKey={sortKey} sortAsc={sortAsc} />
                           </button>
                         </th>
                         <th className="px-4 py-2 text-left">
                           <button onClick={() => handleSort("status")} className="hover:text-sky-400 transition">
-                            상태<SortIcon col="status" />
+                            상태<SortIcon col="status" sortKey={sortKey} sortAsc={sortAsc} />
                           </button>
                         </th>
                         <th className="px-4 py-2 text-right">
                           <button onClick={() => handleSort("size")} className="hover:text-sky-400 transition">
-                            크기<SortIcon col="size" />
+                            크기<SortIcon col="size" sortKey={sortKey} sortAsc={sortAsc} />
                           </button>
                         </th>
                       </tr>
