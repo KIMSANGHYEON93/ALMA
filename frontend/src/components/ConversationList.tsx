@@ -21,7 +21,7 @@ interface ConversationItemProps {
   isEditing: boolean;
   isConfirmDelete: boolean;
   editTitle: string;
-  editInputRef: React.RefObject<HTMLInputElement>;
+  editInputRef: React.RefObject<HTMLInputElement | null>;
   onSelect: () => void;
   onStartEdit: () => void;
   onRename: (title: string) => void;

@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // 인증이 필요한 경로
 const protectedPaths = ["/chat", "/settings", "/goals", "/habits", "/insights", "/knowledge", "/automations", "/ontology"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get("alma_access_token")?.value;
   const { pathname } = request.nextUrl;
 
