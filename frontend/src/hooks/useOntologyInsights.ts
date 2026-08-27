@@ -1,95 +1,74 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import type { OntologyInsight, InsightSummary } from "@/lib/types";
 
-function isAbortError(err: unknown): boolean {
-  return err instanceof Error && (err.name === "AbortError" || /aborted/i.test(err.message));
-}
-
-export function useOntologyInsights(params?: { type?: string; status?: string }) {
+export function useOntologyInsights(params?: {
+  type?: string;
+  status?: string;
+}) {
   const { token } = useAuth();
   const type = params?.type;
   const status = params?.status;
-  const [insights, setInsights] = useState<OntologyInsight[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchInsights = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        setLoading(true);
-        const searchParams = new URLSearchParams();
-        if (type) searchParams.set("insight_type", type);
-        if (status) searchParams.set("status", status);
-        const qs = searchParams.toString();
-        const url = `/api/ontology/insights${qs ? "?" + qs : ""}`;
-        const data = await apiClient<OntologyInsight[]>(url, { token, signal });
-        setInsights(data);
-      } catch (err) {
-        if (!isAbortError(err)) {
-          setError(err instanceof Error ? err.message : "인사이트 조회 실패");
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token, type, status]
+  const searchParams = new URLSearchParams();
+  if (type) searchParams.set("insight_type", type);
+  if (status) searchParams.set("status", status);
+  const qs = searchParams.toString();
+  const url = `/api/ontology/insights${qs ? "?" + qs : ""}`;
+
+  const key: AuthKey | null = token ? [url, token] : null;
+  const { data, isLoading, error, mutate } = useSWR<OntologyInsight[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchInsights(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchInsights]);
-
-  return { insights, loading, error, refresh: () => fetchInsights() };
+  return {
+    insights: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "인사이트 조회 실패"),
+    refresh: () => mutate(),
+  };
 }
 
 export function useInsightSummary() {
   const { token } = useAuth();
-  const [summary, setSummary] = useState<InsightSummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchSummary = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        const data = await apiClient<InsightSummary>("/api/ontology/insights/summary", { token, signal });
-        setSummary(data);
-      } catch (err) {
-        if (!isAbortError(err)) {
-          setError(err instanceof Error ? err.message : "요약 조회 실패");
-        }
-      }
-    },
-    [token]
+  const key: AuthKey | null = token
+    ? ["/api/ontology/insights/summary", token]
+    : null;
+  const { data, error, mutate } = useSWR<InsightSummary>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchSummary(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchSummary]);
-
-  return { summary, error, refresh: () => fetchSummary() };
+  return {
+    summary: data ?? null,
+    error: errMessage(error, "요약 조회 실패"),
+    refresh: () => mutate(),
+  };
 }
 
 export async function generateInsights(token: string) {
-  return apiClient<{ analysis: Record<string, unknown>; insights: OntologyInsight[]; llm_used: boolean }>(
-    "/api/ontology/insights/generate",
-    { method: "POST", token }
-  );
+  return apiClient<{
+    analysis: Record<string, unknown>;
+    insights: OntologyInsight[];
+    llm_used: boolean;
+  }>("/api/ontology/insights/generate", { method: "POST", token });
 }
 
-export async function updateInsightStatus(id: string, status: string, token: string) {
-  return apiClient<OntologyInsight>(
-    `/api/ontology/insights/${id}`,
-    { method: "PATCH", token, body: { status } }
-  );
+export async function updateInsightStatus(
+  id: string,
+  status: string,
+  token: string
+) {
+  return apiClient<OntologyInsight>(`/api/ontology/insights/${id}`, {
+    method: "PATCH",
+    token,
+    body: { status },
+  });
 }

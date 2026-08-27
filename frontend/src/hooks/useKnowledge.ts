@@ -1,47 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { apiClient, uploadFormData } from "@/lib/api";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import { useAuth } from "@/contexts/AuthContext";
 import type { KnowledgeDocument } from "@/lib/types";
 
+const LIST_URL = "/api/knowledge";
+
 export function useKnowledge() {
   const { token } = useAuth();
-  const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDocs = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        const data = await apiClient<KnowledgeDocument[]>("/api/knowledge", { token, signal });
-        setDocuments(data);
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "문서 조회 실패");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  const key: AuthKey | null = token ? [LIST_URL, token] : null;
+  const { data, isLoading, error, mutate } = useSWR<KnowledgeDocument[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
-
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchDocs(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchDocs]);
 
   const addDocument = async (title: string, content: string) => {
     if (!token) return;
-    await apiClient<KnowledgeDocument>("/api/knowledge", {
+    await apiClient<KnowledgeDocument>(LIST_URL, {
       method: "POST",
       token,
       body: { title, content },
     });
-    await fetchDocs();
+    await mutate();
   };
 
   const addFromUrl = async (title: string, url: string) => {
@@ -51,7 +34,7 @@ export function useKnowledge() {
       token,
       body: { title, url },
     });
-    await fetchDocs();
+    await mutate();
   };
 
   const addFile = async (title: string, file: File) => {
@@ -62,23 +45,23 @@ export function useKnowledge() {
       fd.append("title", title);
       return fd;
     });
-    await fetchDocs();
+    await mutate();
   };
 
   const deleteDocument = async (id: string) => {
     if (!token) return;
     await apiClient(`/api/knowledge/${id}`, { method: "DELETE", token });
-    await fetchDocs();
+    await mutate();
   };
 
   return {
-    documents,
-    loading,
-    error,
+    documents: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "문서 조회 실패"),
     addDocument,
     addFromUrl,
     addFile,
     deleteDocument,
-    refresh: () => fetchDocs(),
+    refresh: () => mutate(),
   };
 }

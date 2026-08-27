@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 VIVARA — The Origin of Your Life, Visualized
 - Mission: 삶의 모든 데이터에 의미를 부여하고, 관계를 발견하고, 성장의 방향을 제시하는 인지 엔진
 - Architecture: DDD (Domain-Driven Design) + SDD (Spec-Driven Design) + Event Sourcing
-- Stack: FastAPI + Next.js 14 + Supabase PostgreSQL 16/pgvector + Multi-LLM (Claude/GPT-4o/Gemini) + Embeddings (Gemini/OpenAI)
+- Stack: FastAPI + Next.js 16 (React 19) + Supabase PostgreSQL 16/pgvector + Multi-LLM (Claude/GPT-4o/Gemini) + Embeddings (Gemini/OpenAI)
 
 ## Commands
 
@@ -44,7 +44,7 @@ python -m alma.cli
 ```bash
 npm run dev       # Dev server (port 3000, proxies /api/* → localhost:8000)
 npm run build     # Production build
-npm run lint      # ESLint
+npm run lint      # ESLint (flat config; Next 16에서 next lint 제거됨)
 
 # E2E tests (Playwright) — requires backend on :8000 and frontend on :3000
 npx playwright test
@@ -226,10 +226,10 @@ Domain Action → emit(DomainEvent)
     → OntologyAdapters (지식 그래프 동기화)
 ```
 
-### Frontend: Next.js 14 App Router
+### Frontend: Next.js 16 App Router
 ```
 frontend/src/
-├── middleware.ts               Server-side auth guard (cookie-based)
+├── proxy.ts                    Server-side auth guard (cookie-based, Next 16에서 middleware→proxy 개명)
 │                               Protected: /chat,/settings,/goals,/habits,/insights,
 │                                          /knowledge,/automations,/ontology
 │                               Authenticated: /,/login → redirect to /chat
@@ -362,14 +362,15 @@ frontend/src/
 - **Embeddings**: Gemini (`google-genai` 1.68+) → OpenAI → None fallback chain, 768 dimensions
 - **SAVEPOINT test isolation**: conftest.py uses nested transactions for repeatable tests against shared Supabase DB
 - **asyncio_default_fixture_loop_scope = "function"**: session scope causes event loop mismatch with asyncpg
-- **Cookie + localStorage dual token**: middleware.ts (server-side) reads cookie, client reads localStorage
-- **Spline iframe embed**: `@splinetool/react-spline` NPM package incompatible with Next.js 14 webpack exports
+- **Cookie + localStorage dual token**: proxy.ts (server-side) reads cookie, client reads localStorage
+- **Spline iframe embed**: `@splinetool/react-spline` NPM package incompatible with Next.js webpack exports
 - **Multi-LLM Router**: LLMRouter tries primary provider, falls back on failure (Claude → Gemini → OpenAI)
 - **User-specific API keys**: 사용자 preferences에 암호화 저장, LLM 호출 시 복호화
 - **Event Sourcing**: InMemoryEventBus + EventStore (DB 영속화) + AutomationHandler + OntologyAdapters
 - **Unified Gateway**: ChannelService로 Web/Discord/Telegram 통합 메시지 처리
 - **Ontology Confidence Gating**: LLM 추출 결과 confidence threshold 기반 필터링
 - **Docker Compose**: nginx reverse proxy (80) + backend (8000) + frontend (3000) + pgvector DB
+- **SWR 데이터 페칭**: 모든 조회 훅은 `useSWR` 기반 (`lib/swr.ts`의 `authFetcher`/`swrDefaults`). 키는 `[url, token]` 튜플이라 재로그인 시 캐시가 분리된다. `revalidateOnFocus`는 LLM 호출 비용 때문에 꺼 둠 — 최신성이 중요한 화면에서만 개별로 켤 것. 변경 후 갱신은 `mutate()`.
 
 ## Alembic Notes
 - `env.py` uses `create_async_engine` directly (not `engine_from_config`) for pgbouncer connect_args

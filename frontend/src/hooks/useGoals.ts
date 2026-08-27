@@ -1,53 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
+import useSWR from "swr";
 import { apiClient } from "@/lib/api";
 import { onGoalsChanged } from "@/lib/events";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Goal, GoalDetail, GoalSummary, Milestone } from "@/lib/types";
 
 export type { Goal, GoalDetail, GoalSummary, Milestone };
 
+/** 목록과 요약을 함께 쓰는 화면이라 한 키로 묶는다. */
+type GoalsBundle = { goals: Goal[]; summary: GoalSummary | null };
+
 export function useGoals() {
   const { token } = useAuth();
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [summary, setSummary] = useState<GoalSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchGoals = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        const [goalsData, summaryData] = await Promise.all([
-          apiClient<Goal[]>("/api/goals", { token, signal }),
-          apiClient<GoalSummary>("/api/goals/summary", { token, signal }),
-        ]);
-        setGoals(goalsData);
-        setSummary(summaryData);
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "목표 조회 실패");
-      } finally {
-        setLoading(false);
-      }
+  const key = token ? (["goals-bundle", token] as const) : null;
+  const { data, isLoading, error, mutate } = useSWR<GoalsBundle>(
+    key,
+    async ([, t]: readonly [string, string]): Promise<GoalsBundle> => {
+      const [goals, summary] = await Promise.all([
+        apiClient<Goal[]>("/api/goals", { token: t }),
+        apiClient<GoalSummary>("/api/goals/summary", { token: t }),
+      ]);
+      return { goals, summary };
     },
-    [token]
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchGoals(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchGoals]);
-
   // 다른 페이지에서 목표 변경 시 자동 갱신
-  useEffect(() => {
-    return onGoalsChanged(() => fetchGoals());
-  }, [fetchGoals]);
+  useEffect(() => onGoalsChanged(() => void mutate()), [mutate]);
 
-  const createGoal = async (data: {
+  const createGoal = async (payload: {
     title: string;
     description?: string;
     category?: string;
@@ -56,19 +41,16 @@ export function useGoals() {
     const goal = await apiClient<Goal>("/api/goals", {
       method: "POST",
       token,
-      body: data,
+      body: payload,
     });
-    await fetchGoals();
+    await mutate();
     return goal;
   };
 
   const deleteGoal = async (goalId: string) => {
     if (!token) return;
-    await apiClient<void>(`/api/goals/${goalId}`, {
-      method: "DELETE",
-      token,
-    });
-    await fetchGoals();
+    await apiClient<void>(`/api/goals/${goalId}`, { method: "DELETE", token });
+    await mutate();
   };
 
   const updateGoalStatus = async (goalId: string, status: string) => {
@@ -78,45 +60,31 @@ export function useGoals() {
       token,
       body: { status },
     });
-    await fetchGoals();
+    await mutate();
   };
 
   return {
-    goals,
-    summary,
-    loading,
-    error,
+    goals: data?.goals ?? [],
+    summary: data?.summary ?? null,
+    loading: isLoading,
+    error: errMessage(error, "목표 조회 실패"),
     createGoal,
     deleteGoal,
     updateGoalStatus,
-    refresh: () => fetchGoals(),
+    refresh: () => mutate(),
   };
 }
 
 export function useGoalDetail(goalId: string | null) {
   const { token } = useAuth();
-  const [detail, setDetail] = useState<GoalDetail | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const fetchDetail = useCallback(async () => {
-    if (!token || !goalId) {
-      setDetail(null);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await apiClient<GoalDetail>(`/api/goals/${goalId}`, { token });
-      setDetail(data);
-    } catch {
-      setDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, goalId]);
-
-  useEffect(() => {
-    fetchDetail();
-  }, [fetchDetail]);
+  const key: AuthKey | null =
+    token && goalId ? [`/api/goals/${goalId}`, token] : null;
+  const { data, isLoading, mutate } = useSWR<GoalDetail>(
+    key,
+    authFetcher,
+    swrDefaults
+  );
 
   const addMilestone = async (title: string) => {
     if (!token || !goalId) return;
@@ -125,7 +93,7 @@ export function useGoalDetail(goalId: string | null) {
       token,
       body: { title },
     });
-    await fetchDetail();
+    await mutate();
   };
 
   const completeMilestone = async (milestoneId: string) => {
@@ -134,17 +102,24 @@ export function useGoalDetail(goalId: string | null) {
       `/api/goals/${goalId}/milestones/${milestoneId}/complete`,
       { method: "PATCH", token }
     );
-    await fetchDetail();
+    await mutate();
   };
 
   const deleteMilestone = async (milestoneId: string) => {
     if (!token || !goalId) return;
-    await apiClient<void>(
-      `/api/goals/${goalId}/milestones/${milestoneId}`,
-      { method: "DELETE", token }
-    );
-    await fetchDetail();
+    await apiClient<void>(`/api/goals/${goalId}/milestones/${milestoneId}`, {
+      method: "DELETE",
+      token,
+    });
+    await mutate();
   };
 
-  return { detail, loading, addMilestone, completeMilestone, deleteMilestone, refresh: fetchDetail };
+  return {
+    detail: data ?? null,
+    loading: isLoading,
+    addMilestone,
+    completeMilestone,
+    deleteMilestone,
+    refresh: () => mutate(),
+  };
 }

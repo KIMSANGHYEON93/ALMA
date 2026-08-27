@@ -1,101 +1,70 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import type { OntologyAutomation, OntologyAutomationLog } from "@/lib/types";
 
-function isAbortError(err: unknown): boolean {
-  return err instanceof Error && (err.name === "AbortError" || /aborted/i.test(err.message));
-}
+const LIST_URL = "/api/ontology/automations";
+const LOGS_URL = "/api/ontology/automations/logs";
 
 export function useOntologyAutomations() {
   const { token } = useAuth();
-  const [automations, setAutomations] = useState<OntologyAutomation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchAutomations = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        setLoading(true);
-        const data = await apiClient<OntologyAutomation[]>(
-          "/api/ontology/automations",
-          { token, signal }
-        );
-        setAutomations(data);
-      } catch (err) {
-        if (!isAbortError(err)) {
-          setError(err instanceof Error ? err.message : "자동화 조회 실패");
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  const key: AuthKey | null = token ? [LIST_URL, token] : null;
+  const { data, isLoading, error, mutate } = useSWR<OntologyAutomation[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchAutomations(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchAutomations]);
-
-  return { automations, loading, error, refresh: () => fetchAutomations() };
+  return {
+    automations: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "자동화 조회 실패"),
+    refresh: () => mutate(),
+  };
 }
 
 export function useAutomationLogs() {
   const { token } = useAuth();
-  const [logs, setLogs] = useState<OntologyAutomationLog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchLogs = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        setLoading(true);
-        const data = await apiClient<OntologyAutomationLog[]>(
-          "/api/ontology/automations/logs",
-          { token, signal }
-        );
-        setLogs(data);
-      } catch (err) {
-        if (!isAbortError(err)) {
-          setError(err instanceof Error ? err.message : "로그 조회 실패");
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  const key: AuthKey | null = token ? [LOGS_URL, token] : null;
+  const { data, isLoading, error, mutate } = useSWR<OntologyAutomationLog[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchLogs(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchLogs]);
-
-  return { logs, loading, error, refresh: () => fetchLogs() };
+  return {
+    logs: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "로그 조회 실패"),
+    refresh: () => mutate(),
+  };
 }
 
 export async function createAutomation(
-  data: { name: string; insight_type: string; action_type: string; auto_execute?: boolean },
+  data: {
+    name: string;
+    insight_type: string;
+    action_type: string;
+    auto_execute?: boolean;
+  },
   token: string
 ) {
-  return apiClient<OntologyAutomation>("/api/ontology/automations", {
+  return apiClient<OntologyAutomation>(LIST_URL, {
     method: "POST",
     token,
     body: data,
   });
 }
 
-export async function toggleAutomation(id: string, enabled: boolean, token: string) {
-  return apiClient<OntologyAutomation>(`/api/ontology/automations/${id}`, {
+export async function toggleAutomation(
+  id: string,
+  enabled: boolean,
+  token: string
+) {
+  return apiClient<OntologyAutomation>(`${LIST_URL}/${id}`, {
     method: "PATCH",
     token,
     body: { enabled },
@@ -103,15 +72,12 @@ export async function toggleAutomation(id: string, enabled: boolean, token: stri
 }
 
 export async function deleteAutomation(id: string, token: string) {
-  return apiClient<void>(`/api/ontology/automations/${id}`, {
-    method: "DELETE",
-    token,
-  });
+  return apiClient<void>(`${LIST_URL}/${id}`, { method: "DELETE", token });
 }
 
 export async function executeAutomation(insightId: string, token: string) {
   return apiClient<{ results: Record<string, unknown>[] }>(
-    `/api/ontology/automations/execute`,
+    `${LIST_URL}/execute`,
     {
       method: "POST",
       token,

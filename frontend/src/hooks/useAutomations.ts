@@ -1,66 +1,54 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { apiClient } from "@/lib/api";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import { useAuth } from "@/contexts/AuthContext";
 import type { AutomationRule, AutomationRuleCreate } from "@/lib/types";
 
+const LIST_URL = "/api/automations?active_only=false";
+
 export function useAutomations() {
   const { token } = useAuth();
-  const [rules, setRules] = useState<AutomationRule[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRules = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        const data = await apiClient<AutomationRule[]>("/api/automations?active_only=false", {
-          token,
-          signal,
-        });
-        setRules(data);
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "자동화 조회 실패");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  const key: AuthKey | null = token ? [LIST_URL, token] : null;
+  const { data, isLoading, error, mutate } = useSWR<AutomationRule[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchRules(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchRules]);
-
-  const createRule = async (data: AutomationRuleCreate) => {
+  const createRule = async (payload: AutomationRuleCreate) => {
     if (!token) return;
     await apiClient<AutomationRule>("/api/automations", {
       method: "POST",
       token,
-      body: data,
+      body: payload,
     });
-    await fetchRules();
+    await mutate();
   };
 
   const deleteRule = async (id: string) => {
     if (!token) return;
     await apiClient(`/api/automations/${id}`, { method: "DELETE", token });
-    await fetchRules();
+    await mutate();
   };
 
   const toggleRule = async (id: string, isActive: boolean) => {
     if (!token) return;
-    await apiClient<AutomationRule>(`/api/automations/${id}/toggle?is_active=${isActive}`, {
-      method: "PUT",
-      token,
-    });
-    await fetchRules();
+    await apiClient<AutomationRule>(
+      `/api/automations/${id}/toggle?is_active=${isActive}`,
+      { method: "PUT", token }
+    );
+    await mutate();
   };
 
-  return { rules, loading, error, createRule, deleteRule, toggleRule, refresh: () => fetchRules() };
+  return {
+    rules: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "자동화 조회 실패"),
+    createRule,
+    deleteRule,
+    toggleRule,
+    refresh: () => mutate(),
+  };
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 import type {
   ScanResponse,
   ProcessResponse,
@@ -56,45 +57,23 @@ export async function importDB(
   });
 }
 
-function isAbortError(err: unknown): boolean {
-  return err instanceof Error && (err.name === "AbortError" || /aborted/i.test(err.message));
-}
-
 export function useImportSources() {
   const { token } = useAuth();
-  const [sources, setSources] = useState<ImportSourceItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchSources = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        setLoading(true);
-        const data = await apiClient<ImportSourceItem[]>(
-          "/api/ontology/import/sources",
-          { token, signal }
-        );
-        setSources(data);
-      } catch (err) {
-        if (!isAbortError(err)) {
-          setError(err instanceof Error ? err.message : "임포트 소스 조회 실패");
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  const key: AuthKey | null = token
+    ? ["/api/ontology/import/sources", token]
+    : null;
+  const { data, isLoading, error, mutate } = useSWR<ImportSourceItem[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchSources(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchSources]);
-
-  return { sources, loading, error, refresh: () => fetchSources() };
+  return {
+    sources: data ?? [],
+    loading: isLoading,
+    error: errMessage(error, "임포트 소스 조회 실패"),
+    refresh: () => mutate(),
+  };
 }
 
 export async function deleteImportSource(
