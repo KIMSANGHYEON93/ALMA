@@ -32,3 +32,9 @@ frontend/tsconfig.tsbuildinfo
 # Local AI tooling
 .github/copilot-instructions.md
 .vexp/
+
+# Personal Obsidian vault (docs/guides and docs/superpowers remain tracked)
+docs/.obsidian/
+docs/.claude/
+docs/CLAUDE.md
+docs/Ontology/
