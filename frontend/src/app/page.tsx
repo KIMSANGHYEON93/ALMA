@@ -260,7 +260,7 @@ function VoiceWaveform() {
           key={i}
           className="w-1 bg-sky-400 rounded-full animate-pulse"
           style={{
-            height: `${20 + Math.sin(i * 0.5) * 30 + ((i * 37) % 10)}%`,
+            height: `${(20 + Math.sin(i * 0.5) * 30 + ((i * 37) % 10)).toFixed(2)}%`,
             animationDelay: `${i * 80}ms`,
             animationDuration: `${800 + ((i * 53) % 400)}ms`,
           }}
