@@ -35,10 +35,11 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=6.0.0",
     "httpx>=0.27.0",
-    # Exact pin: ruff's default rule set changes between minor versions.
-    # Keep in sync with .github/workflows/ci.yml (backend-lint).
+    # Exact pins. A linter's default rule set changes between releases, so
+    # an unpinned dev tool silently makes CI and local disagree. CI installs
+    # this extra, so these two lines are the only place versions are set.
     "ruff==0.15.6",
-    "mypy>=1.13.0",
+    "mypy==1.19.1",
 ]
 
 [build-system]
@@ -67,3 +68,28 @@ testpaths = ["tests"]
 python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
+
+# Annotation completeness is a separate, larger job (160 no-untyped-def,
+# 173 type-arg, 34 no-untyped-call, 14 no-any-return across src/). Turning
+# those off keeps every *correctness* check strict, which is the part that
+# finds bugs. Re-enable one code at a time as annotations get filled in.
+disable_error_code = [
+    "no-untyped-def",
+    "type-arg",
+    "no-untyped-call",
+    "no-any-return",
+]
+
+# Third-party packages that ship no stubs and no py.typed marker.
+[[tool.mypy.overrides]]
+module = [
+    "docx.*",
+    "fitz.*",
+    "google_auth_oauthlib.*",
+    "googleapiclient.*",
+    "jose.*",
+    "networkx.*",
+    "pgvector.*",
+    "pywebpush.*",
+]
+ignore_missing_imports = true

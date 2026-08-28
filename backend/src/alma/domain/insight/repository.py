@@ -20,7 +20,7 @@ class RetrospectiveRepository:
         summary: str,
         highlights: list,
         challenges: list,
-        goals_progress: list,
+        goals_progress: dict,
         conversation_count: int,
         message_count: int,
     ) -> Retrospective:

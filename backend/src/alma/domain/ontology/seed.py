@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +9,7 @@ from alma.domain.ontology.repository import (
     ObjectTypeRepository,
 )
 
-SYSTEM_OBJECT_TYPES = [
+SYSTEM_OBJECT_TYPES: list[dict[str, Any]] = [
     {"name": "Person", "parent": "Entity", "schema": {"role": "str"}},
     {"name": "Project", "parent": "Entity", "schema": {"status": "str", "deadline": "date"}},
     {"name": "Organization", "parent": "Entity", "schema": {"domain": "str"}},
@@ -32,7 +33,7 @@ SYSTEM_OBJECT_TYPES = [
     {"name": "Period", "parent": "Temporal", "schema": {"start": "date", "end": "date"}},
 ]
 
-SYSTEM_LINK_TYPES = [
+SYSTEM_LINK_TYPES: list[dict[str, Any]] = [
     {"name": "supports", "cardinality": "N:M", "desc": "A supports/promotes B"},
     {"name": "blocks", "cardinality": "N:M", "desc": "A blocks/hinders B"},
     {"name": "causes", "cardinality": "N:M", "desc": "A causes B"},
@@ -45,7 +46,7 @@ SYSTEM_LINK_TYPES = [
     {"name": "contradicts", "cardinality": "N:M", "desc": "A contradicts B"},
 ]
 
-SYSTEM_ACTION_TYPES = [
+SYSTEM_ACTION_TYPES: list[dict[str, Any]] = [
     {"name": "create_object", "desc": "Create node"},
     {"name": "update_object", "desc": "Update node properties"},
     {"name": "archive_object", "desc": "Archive node"},
@@ -76,8 +77,8 @@ class SystemSeed:
                 )
 
         for lt in SYSTEM_LINK_TYPES:
-            existing = await self.lt_repo.get_by_name(user_id, lt["name"])
-            if not existing:
+            existing_lt = await self.lt_repo.get_by_name(user_id, lt["name"])
+            if not existing_lt:
                 await self.lt_repo.create(
                     user_id=user_id,
                     name=lt["name"],
@@ -87,8 +88,8 @@ class SystemSeed:
                 )
 
         for at in SYSTEM_ACTION_TYPES:
-            existing = await self.at_repo.get_by_name(user_id, at["name"])
-            if not existing:
+            existing_at = await self.at_repo.get_by_name(user_id, at["name"])
+            if not existing_at:
                 await self.at_repo.create(user_id=user_id, name=at["name"], is_system=True)
 
         await self.session.flush()

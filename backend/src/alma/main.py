@@ -31,7 +31,7 @@ from alma.domain.automation.handler import AutomationEventHandler
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
+async def lifespan(app: FastAPI):
     yield
 
 
@@ -127,13 +127,14 @@ async def _ontology_adapter_handler(event):
 
                 extractor = SemanticExtractor(llm_router, service)
 
+                ontology_adapter: ChatAdapter | KnowledgeAdapter
                 if event.event_type == "message.received":
-                    adapter = ChatAdapter(extractor, pipeline)
+                    ontology_adapter = ChatAdapter(extractor, pipeline)
                 else:
-                    adapter = KnowledgeAdapter(extractor, pipeline)
+                    ontology_adapter = KnowledgeAdapter(extractor, pipeline)
 
                 try:
-                    await adapter.handle(event)
+                    await ontology_adapter.handle(event)
                     await session.commit()
                 except Exception:
                     await session.rollback()

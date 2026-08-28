@@ -1,7 +1,7 @@
 # backend/src/alma/api/habits.py
 import uuid
 from datetime import date
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, model_validator
@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from alma.auth.dependencies import get_current_user
 from alma.database import get_session
 from alma.domain.habit.service import HabitService
-from alma.models.models import User
+from alma.models.models import HabitLog, User
 
 router = APIRouter(prefix="/api/habits", tags=["habits"])
 
@@ -143,7 +143,7 @@ def _habit_response(habit) -> HabitResponse:
     )
 
 
-def _log_response(log: object) -> HabitLogResponse:
+def _log_response(log: HabitLog) -> HabitLogResponse:
     return HabitLogResponse(
         id=str(log.id),
         habit_id=str(log.habit_id),
@@ -186,7 +186,7 @@ async def create_habit(
     session: AsyncSession = Depends(get_session),
 ):
     service = HabitService(session)
-    kwargs = {}
+    kwargs: dict[str, Any] = {}
     if req.description:
         kwargs["description"] = req.description
     if req.target_value is not None:

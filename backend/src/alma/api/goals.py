@@ -1,3 +1,4 @@
+import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -244,7 +245,7 @@ async def update_milestone(
     if not goal:
         raise HTTPException(status_code=404, detail="Goal not found")
     ms_repo = MilestoneRepository(session)
-    ms = await ms_repo.get(milestone_id)
+    ms = await ms_repo.get(uuid.UUID(milestone_id))
     if not ms or ms.goal_id != goal.id:
         raise HTTPException(status_code=404, detail="Milestone not found")
     updates = req.model_dump(exclude_none=True)
@@ -265,7 +266,7 @@ async def delete_milestone(
     goal = await service.get_goal(goal_id, user.id)
     if not goal:
         raise HTTPException(status_code=404, detail="Goal not found")
-    ms = await MilestoneRepository(session).get(milestone_id)
+    ms = await MilestoneRepository(session).get(uuid.UUID(milestone_id))
     if not ms or ms.goal_id != goal.id:
         raise HTTPException(status_code=404, detail="Milestone not found")
     await service.delete_milestone(ms.id, goal)
@@ -283,7 +284,7 @@ async def complete_milestone(
     if not goal:
         raise HTTPException(status_code=404, detail="Goal not found")
     ms_repo = MilestoneRepository(session)
-    ms = await ms_repo.get(milestone_id)
+    ms = await ms_repo.get(uuid.UUID(milestone_id))
     if not ms or ms.goal_id != goal.id:
         raise HTTPException(status_code=404, detail="Milestone not found")
     _, updated_goal, suggest = await service.complete_milestone(ms, goal)

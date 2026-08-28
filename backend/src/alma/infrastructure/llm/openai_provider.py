@@ -1,6 +1,7 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, cast
 
 import openai
+from openai.types.chat import ChatCompletionMessageParam
 
 from alma.config import settings
 from alma.infrastructure.llm.base import LLMRequest, LLMResponse, LLMStreamChunk
@@ -11,12 +12,12 @@ class OpenAIProvider:
         self.client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
         self.model = model
 
-    def _build_messages(self, request: LLMRequest) -> list[dict[str, str]]:
+    def _build_messages(self, request: LLMRequest) -> list[ChatCompletionMessageParam]:
         messages: list[dict[str, str]] = []
         if request.system_prompt:
             messages.append({"role": "system", "content": request.system_prompt})
         messages.extend({"role": m.role, "content": m.content} for m in request.messages)
-        return messages
+        return cast(list[ChatCompletionMessageParam], messages)
 
     async def complete(self, request: LLMRequest) -> LLMResponse:
         response = await self.client.chat.completions.create(
@@ -58,7 +59,7 @@ class OpenAIProvider:
                     yield LLMStreamChunk(delta=delta.content or "")
 
             # 마지막 chunk에 usage 포함 (stream_options.include_usage=True 덕분)
-            if getattr(chunk, "usage", None):
+            if chunk.usage:
                 input_tokens = chunk.usage.prompt_tokens or 0
                 output_tokens = chunk.usage.completion_tokens or 0
 

@@ -66,6 +66,8 @@ class GoogleCalendarProvider:
                 return creds
 
             creds = await asyncio.to_thread(_refresh)
+            if not creds.token:
+                raise RuntimeError("Google OAuth refresh returned no access token")
             new_access = encrypt_token(creds.token)
 
             # DB에 새 토큰 명시적으로 영속화 (다음 요청에서 재사용 가능)

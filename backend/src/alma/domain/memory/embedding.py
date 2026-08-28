@@ -32,7 +32,10 @@ class GeminiEmbedding:
                 contents=text,
                 config={"output_dimensionality": self.dimensions},
             )
-            return list(result.embeddings[0].values)
+            embeddings = result.embeddings
+            if not embeddings or not embeddings[0].values:
+                return None
+            return list(embeddings[0].values)
         except Exception:
             logger.warning("Gemini embedding failed", exc_info=True)
             return None

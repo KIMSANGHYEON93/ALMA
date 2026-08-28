@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from alma.config import settings
 from alma.domain.chat.repository import ConversationRepository
 from alma.domain.identity.profile import UserProfileService
-from alma.domain.integration.service import IntegrationService
+from alma.domain.integration.service import ActionIntent, IntegrationService
 from alma.domain.memory.embedding import create_embedding_provider
 from alma.domain.memory.service import MemoryService
 from alma.infrastructure.llm.base import ChatMessage, LLMProvider, LLMRequest
@@ -57,7 +57,7 @@ class ChatService:
 
     async def _build_request_context(
         self, user_id: str, conversation_id: str, content: str
-    ) -> tuple[LLMRequest, str | None, object | None]:
+    ) -> tuple[LLMRequest, str | None, ActionIntent | None]:
         """LLM 요청 + provider_name + intent 구성. process_message와 stream 양쪽에서 공유."""
         # 1. 사용자 메시지에서 액션 인텐트 먼저 감지
         try:
@@ -164,9 +164,9 @@ class ChatService:
         llm_content = ""
         try:
             stream_iter = (
-                self.llm.stream(request, provider_name=provider_name)
+                self.llm.stream(request, provider_name=provider_name)  # type: ignore[call-arg]
                 if isinstance(getattr(self.llm, "providers", None), dict)
-                else self.llm.stream(request)  # type: ignore[call-arg]
+                else self.llm.stream(request)
             )
             async for chunk in stream_iter:
                 if chunk.delta:
