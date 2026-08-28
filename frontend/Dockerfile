@@ -5,7 +5,8 @@ ARG BACKEND_URL=http://localhost:8000
 ENV BACKEND_URL=${BACKEND_URL}
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# package-lock.json is authored by npm 11; node:22-alpine bundles npm 10.
+RUN npm install -g npm@11.6.2 && npm ci
 COPY . .
 RUN npm run build
 

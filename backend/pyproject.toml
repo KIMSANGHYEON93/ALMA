@@ -35,7 +35,9 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=6.0.0",
     "httpx>=0.27.0",
-    "ruff>=0.8.0",
+    # Exact pin: ruff's default rule set changes between minor versions.
+    # Keep in sync with .github/workflows/ci.yml (backend-lint).
+    "ruff==0.15.6",
     "mypy>=1.13.0",
 ]
 
@@ -49,6 +51,12 @@ where = ["src"]
 [tool.ruff]
 target-version = "py313"
 line-length = 100
+
+# Pin the rule set explicitly. With no `select`, ruff falls back to its
+# built-in default, which grew from 59 rules (0.15.x) to 414 rules (0.16.x).
+# These four are exactly that former default, so behaviour is unchanged.
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
