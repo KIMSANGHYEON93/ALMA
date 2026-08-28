@@ -32,31 +32,31 @@ export default function OntologyPage() {
       <NavBar />
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Ontology</h1>
+          <h1 className="text-2xl font-bold">온톨로지</h1>
           <div className="flex gap-2">
             <Link
               href="/ontology/import"
               className="px-4 py-2 rounded bg-orange-700 text-sm font-medium hover:bg-orange-600 transition"
             >
-              Import
+              임포트
             </Link>
             <Link
               href="/ontology/insights"
               className="px-4 py-2 rounded bg-purple-600 text-sm font-medium hover:bg-purple-500 transition"
             >
-              Insights
+              인사이트
             </Link>
             <Link
               href="/ontology/automations"
               className="px-4 py-2 rounded bg-green-700 text-sm font-medium hover:bg-green-600 transition"
             >
-              Automations
+              자동화
             </Link>
             <Link
               href="/ontology/graph"
               className="px-4 py-2 rounded bg-sky-700 text-sm font-medium hover:bg-sky-800 transition"
             >
-              Graph View
+              그래프 보기
             </Link>
           </div>
         </div>
@@ -83,13 +83,13 @@ export default function OntologyPage() {
             onClick={() => setTab("all")}
             className={`px-4 py-2 rounded ${tab === "all" ? "bg-sky-700" : "bg-gray-800"}`}
           >
-            All Nodes ({verified.length})
+            전체 노드 ({verified.length})
           </button>
           <button
             onClick={() => setTab("drafts")}
             className={`px-4 py-2 rounded ${tab === "drafts" ? "bg-yellow-600" : "bg-gray-800"}`}
           >
-            Drafts ({drafts.length})
+            드래프트 ({drafts.length})
           </button>
         </div>
 

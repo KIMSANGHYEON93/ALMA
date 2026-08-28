@@ -90,9 +90,9 @@ export default function OntologyInsightsPage() {
               href="/ontology"
               className="text-gray-400 hover:text-white transition text-sm"
             >
-              ← Ontology
+              ← 온톨로지
             </Link>
-            <h1 className="text-2xl font-bold">Insights</h1>
+            <h1 className="text-2xl font-bold">인사이트</h1>
           </div>
           <button
             onClick={handleGenerate}

@@ -44,7 +44,7 @@ export default function InsightCard({ insight, onStatusChange, onDismiss }: Insi
             {typeConf.label}
           </span>
           {insight.status === "new" && (
-            <span className="text-xs px-2 py-0.5 rounded font-medium bg-orange-700">NEW</span>
+            <span className="text-xs px-2 py-0.5 rounded font-medium bg-orange-700">신규</span>
           )}
         </div>
         <span className={`text-xs font-mono font-bold ${confidenceColor}`}>

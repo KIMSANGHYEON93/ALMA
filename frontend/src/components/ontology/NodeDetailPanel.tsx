@@ -61,7 +61,7 @@ export default function NodeDetailPanel({
         {/* Confidence */}
         <div>
           <span className="text-xs text-gray-500 uppercase tracking-wide">
-            Confidence
+            신뢰도
           </span>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -82,7 +82,7 @@ export default function NodeDetailPanel({
         {/* Status */}
         <div>
           <span className="text-xs text-gray-500 uppercase tracking-wide">
-            Status
+            상태
           </span>
           <p className="text-sm text-white mt-0.5 capitalize">{node.status}</p>
         </div>
@@ -91,7 +91,7 @@ export default function NodeDetailPanel({
         {propertyEntries.length > 0 && (
           <div>
             <span className="text-xs text-gray-500 uppercase tracking-wide">
-              Properties
+              속성
             </span>
             <table className="w-full mt-1 text-sm">
               <tbody>
@@ -120,7 +120,7 @@ export default function NodeDetailPanel({
             onClick={() => onVerify(node.id)}
             className="w-full px-4 py-2 rounded bg-sky-700 text-white text-sm font-medium hover:bg-sky-800 transition"
           >
-            Verify
+            승인
           </button>
         </div>
       )}

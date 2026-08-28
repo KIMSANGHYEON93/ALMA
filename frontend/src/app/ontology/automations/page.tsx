@@ -116,9 +116,9 @@ export default function OntologyAutomationsPage() {
               href="/ontology"
               className="text-gray-400 hover:text-white transition text-sm"
             >
-              ← Ontology
+              ← 온톨로지
             </Link>
-            <h1 className="text-2xl font-bold">Automations</h1>
+            <h1 className="text-2xl font-bold">자동화</h1>
           </div>
           <button
             onClick={() => setShowForm((v) => !v)}

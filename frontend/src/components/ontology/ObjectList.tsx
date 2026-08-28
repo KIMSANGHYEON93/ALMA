@@ -10,8 +10,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function ObjectList({ objects, loading }: { objects: OntologyNode[]; loading: boolean }) {
-  if (loading) return <div className="text-gray-400">Loading...</div>;
-  if (objects.length === 0) return <div className="text-gray-400">No nodes yet.</div>;
+  if (loading) return <div className="text-gray-400">로딩 중...</div>;
+  if (objects.length === 0) return <div className="text-gray-400">아직 등록된 노드가 없습니다.</div>;
 
   return (
     <div className="space-y-2">

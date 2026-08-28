@@ -493,9 +493,9 @@ export default function OntologyImportPage() {
   }
 
   const dbSources = [
-    { key: "goals", label: "Goals", description: "목표 및 마일스톤 데이터" },
-    { key: "habits", label: "Habits", description: "습관 추적 및 로그 데이터" },
-    { key: "memories", label: "Memories", description: "대화 메모리 및 지식 데이터" },
+    { key: "goals", label: "목표", description: "목표 및 마일스톤 데이터" },
+    { key: "habits", label: "습관", description: "습관 추적 및 로그 데이터" },
+    { key: "memories", label: "기억", description: "대화 메모리 및 지식 데이터" },
   ];
 
   const statusCounts = {
@@ -534,14 +534,14 @@ export default function OntologyImportPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Ontology Import</h1>
+            <h1 className="text-2xl font-bold">온톨로지 임포트</h1>
             <p className="text-gray-400 text-sm mt-1">파일 또는 DB에서 온톨로지 노드를 가져옵니다</p>
           </div>
           <Link
             href="/ontology"
             className="px-4 py-2 rounded bg-gray-800 text-sm font-medium hover:bg-gray-700 transition"
           >
-            ← Ontology
+            ← 온톨로지
           </Link>
         </div>
 
@@ -555,7 +555,7 @@ export default function OntologyImportPage() {
                 : "border-transparent text-gray-400 hover:text-gray-200 bg-transparent"
             }`}
           >
-            Files
+            파일
           </button>
           <button
             onClick={() => setActiveTab("database")}
@@ -565,7 +565,7 @@ export default function OntologyImportPage() {
                 : "border-transparent text-gray-400 hover:text-gray-200 bg-transparent"
             }`}
           >
-            Database
+            데이터베이스
           </button>
         </div>
 

@@ -53,7 +53,7 @@ export default function GraphToolbar({
 
       {/* Confidence slider — toolbar is always bg-gray-900 so text is fixed light */}
       <div className="flex items-center gap-2 text-xs text-gray-300">
-        <label htmlFor="graph-confidence-slider">Confidence</label>
+        <label htmlFor="graph-confidence-slider">신뢰도</label>
         <input
           id="graph-confidence-slider"
           type="range"
@@ -62,7 +62,7 @@ export default function GraphToolbar({
           step={0.1}
           value={confidenceMin}
           onChange={(e) => onConfidenceChange(parseFloat(e.target.value))}
-          aria-label="Minimum confidence threshold"
+          aria-label="최소 신뢰도 기준"
           aria-valuemin={0}
           aria-valuemax={1}
           aria-valuenow={confidenceMin}
@@ -74,7 +74,7 @@ export default function GraphToolbar({
       {/* Search */}
       <input
         type="text"
-        placeholder="Search nodes..."
+        placeholder="노드 검색..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         className="px-3 py-1 rounded bg-gray-800 border border-gray-700 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-sky-500 w-48"
@@ -85,7 +85,7 @@ export default function GraphToolbar({
         onClick={onReset}
         className="px-3 py-1 rounded bg-gray-800 text-xs text-gray-400 hover:text-white hover:bg-gray-700 transition"
       >
-        Reset
+        초기화
       </button>
 
       {/* List View link */}
@@ -93,7 +93,7 @@ export default function GraphToolbar({
         href="/ontology"
         className="ml-auto px-3 py-1 rounded bg-gray-800 text-xs text-gray-400 hover:text-white hover:bg-gray-700 transition"
       >
-        List View
+        목록 보기
       </Link>
     </div>
   );

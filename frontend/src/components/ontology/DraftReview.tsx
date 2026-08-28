@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function DraftReview({ drafts, onAction }: { drafts: OntologyNode[]; onAction: () => void }) {
   const { token } = useAuth();
 
-  if (drafts.length === 0) return <div className="text-gray-400">No drafts to review.</div>;
+  if (drafts.length === 0) return <div className="text-gray-400">검토할 드래프트가 없습니다.</div>;
 
   const handleVerify = async (id: string) => {
     if (!token) return;
@@ -36,13 +36,13 @@ export default function DraftReview({ drafts, onAction }: { drafts: OntologyNode
               onClick={() => handleVerify(draft.id)}
               className="px-3 py-1 bg-green-700 rounded text-sm hover:bg-green-600"
             >
-              Verify
+              승인
             </button>
             <button
               onClick={() => handleReject(draft.id)}
               className="px-3 py-1 bg-red-600 rounded text-sm hover:bg-red-500"
             >
-              Reject
+              거부
             </button>
           </div>
         </div>
