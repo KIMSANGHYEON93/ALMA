@@ -52,7 +52,13 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-screen bg-vivara-surface dark:bg-vivara-surface-dark font-body">
+      {/* suppressHydrationWarning: extensions (Grammarly, password managers) add
+          attributes to <body> before React hydrates. It applies to this element
+          only, so mismatches inside the tree are still reported. */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-vivara-surface dark:bg-vivara-surface-dark font-body"
+      >
         <a href="#main-content" className="skip-to-content">본문으로 건너뛰기</a>
         <AuthProvider>
           <main id="main-content">{children}</main>
