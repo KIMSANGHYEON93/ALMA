@@ -26,7 +26,14 @@ export default function HabitHeatmap({ data }: Props) {
     return { days: daysArr, summaryText: formatHeatmapSummary(summary, year) };
   }, [data, year]);
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">연간 습관 히트맵</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">아직 기록이 없습니다. 습관을 체크인하면 이곳에 표시됩니다</p>
+      </div>
+    );
+  }
 
   const getCellStyle = (count: number) => {
     if (count === 0) return "bg-gray-100 dark:bg-gray-800";
