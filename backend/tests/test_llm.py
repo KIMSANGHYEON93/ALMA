@@ -46,3 +46,33 @@ async def test_claude_provider_complete():
 
     assert resp.content == "Hello from Claude"
     assert resp.input_tokens == 10
+
+
+def test_create_llm_router_is_cached_per_key_set():
+    """같은 키 조합이면 프로바이더를 새로 만들지 않는다.
+
+    회귀 방지: LLM 클라이언트 생성자는 ssl.SSLContext(CA 번들 파싱)를 매번 만들며
+    수 초가 걸린다. WebSocket 연결마다 이를 반복하면 asyncio 이벤트 루프가 막혀
+    같은 프로세스의 다른 HTTP 요청(대화 rename PATCH / delete DELETE)이 멈춘다.
+    """
+    from alma.api.llm import create_llm_router
+
+    first = create_llm_router(user_prefs=None)
+    second = create_llm_router(user_prefs=None)
+    assert first is second
+
+    other = create_llm_router(user_prefs={"anthropic_api_key": "user-specific-key"})
+    assert other is not first
+    assert create_llm_router(user_prefs={"anthropic_api_key": "user-specific-key"}) is other
+
+
+def test_create_embedding_provider_is_cached_per_key_set():
+    """임베딩 프로바이더도 동일 이유로 키 조합별 1회만 생성되어야 한다."""
+    from unittest.mock import MagicMock as _MagicMock
+
+    from alma.domain.memory.embedding import create_embedding_provider
+
+    settings_a = _MagicMock()
+    settings_a.gemini_api_key = ""
+    settings_a.openai_api_key = ""
+    assert create_embedding_provider(settings_a) is create_embedding_provider(settings_a)

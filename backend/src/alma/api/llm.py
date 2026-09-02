@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from fastapi import APIRouter
 
 from alma.config import settings
@@ -10,7 +12,33 @@ router = APIRouter(prefix="/api/llm", tags=["llm"])
 
 
 def create_llm_router(user_prefs: dict | None = None) -> LLMRouter:
-    """Create LLM router with user-specific or global API keys"""
+    """Create LLM router with user-specific or global API keys.
+
+    프로바이더 생성자는 매번 새 httpx 클라이언트와 ssl.SSLContext를 만들고,
+    load_verify_locations()(CA 번들 파싱)에 수 초가 걸린다. 이 동기 작업이 async
+    핸들러 안에서 연결·요청마다 반복되면 asyncio 이벤트 루프가 그동안 멈춰
+    같은 프로세스의 다른 모든 HTTP 요청(PATCH/DELETE 등)이 응답 없이 밀린다.
+    그래서 실제 생성은 사용자 키 조합별로 캐시한다.
+    """
+    prefs = user_prefs or {}
+    return _build_llm_router(
+        prefs.get("anthropic_api_key") or None,
+        prefs.get("openai_api_key") or None,
+        prefs.get("gemini_api_key") or None,
+    )
+
+
+@lru_cache(maxsize=32)
+def _build_llm_router(
+    user_anthropic_key: str | None,
+    user_openai_key: str | None,
+    user_gemini_key: str | None,
+) -> LLMRouter:
+    user_prefs = {
+        "anthropic_api_key": user_anthropic_key,
+        "openai_api_key": user_openai_key,
+        "gemini_api_key": user_gemini_key,
+    }
     providers: dict = {}
 
     # User keys take priority over global settings

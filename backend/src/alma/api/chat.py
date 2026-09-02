@@ -103,10 +103,14 @@ async def websocket_chat(websocket: WebSocket, conversation_id: str):
         profile_service = UserProfileService(session)
         user_prefs = await profile_service.get_decrypted_preferences(user_id)
 
-        llm_router = create_llm_router(user_prefs=user_prefs)
+        # LLM/임베딩 클라이언트 생성은 캐시되지만, 캐시 미스(프로세스 첫 연결 또는
+        # 새로운 사용자 키 조합)일 때는 CA 번들 파싱으로 수 초가 걸리는 동기 작업이다.
+        # 이벤트 루프에서 직접 돌리면 그동안 이 프로세스의 모든 HTTP 요청이 멈추므로
+        # 워커 스레드로 내린다.
+        llm_router = await asyncio.to_thread(create_llm_router, user_prefs)
         goal_service = GoalService(session)
         habit_service = HabitService(session)
-        embedding_provider = create_embedding_provider(settings)
+        embedding_provider = await asyncio.to_thread(create_embedding_provider, settings)
         knowledge_service = KnowledgeService(session, embedding_provider)
         chat_service = ChatService(
             session=session,
