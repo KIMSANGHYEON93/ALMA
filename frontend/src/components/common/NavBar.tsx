@@ -23,10 +23,13 @@ export default function NavBar() {
   const { isDark, toggle } = useDarkMode();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  // Close mobile menu on route change — effect 대신 렌더 중 조건부로 리셋한다
+  // (React 공식 "Adjusting state when a prop changes" 패턴)
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMobileOpen(false);
-  }, [pathname]);
+  }
 
   // Close on ESC
   useEffect(() => {

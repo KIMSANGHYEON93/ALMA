@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo, useSyncExternalStore } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import NavBar from "@/components/common/NavBar";
 import { useAuth } from "@/contexts/AuthContext";
+import { swrDefaults, errMessage } from "@/lib/swr";
 import {
   browseDirectory,
   scanDirectory,
@@ -12,7 +14,7 @@ import {
   useImportSources,
   deleteImportSource,
 } from "@/hooks/useOntologyImport";
-import type { ScanFileItem, BrowseEntry } from "@/lib/types";
+import type { ScanFileItem, BrowseResponse } from "@/lib/types";
 
 type Tab = "files" | "database";
 type StatusFilter = "all" | "new" | "modified" | "unchanged";
@@ -75,6 +77,30 @@ function getRecentPaths(): string[] {
   }
 }
 
+// useSyncExternalStore의 getSnapshot은 값이 그대로면 "같은 참조"를 반환해야 한다 —
+// JSON.parse는 매 호출 새 배열을 만들어 매번 "변경"으로 오인, 무한 렌더 루프
+// ("Maximum update depth exceeded")를 일으킨다. 원본 문자열이 같으면 캐시를 재사용한다.
+let recentPathsRawCache: string | null = null;
+let recentPathsSnapshotCache: string[] = [];
+function getRecentPathsSnapshot(): string[] {
+  const raw = localStorage.getItem(RECENT_PATHS_KEY);
+  if (raw === recentPathsRawCache) return recentPathsSnapshotCache;
+  recentPathsRawCache = raw;
+  recentPathsSnapshotCache = getRecentPaths();
+  return recentPathsSnapshotCache;
+}
+
+const EMPTY_RECENT_PATHS: string[] = [];
+function getServerRecentPaths(): string[] {
+  return EMPTY_RECENT_PATHS;
+}
+
+// saveRecentPath 직후 컴포넌트가 다른 state로 인해 어차피 리렌더되므로
+// (handleScan의 setScanFiles 등) 구독은 no-op이어도 스냅샷이 함께 갱신된다.
+function subscribeRecentPathsNoop(): () => void {
+  return () => {};
+}
+
 function saveRecentPath(path: string) {
   const recent = getRecentPaths().filter((p) => p !== path);
   recent.unshift(path);
@@ -96,43 +122,45 @@ function FolderBrowserModal({
   onSelect: (path: string) => void;
   onClose: () => void;
 }) {
-  const [currentPath, setCurrentPath] = useState("");
-  const [entries, setEntries] = useState<BrowseEntry[]>([]);
-  const [parentPath, setParentPath] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [path, setPath] = useState("");
   const [search, setSearch] = useState("");
 
-  const browse = useCallback(
-    async (path: string) => {
-      setLoading(true);
-      setError("");
+  // 모달이 열릴 때마다 루트부터 다시 보여준다 — effect 대신 렌더 중 조건부로 리셋
+  // (React 공식 "Adjusting state when a prop changes" 패턴)
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setPath("");
       setSearch("");
-      try {
-        const res = await browseDirectory(path, token);
-        setCurrentPath(res.current);
-        setParentPath(res.parent);
-        setEntries(res.entries);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "디렉토리 조회 실패");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+    }
+  }
+
+  // path를 SWR 키로 써서 탐색을 "키가 바뀌면 자동 refetch"로 표현한다 —
+  // browse()가 매번 setLoading(true) 등을 await 이전에 동기 호출해 effect에서
+  // 문제가 됐던 것을, 프로젝트 전역 컨벤션인 SWR(lib/swr.ts)로 대체한다.
+  const browseKey = open ? (["ontology-import-browse", path, token] as const) : null;
+  const { data, isLoading, error } = useSWR<BrowseResponse>(
+    browseKey,
+    ([, p, t]: readonly [string, string, string]) => browseDirectory(p, t),
+    swrDefaults
   );
 
-  useEffect(() => {
-    if (open) browse("");
-  }, [open, browse]);
+  const currentPath = data?.current ?? path;
+  const parentPath = data?.parent ?? null;
+  const loading = isLoading;
+  const errorMessage = errMessage(error, "디렉토리 조회 실패");
 
-  const filtered = useMemo(
-    () =>
-      search
-        ? entries.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
-        : entries,
-    [entries, search]
-  );
+  const browse = (p: string) => setPath(p);
+
+  // data?.entries ?? [] 를 밖에서 상수로 빼면 매 렌더 새 배열이 생겨 useMemo 의존성이
+  // 불안정해진다 — data.entries 자체(참조 안정적인 SWR 캐시 값)를 의존성으로 둔다.
+  const filtered = useMemo(() => {
+    const list = data?.entries ?? [];
+    return search
+      ? list.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
+      : list;
+  }, [data?.entries, search]);
 
   const dirs = filtered.filter((e) => e.is_dir);
   const files = filtered.filter((e) => !e.is_dir);
@@ -210,8 +238,8 @@ function FolderBrowserModal({
         <div className="flex-1 overflow-y-auto min-h-0">
           {loading ? (
             <div className="py-12 text-center text-gray-500 text-sm">로딩 중...</div>
-          ) : error ? (
-            <div className="py-12 text-center text-red-400 text-sm">{error}</div>
+          ) : errorMessage ? (
+            <div className="py-12 text-center text-red-400 text-sm">{errorMessage}</div>
           ) : (
             <div className="divide-y divide-gray-800">
               {/* Parent directory */}
@@ -314,7 +342,13 @@ export default function OntologyImportPage() {
 
   // Browser modal
   const [browserOpen, setBrowserOpen] = useState(false);
-  const [recentPaths, setRecentPaths] = useState<string[]>([]);
+  // localStorage 읽기라 서버 스냅샷과 다를 수 있다 — useSyncExternalStore로 하이드레이션 안전하게 처리.
+  // saveRecentPath 직후엔 handleScan의 다른 setState들이 어차피 리렌더를 일으키므로 구독은 no-op으로 충분하다.
+  const recentPaths = useSyncExternalStore(
+    subscribeRecentPathsNoop,
+    getRecentPathsSnapshot,
+    getServerRecentPaths
+  );
 
   // Search & filter
   const [fileSearch, setFileSearch] = useState("");
@@ -327,10 +361,6 @@ export default function OntologyImportPage() {
 
   // Toast
   const [toast, setToast] = useState<Toast | null>(null);
-
-  useEffect(() => {
-    setRecentPaths(getRecentPaths());
-  }, []);
 
   function showToast(type: Toast["type"], message: string) {
     setToast({ type, message });
@@ -386,8 +416,9 @@ export default function OntologyImportPage() {
     try {
       const result = await scanDirectory(directory, pattern, validToken);
       setScanFiles(result.files);
+      // recentPaths는 useSyncExternalStore 스냅샷이라, 위 setScanFiles 등으로 인한
+      // 리렌더에서 자동으로 최신 localStorage 값을 다시 읽는다 — 별도 setter 불필요.
       saveRecentPath(directory);
-      setRecentPaths(getRecentPaths());
     } catch (e) {
       showToast("error", e instanceof Error ? e.message : "스캔 실패");
     } finally {

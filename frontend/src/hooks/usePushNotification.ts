@@ -1,8 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+
+// 브라우저 지원 여부는 세션 동안 바뀌지 않으므로 구독은 no-op — 서버/클라이언트
+// 스냅샷이 다를 수 있는 하이드레이션 케이스만 useSyncExternalStore로 안전하게 처리한다.
+function subscribeNoop(): () => void {
+  return () => {};
+}
+
+function getSupportSnapshot(): boolean {
+  return "serviceWorker" in navigator && "PushManager" in window;
+}
+
+function getServerSupportSnapshot(): boolean {
+  return false;
+}
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -18,11 +32,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 export function usePushNotification() {
   const { token } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-
-  useEffect(() => {
-    setIsSupported("serviceWorker" in navigator && "PushManager" in window);
-  }, []);
+  const isSupported = useSyncExternalStore(
+    subscribeNoop,
+    getSupportSnapshot,
+    getServerSupportSnapshot
+  );
 
   useEffect(() => {
     if (!isSupported) return;

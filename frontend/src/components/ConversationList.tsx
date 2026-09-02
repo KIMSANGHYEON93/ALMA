@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { authFetcher, errMessage, swrDefaults, type AuthKey } from "@/lib/swr";
 
 interface Conversation {
   id: string;
@@ -135,9 +137,6 @@ export default function ConversationList({
   onSelect,
 }: ConversationListProps) {
   const { token } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -145,38 +144,30 @@ export default function ConversationList({
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchConversations = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!token) return;
-      setError(null);
-      try {
-        const data = await apiClient<Conversation[]>("/api/conversations", {
-          token,
-          signal,
-        });
-        setConversations(data);
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        setError(err instanceof Error ? err.message : "대화 목록 조회 실패");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [token]
+  // 다른 조회 훅과 동일하게 SWR로 통일 — 마운트 시 fetch 하나가 effect 안에서
+  // async 함수를 동기 호출하는 형태라 set-state-in-effect에 걸렸었다.
+  const key: AuthKey | null = token ? ["/api/conversations", token] : null;
+  const { data, isLoading, error, mutate } = useSWR<Conversation[]>(
+    key,
+    authFetcher,
+    swrDefaults
   );
+  const conversations = data ?? [];
+  const loading = isLoading;
+  const errorMessage = errMessage(error, "대화 목록 조회 실패");
 
   const createConversation = async () => {
     if (!token || isCreating) return;
     setCreateError(null);
     setIsCreating(true);
     try {
-      const data = await apiClient<Conversation>("/api/conversations", {
+      const created = await apiClient<Conversation>("/api/conversations", {
         method: "POST",
         token,
         body: { title: null },
       });
-      setConversations((prev) => [data, ...prev]);
-      onSelect(data.id);
+      await mutate();
+      onSelect(created.id);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "대화 생성 실패");
     } finally {
@@ -187,13 +178,12 @@ export default function ConversationList({
   const renameConversation = async (id: string, title: string) => {
     if (!token || !title.trim()) return;
     try {
-      const updated = await apiClient<Conversation>(
-        `/api/conversations/${id}`,
-        { method: "PATCH", token, body: { title: title.trim() } }
-      );
-      setConversations((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, title: updated.title } : c))
-      );
+      await apiClient<Conversation>(`/api/conversations/${id}`, {
+        method: "PATCH",
+        token,
+        body: { title: title.trim() },
+      });
+      await mutate();
     } catch {
       // revert
     }
@@ -207,11 +197,11 @@ export default function ConversationList({
         method: "DELETE",
         token,
       });
-      const remaining = conversations.filter((c) => c.id !== id);
-      setConversations(remaining);
       if (activeId === id) {
+        const remaining = conversations.filter((c) => c.id !== id);
         onSelect(remaining.length > 0 ? remaining[0].id : null as unknown as string);
       }
+      await mutate();
     } catch {
       // handled
     }
@@ -224,18 +214,12 @@ export default function ConversationList({
     setTimeout(() => editInputRef.current?.focus(), 50);
   };
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    fetchConversations(ctrl.signal);
-    return () => ctrl.abort();
-  }, [fetchConversations]);
-
   // 제목 자동 갱신 (첫 메시지 후 서버에서 제목 생성됨)
   useEffect(() => {
     if (!activeId) return;
-    const timer = setTimeout(() => fetchConversations(), 3000);
+    const timer = setTimeout(() => void mutate(), 3000);
     return () => clearTimeout(timer);
-  }, [activeId, fetchConversations]);
+  }, [activeId, mutate]);
 
   return (
     <aside className="w-72 border-r dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900">
@@ -259,18 +243,18 @@ export default function ConversationList({
             대화 목록 로드 중...
           </div>
         )}
-        {error && !loading && (
+        {errorMessage && !loading && (
           <div role="alert" className="m-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-xs text-red-700 dark:text-red-400 mb-2">{error}</p>
+            <p className="text-xs text-red-700 dark:text-red-400 mb-2">{errorMessage}</p>
             <button
-              onClick={() => fetchConversations()}
+              onClick={() => mutate()}
               className="text-xs font-medium text-red-700 dark:text-red-300 hover:underline"
             >
               다시 시도
             </button>
           </div>
         )}
-        {!loading && !error && conversations.length === 0 && (
+        {!loading && !errorMessage && conversations.length === 0 && (
           <div className="p-6 text-center">
             <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
               아직 대화가 없습니다
