@@ -86,6 +86,7 @@ export function formatCorrelationSummary(pairs: CorrelationPair[]): string {
 // ─── Ontology Graph ───
 
 import type { GraphNodeData, GraphLinkData } from "./types";
+import { ontologyCategoryLabel } from "./ontology-palette";
 
 export interface GraphCategorySummary {
   category: string;
@@ -113,6 +114,9 @@ export function summarizeGraph(
 export function formatGraphSummary(nodes: GraphNodeData[], links: GraphLinkData[]): string {
   const s = summarizeGraph(nodes, links);
   if (s.categories.length === 0) return s.total;
-  const catText = s.categories.slice(0, 5).map((c) => `${c.category} ${c.count}개`).join(", ");
+  const catText = s.categories
+    .slice(0, 5)
+    .map((c) => `${ontologyCategoryLabel(c.category)} ${c.count}개`)
+    .join(", ");
   return `${s.total} 주요 카테고리: ${catText}.`;
 }

@@ -1,4 +1,5 @@
 import type { OntologyNode } from "@/lib/types";
+import { ontologyCategoryLabel } from "@/lib/ontology-palette";
 
 // WCAG AA compliant with white text (≥4.5:1)
 const CATEGORY_COLORS: Record<string, string> = {
@@ -19,7 +20,7 @@ export default function ObjectList({ objects, loading }: { objects: OntologyNode
         <div key={obj.id} className="bg-gray-800 rounded-lg p-4 flex items-center justify-between">
           <div>
             <span className={`text-xs px-2 py-1 rounded mr-2 ${CATEGORY_COLORS[obj.parent_category] || "bg-gray-600"}`}>
-              {obj.parent_category}
+              {ontologyCategoryLabel(obj.parent_category)}
             </span>
             <span className="font-medium">{obj.name}</span>
             <span className="text-gray-400 text-sm ml-2">({obj.type_name})</span>

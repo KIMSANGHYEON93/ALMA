@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ONTOLOGY_CATEGORIES, ONTOLOGY_CATEGORY_COLORS } from "@/lib/ontology-palette";
+import {
+  ONTOLOGY_CATEGORIES,
+  ONTOLOGY_CATEGORY_COLORS,
+  ontologyCategoryLabel,
+} from "@/lib/ontology-palette";
 
 const CATEGORIES = ONTOLOGY_CATEGORIES.map((key) => ({
   key,
+  label: ontologyCategoryLabel(key),
   color: ONTOLOGY_CATEGORY_COLORS[key],
 }));
 
@@ -31,7 +36,7 @@ export default function GraphToolbar({
     <div className="flex items-center gap-3 px-4 py-2 bg-gray-900 border-b border-gray-800 flex-wrap">
       {/* Category toggles */}
       <div className="flex items-center gap-1">
-        {CATEGORIES.map(({ key, color }) => {
+        {CATEGORIES.map(({ key, label, color }) => {
           const active = activeCategories.has(key);
           return (
             <button
@@ -45,7 +50,7 @@ export default function GraphToolbar({
                 opacity: active ? 1 : 0.4,
               }}
             >
-              {key}
+              {label}
             </button>
           );
         })}

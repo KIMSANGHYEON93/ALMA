@@ -9,8 +9,7 @@ import { useOntologyGraph } from "@/hooks/useOntologyGraph";
 import { useAuth } from "@/contexts/AuthContext";
 import { verifyObject } from "@/hooks/useOntology";
 import type { GraphNodeData } from "@/lib/types";
-
-const ALL_CATEGORIES = ["Entity", "Action", "Concept", "Attribute", "Temporal"];
+import { ONTOLOGY_CATEGORIES } from "@/lib/ontology-palette";
 
 export default function GraphPage() {
   const { token, isLoading } = useAuth();
@@ -18,7 +17,7 @@ export default function GraphPage() {
 
   const [selectedNode, setSelectedNode] = useState<GraphNodeData | null>(null);
   const [activeCategories, setActiveCategories] = useState<Set<string>>(
-    () => new Set(ALL_CATEGORIES)
+    () => new Set<string>(ONTOLOGY_CATEGORIES)
   );
   const [confidenceMin, setConfidenceMin] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,7 +56,7 @@ export default function GraphPage() {
   }, []);
 
   const handleReset = useCallback(() => {
-    setActiveCategories(new Set(ALL_CATEGORIES));
+    setActiveCategories(new Set<string>(ONTOLOGY_CATEGORIES));
     setConfidenceMin(0);
     setSearchQuery("");
     setSelectedNode(null);

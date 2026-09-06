@@ -1,6 +1,7 @@
 "use client";
 
 import type { GraphNodeData } from "@/lib/types";
+import { ontologyCategoryLabel } from "@/lib/ontology-palette";
 
 interface NodeDetailPanelProps {
   node: GraphNodeData;
@@ -33,7 +34,7 @@ export default function NodeDetailPanel({
               color: node.color,
             }}
           >
-            {node.parentCategory}
+            {ontologyCategoryLabel(node.parentCategory)}
           </span>
         </div>
         <button
