@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from alma.api.llm import resolve_llm_router
 from alma.auth.dependencies import get_current_user
 from alma.database import get_session
 from alma.domain.ontology.dedup import DeduplicationService
@@ -93,27 +94,15 @@ class SourceResponse(BaseModel):
 # --- Helpers ---
 
 
-async def _get_extractor(session, service):
-    try:
-        from alma.config import settings
-        from alma.infrastructure.llm.router import LLMRouter
+async def _get_extractor(session, service, user_id):
+    """LLM이 설정돼 있으면 추출기를, 아니면 None(정규식 폴백)을 준다."""
+    llm_router = await resolve_llm_router(session, user_id)
+    if not llm_router:
+        return None
 
-        providers: dict = {}
-        if settings.anthropic_api_key:
-            from alma.infrastructure.llm.claude import ClaudeProvider
+    from alma.domain.ontology.extractor import SemanticExtractor
 
-            providers["claude"] = ClaudeProvider()
-        if settings.openai_api_key:
-            from alma.infrastructure.llm.openai_provider import OpenAIProvider
-
-            providers["openai"] = OpenAIProvider()
-        if providers:
-            from alma.domain.ontology.extractor import SemanticExtractor
-
-            return SemanticExtractor(LLMRouter(providers), service)
-    except Exception:
-        pass
-    return None
+    return SemanticExtractor(llm_router, service)
 
 
 def _source_response(source) -> SourceResponse:
@@ -238,7 +227,7 @@ async def process_files(
     await service.ensure_seeded(user.id)
     pipeline = PurificationPipeline(DeduplicationService(session), SchemaValidator(), service)
     import_repo = ImportSourceRepository(session)
-    extractor = await _get_extractor(session, service)
+    extractor = await _get_extractor(session, service, user.id)
 
     processor = ImportProcessor(service, pipeline, import_repo, extractor)
 

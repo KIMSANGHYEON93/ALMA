@@ -1,14 +1,18 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from alma.api.llm import resolve_llm_router
 from alma.auth.dependencies import get_current_user
 from alma.database import get_session
 from alma.domain.ontology.models import NodeCandidate
 from alma.domain.ontology.service import OntologyService
 from alma.models.models import User
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/ontology", tags=["ontology"])
 
@@ -121,28 +125,6 @@ async def _get_service(session: AsyncSession, user_id) -> OntologyService:
     service = OntologyService(session, embedding_provider=None)
     await service.ensure_seeded(user_id)
     return service
-
-
-async def _get_llm_router():
-    """Try to construct LLMRouter. Returns None if no API keys configured."""
-    try:
-        from alma.config import settings
-        from alma.infrastructure.llm.router import LLMRouter
-
-        providers: dict = {}
-        if settings.anthropic_api_key:
-            from alma.infrastructure.llm.claude import ClaudeProvider
-
-            providers["claude"] = ClaudeProvider()
-        if settings.openai_api_key:
-            from alma.infrastructure.llm.openai_provider import OpenAIProvider
-
-            providers["openai"] = OpenAIProvider()
-        if providers:
-            return LLMRouter(providers)
-    except Exception:
-        pass
-    return None
 
 
 def _node_response(obj, type_name: str = "", parent_category: str = "") -> NodeResponse:
@@ -497,46 +479,46 @@ async def extract_preview(
     user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
-    try:
-        from alma.domain.ontology.extractor import SemanticExtractor
+    from alma.domain.ontology.extractor import SemanticExtractor
 
-        service = OntologyService(session, embedding_provider=None)
-        llm_router = await _get_llm_router()
-        if not llm_router:
-            raise HTTPException(
-                status_code=503,
-                detail="LLM extraction not available. Check LLM configuration.",
-            )
-        extractor = SemanticExtractor(llm_router, service)
-        extraction = await extractor.extract(req.text, user.id)
-
-        return ExtractPreviewResponse(
-            nodes=[
-                {
-                    "name": n.name,
-                    "parent_category": n.parent_category,
-                    "sub_type": n.sub_type,
-                    "properties": n.properties,
-                    "confidence": n.confidence,
-                }
-                for n in extraction.node_candidates
-            ],
-            edges=[
-                {
-                    "source_name": e.source_name,
-                    "target_name": e.target_name,
-                    "relation": e.relation,
-                    "properties": e.properties,
-                    "confidence": e.confidence,
-                }
-                for e in extraction.edge_candidates
-            ],
-        )
-    except Exception:
+    service = OntologyService(session, embedding_provider=None)
+    llm_router = await resolve_llm_router(session, user.id)
+    if not llm_router:
         raise HTTPException(
             status_code=503,
             detail="LLM extraction not available. Check LLM configuration.",
         )
+
+    extractor = SemanticExtractor(llm_router, service)
+    try:
+        extraction = await extractor.extract(req.text, user.id)
+    except Exception:
+        # 설정 문제가 아니라 추출 자체의 실패다. 503으로 뭉뚱그리면 원인을 찾을 수 없다.
+        logger.warning("Ontology extraction failed", exc_info=True)
+        raise HTTPException(status_code=502, detail="Extraction failed. Please try again.")
+
+    return ExtractPreviewResponse(
+        nodes=[
+            {
+                "name": n.name,
+                "parent_category": n.parent_category,
+                "sub_type": n.sub_type,
+                "properties": n.properties,
+                "confidence": n.confidence,
+            }
+            for n in extraction.node_candidates
+        ],
+        edges=[
+            {
+                "source_name": e.source_name,
+                "target_name": e.target_name,
+                "relation": e.relation,
+                "properties": e.properties,
+                "confidence": e.confidence,
+            }
+            for e in extraction.edge_candidates
+        ],
+    )
 
 
 @router.get("/stats", response_model=GraphStats)

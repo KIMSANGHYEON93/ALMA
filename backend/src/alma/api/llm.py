@@ -1,8 +1,12 @@
+import asyncio
+import uuid
 from functools import lru_cache
 
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from alma.config import settings
+from alma.domain.identity.profile import UserProfileService
 from alma.infrastructure.llm.claude import ClaudeProvider
 from alma.infrastructure.llm.gemini_provider import GeminiProvider
 from alma.infrastructure.llm.openai_provider import OpenAIProvider
@@ -68,6 +72,18 @@ def _build_llm_router(
 
     default = "claude" if "claude" in providers else next(iter(providers), "claude")
     return LLMRouter(providers, default=default)
+
+
+async def resolve_llm_router(session: AsyncSession, user_id: uuid.UUID | str) -> LLMRouter | None:
+    """요청 사용자의 키까지 반영한 LLM 라우터. 쓸 수 있는 프로바이더가 없으면 None.
+
+    생성은 `create_llm_router`가 키 조합별로 캐시하지만 캐시 미스일 때는 CA 번들
+    파싱이 수 초 걸리는 동기 작업이라, 이벤트 루프를 막지 않도록 워커 스레드로 내린다.
+    """
+    profile_service = UserProfileService(session)
+    user_prefs = await profile_service.get_decrypted_preferences(str(user_id))
+    llm_router = await asyncio.to_thread(create_llm_router, user_prefs)
+    return llm_router if llm_router.list_available() else None
 
 
 @router.get("/models")
